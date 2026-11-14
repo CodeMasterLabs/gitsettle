@@ -6,6 +6,8 @@ Repository: **https://github.com/CodeMasterLabs/gitsettle**. Built for **NEAR HA
 
 ## Try it
 
+Contributor quick starts: [English](locales/en/contributing.md) · [Español](locales/es/contributing.md).
+
 ```sh
 git clone https://github.com/CodeMasterLabs/gitsettle.git
 cd gitsettle
