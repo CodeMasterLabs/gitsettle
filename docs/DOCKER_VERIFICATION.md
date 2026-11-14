@@ -112,3 +112,13 @@ reduced to counts and marker checks. No fatal/unhandled-error marker or obvious
 credential-format marker was found. Containers, source checkout, environment,
 and configuration were not modified. Support smoke tests and the escrow payout
 loop are separate evidence in `STATUS.md` and the corresponding E2E records.
+
+## Premium workspace and CLI release
+
+On November 14, 2026, public revision `85c4c3bab27f37d1fce19d5987d2f8913e88a42c` was built and deployed from the existing clean public clone. `docker compose up --build --detach --wait` completed successfully, both services reported healthy startup, and the web remained bound to `127.0.0.1:3000` behind Caddy HTTPS. The source checkout was clean. `docker compose exec -T web npm run cli -- --version` returned `0.1.0` on both the local Docker build and the VPS.
+
+Public config, nine real bounties, the Released translation bounty, leaderboard, seven main screens and signed support HTTP flow all passed. The updated image still exposes no NEAR signer or GitHub token in the web environment and contains none of the private `.env`/wallet files. Persistent data survived the upgrade; existing live escrow and reputation remained unchanged. No contract redeployment or funding occurred.
+
+[GitHub CI run 43599590656](https://github.com/CodeMasterLabs/gitsettle/actions/runs/43599590656) passed all contract, application and container jobs on the exact runtime revision. Its container job independently built from a fresh public checkout/empty volume and verified default demo startup and credential isolation. Final live performance and support proofs are in `PERFORMANCE_LIVE.json` and `COMMUNITY_E2E.json`.
+
+The deployed premium image ID is `sha256:5c3d5bb7943a138202590c8e33911e88ffbcf8dfee6ae9d1165aa51c56586ef9`. Later documentation-only commits do not change that verified runtime.

@@ -12,19 +12,23 @@ Updated: 2026-11-14. Canonical repository: https://github.com/CodeMasterLabs/git
 - **AgentGuard:** pinned MIT risk rules, exact per-payout cap, held submissions stay protected, no raw PR text persisted. `docs/AGENTGUARD.md` documents local trust boundary and baseline reuse. Approved reciprocal README disclosure published to AgentGuard commit `fe8a64d`; user confirmed it is their other submitted hackathon project.
 - **Community and triage:** NEP-413 wallet sessions, private support/appeal conversations, ticket ACLs/status/replies, atomic spam/duplicate limits, deterministic issue preflight, duplicate-PR holds, optional BYO-LLM advice with quotas and bounded context. No LLM key configured and no live paid AI call claimed.
 - **Initial application checks:** combined Node suite passed 136 tests and TypeScript passed after the auth/AI review. Expanded Next production build passed. All 78 browser scenarios pass across desktop/mobile/dark; screenshots reviewed. Worker-scoped processing retains the full contract list for duplicate detection.
-- **Live expanded deployment:** public source revision `5665b616cb0bae4a513bcb9a46727b51a5603c10` is running on the VPS. Both services healthy; HTTPS config reports testnet and AgentGuard enabled. Board shows eight Open bounties and bounty 8 Released; leaderboard shows 100 points / 0.05 NEAR earned. Optional AI reports `configured: false`.
-- **Real support proof:** at 09:22 UTC, `scripts/verify-support.ts` passed against public HTTPS using actual finalized testnet FullAccess keys. It verified NEP-413 signatures, nonce replay, CSRF, session-derived identity, unrelated-wallet isolation, ticket reply/resolution and logout. No NEAR transactions sent. Evidence: `docs/COMMUNITY_E2E.json`.
+- **Initial expanded deployment:** public source revision `5665b616cb0bae4a513bcb9a46727b51a5603c10` was verified on the VPS before the premium/CLI release below. Both services healthy; HTTPS config reports testnet and AgentGuard enabled. Board shows eight Open bounties and bounty 8 Released; leaderboard shows 100 points / 0.05 NEAR earned. Optional AI reports `configured: false`.
+- **Initial real support proof:** at 09:22 UTC, `scripts/verify-support.ts` passed against public HTTPS using actual finalized testnet FullAccess keys. It verified NEP-413 signatures, nonce replay, CSRF, session-derived identity, unrelated-wallet isolation, ticket reply/resolution and logout. No NEAR transactions sent. Evidence: `docs/COMMUNITY_E2E.json`.
 - **Original containers:** clean public clone `9ca2b56` built and started on VPS using Docker Compose without credentials, with persistent SQLite and HTTPS verified. Details: `docs/DOCKER_VERIFICATION.md`. Latest live checks are recorded alongside that baseline.
 
-## Current refinement requested by the user
+## Premium workspace / CLI release — complete
 
-The user requested a premium SaaS/PaaS design, faster loading, and a CLI after the verified initial deployment. The redesign is in `apps/web` (Manrope/Source Sans, graphite navigation, forest-green actions, structured surfaces). A real CLI is implemented under `apps/cli`, and performance changes remove repeated RPC reads and blocking GitHub metadata fetches. The VPS already uses the verified FASTNEAR RPC; new source/UI deployment follows final browser review. Combined Node suite now passes **182 tests** and typecheck passes. Live read-only CLI evidence is in `docs/CLI_E2E.json`. Do not submit a hackathon application; the user handles it manually.
+- **Runtime source:** `85c4c3bab27f37d1fce19d5987d2f8913e88a42c`, committed and published as CodeMasterLabs, deployed from the public clone to the VPS. Subsequent commits contain handoff documentation/evidence only.
+- **Design:** Manrope/Source Sans, graphite navigation, forest-green actions, structured queues/forms/inbox, mobile layouts, light/dark themes and CLI documentation links. Production build passed. **96/96 browser checks** pass, including connected-wallet layout at 320/375 px. All main-screen screenshots are reviewed; current public captures are in `docs/screenshots/live/`.
+- **Backend/CLI:** **182/182 Node tests** and TypeScript pass. CLI has 25 focused tests, real finalized/API read proof, exact transaction previews and duplicate-create acknowledgement. No new CLI transaction was needed; `docs/CLI_E2E.json` separates live reads from fake-port signing tests.
+- **Performance:** FASTNEAR is the configured testnet RPC. Public API medians: board **222 ms**, bounty detail **221 ms**, leaderboard **225 ms**, all 20 measured requests successful. Cached and first observed samples are separately recorded in `docs/PERFORMANCE_LIVE.json`. A fresh browser observation reached the first bounty row in **3.092 s**, with 16 JS requests / 199,312 transferred bytes (`docs/BROWSER_PERFORMANCE.json`); this is a single observation, not a percentile or an instant-load claim.
+- **Live support:** the real HTTPS NEP-413 session, private ticket, reply/resolution, ACL, replay, CSRF and logout proof passed again on this deployment. Updated evidence: `docs/COMMUNITY_E2E.json`. No NEAR transactions sent by the support check.
+- **Docker/CI:** local production image/startup and CLI execution pass. Both VPS containers are healthy, loopback-bound behind HTTPS; web credential isolation passed. GitHub run [43599590656](https://github.com/CodeMasterLabs/gitsettle/actions/runs/43599590656) passed **contract, application and clean-clone container jobs** on this exact runtime source, including the unchanged 41-test contract suite.
+- **Handoff:** README, architecture, design, CLI, performance, security, Docker and demo docs are current. AgentGuard reciprocal disclosure is already public. No engineering deployment checkpoint remains for this requested release.
 
-## In progress / remaining
+## Human-owned next steps
 
-1. Build and visually review the premium redesign, including all screens and existing/new browser checks; keep the previous public deployment healthy until this passes.
-2. Rebuild/publish/deploy the reviewed source; measure public loading again, rerun support proof for the new UI/runtime, and record CI/Docker evidence.
-3. Publish final CLI/performance/design docs and evidence. The human owns the X post and manual application. **No hackathon submission action is authorized.**
+The user explicitly instructed: **“I will submit, do not submit anything to the Hackathon.”** The human owns the X post and manual application. No submission request is authorized or has been sent by this agent. Optional AI is implemented and fixture-tested, but remains disabled on the VPS until the operator supplies `LLM_BASE_URL`, `LLM_API_KEY`, and `LLM_MODEL`; no paid live LLM call is claimed.
 
 ## Deployment and credential map
 
@@ -32,7 +36,7 @@ The user requested a premium SaaS/PaaS design, faster loading, and a CLI after t
 - VPS source: `/opt/gitsettle/source`; data: `/opt/gitsettle/data`; root-only runtime env: `/opt/gitsettle/env/production.env`.
 - Only the dedicated verifier private key is installed in the VPS runtime environment. Deployer/contributor keys and the local GitHub CLI token are not transferred. Web receives no NEAR key or GitHub token. Optional LLM credentials belong only to web.
 - Bind app port to `127.0.0.1:3000` behind Caddy. `APP_ORIGIN` equals the public HTTPS origin; `TRUST_PROXY_HEADERS=true` only with that isolation.
-- Local baseline demo Docker uses port 3001. Browser QA owns port 3000 temporarily. Coordinate before starting another server or rebuilding `.next`.
+- Local Docker demo uses port 3001. Native browser QA uses port 3000 when started. Coordinate before rebuilding `.next`.
 
 ## Session constraints and decisions
 

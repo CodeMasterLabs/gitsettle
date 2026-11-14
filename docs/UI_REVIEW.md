@@ -60,3 +60,7 @@ The suite lives in `tests/ui.spec.ts`, `tests/community.ui.spec.ts`, and `tests/
 ```sh
 npx playwright test --grep 'narrow connected-wallet header'
 ```
+
+## Final public deployment captures
+
+The same app source was deployed at `https://gitsettle.89.167.109.196.sslip.io` and all seven main routes loaded without browser runtime errors. These captures show real testnet data and signed-out public pages, not mocked account sessions: [queue](screenshots/live/work-queue.png), [mobile queue](screenshots/live/work-queue-mobile.png), [paid translation](screenshots/live/paid-translation.png), [posting](screenshots/live/post-bounty.png), [leaderboard](screenshots/live/leaderboard.png), [contributor](screenshots/live/contributor.png), [maintainer](screenshots/live/maintainer.png), and [support](screenshots/live/support.png). The queue/paid-detail/mobile captures were visually rechecked after deployment.

@@ -6,6 +6,8 @@ Repository: **https://github.com/CodeMasterLabs/gitsettle**. Built for **NEAR HA
 
 ## Try it
 
+Current release: **41 contract tests, 182 Node tests and 96 browser checks pass**; production build, clean-clone Docker CI, live support authentication and the real testnet payout loop are verified. See [STATUS.md](STATUS.md) for evidence and operating limits.
+
 **Live testnet app: https://gitsettle.89.167.109.196.sslip.io**. The contract address and reproducible transaction evidence are below.
 
 Contributor quick starts: [English](locales/en/contributing.md) · [Español](locales/es/contributing.md).
