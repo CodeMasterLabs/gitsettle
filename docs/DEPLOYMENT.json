@@ -1,0 +1,17 @@
+{
+  "network": "testnet",
+  "contract_id": "gitsettle-ac1b0f23f4.testnet",
+  "verifier_id": "verifier.gitsettle-ac1b0f23f4.testnet",
+  "contributor_id": "contributor.gitsettle-ac1b0f23f4.testnet",
+  "rpc_url": "https://rpc.testnet.near.org",
+  "wasm_sha256": "88a9d6824ff7b09f107bf7682dea477bd1352dbdb11ab5520abd8cae56170137",
+  "transaction_hash": "Cd741zywcPRe1npNGp4wgxTFbZhHKqncnfoBFww3LYRZ",
+  "deployed_at": "2026-11-14T05:39:08.167Z",
+  "config": {
+    "verifier": "verifier.gitsettle-ac1b0f23f4.testnet",
+    "storage_reserve": "50000000000000000000000",
+    "bounty_count": 0,
+    "points_per_merge": 100,
+    "leaderboard_limit": 100
+  }
+}

@@ -1,0 +1,25 @@
+[package]
+name = "gitsettle"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.95"
+description = "Native NEAR contribution escrow for codemaster/gitsettle"
+repository = "https://github.com/codemaster/gitsettle"
+license = "MIT"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+near-sdk = "=5.30.2"
+
+[dev-dependencies]
+near-sdk = { version = "=5.30.2", features = ["unit-testing"] }
+
+[profile.release]
+codegen-units = 1
+opt-level = "z"
+lto = true
+panic = "abort"
+overflow-checks = true
+strip = "debuginfo"
