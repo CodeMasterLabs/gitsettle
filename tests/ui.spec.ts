@@ -209,6 +209,71 @@ test('theme preference survives navigation and keyboard focus is visible', async
   await expect(page.locator('html')).toHaveAttribute('data-theme', changedTheme);
 });
 
+test('both appearances keep short-screen navigation reachable and narrow footer text readable', async ({ page }) => {
+  async function changeAppearance(theme: 'light' | 'dark') {
+    if (await page.locator('html').getAttribute('data-theme') !== theme) {
+      await page.getByRole('button', { name: theme === 'light' ? 'Light appearance' : 'Dark appearance', exact: true }).click();
+    }
+    await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
+    await page.evaluate(() => document.fonts.ready);
+  }
+
+  for (const viewport of [{ width: 1280, height: 720 }, { width: 1024, height: 600 }]) {
+    await page.setViewportSize(viewport);
+    await page.goto('/');
+    await expect(page.locator('.bounty-row')).toHaveCount(8);
+    for (const theme of ['light', 'dark'] as const) {
+      await changeAppearance(theme);
+      const sidebar = page.locator('aside.sidebar');
+      const bounds = (await sidebar.boundingBox())!;
+      expect(bounds.y).toBeGreaterThanOrEqual(0);
+      expect(bounds.y + bounds.height).toBeLessThanOrEqual(viewport.height + 1);
+      const links = await sidebar.getByRole('link').evaluateAll(elements => elements.map(element => {
+        const { x, y, width, height } = element.getBoundingClientRect();
+        return { x, y, width, height };
+      }));
+      for (let first = 0; first < links.length; first++) for (let next = first + 1; next < links.length; next++) {
+        const a = links[first], b = links[next];
+        const overlap = Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x) > 1
+          && Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y) > 1;
+        expect(overlap, `Sidebar links overlap in ${theme} at ${viewport.width}×${viewport.height}`).toBe(false);
+      }
+      await sidebar.getByRole('link', { name: 'GitSettle home', exact: true }).focus();
+      for (const name of ['View source', 'Command line']) {
+        const link = sidebar.getByRole('link', { name, exact: true });
+        for (let tabs = 0; tabs < 12 && !await link.evaluate(element => element === document.activeElement); tabs++) await page.keyboard.press('Tab');
+        await expect(link).toBeFocused();
+        const target = (await link.boundingBox())!;
+        expect(target.y).toBeGreaterThanOrEqual(bounds.y);
+        expect(target.y + target.height).toBeLessThanOrEqual(bounds.y + bounds.height + 1);
+        expect(await page.evaluate(() => window.scrollY), 'Keyboard navigation should scroll the sidebar without moving the page').toBe(0);
+      }
+      await checkPageWidth(page);
+    }
+  }
+
+  await page.setViewportSize({ width: 320, height: 812 });
+  await page.goto('/');
+  await expect(page.locator('.bounty-row')).toHaveCount(8);
+  for (const theme of ['light', 'dark'] as const) {
+    await changeAppearance(theme);
+    const footer = page.getByRole('contentinfo');
+    const name = (await footer.getByText('GitSettle', { exact: true }).boundingBox())!;
+    const description = (await footer.getByText('Contribution infrastructure for open source.', { exact: true }).boundingBox())!;
+    expect(description.y).toBeGreaterThanOrEqual(name.y + name.height - 1);
+    for (const box of [name, description]) {
+      expect(box.x).toBeGreaterThanOrEqual(0);
+      expect(box.x + box.width).toBeLessThanOrEqual(321);
+    }
+    const count = page.getByText('8 bounties in the queue', { exact: true });
+    const countBox = (await count.boundingBox())!;
+    const sortBox = (await page.getByLabel('Sort bounties', { exact: true }).boundingBox())!;
+    expect(countBox.height).toBeLessThanOrEqual(await count.evaluate(element => Number.parseFloat(getComputedStyle(element).lineHeight) * 2));
+    expect(sortBox.y).toBeGreaterThanOrEqual(countBox.y + countBox.height - 1);
+    await checkPageWidth(page);
+  }
+});
+
 /** Response fixtures exercise presentation/recovery only. No signing or payout is simulated as evidence. */
 const simulatedConfig = { mode: 'testnet', contractId: 'ui-fixture.testnet', rpcUrl: 'https://rpc.testnet.near.org', network: 'testnet' };
 const simulatedHash = 'A'.repeat(44);

@@ -58,6 +58,8 @@ All category totals derive from open, unexpired bounties. The locale panel count
 
 At intermediate widths the yellow locale panel becomes a horizontal summary above the queue. At mobile widths the type overview becomes one horizontally scrollable row, navigation becomes a contained horizontal strip, and the bounty queue becomes issue-first rows. The locale panel follows the queue so contributors reach actual work sooner. The global desktop search is replaced by the queue's visible search field. No screen requires horizontal page scrolling; the comparative leaderboard remains a labeled, keyboard-focusable scroll region.
 
+The desktop sidebar compacts its vertical spacing below 820 px of viewport height and scrolls internally when its content still cannot fit. Navigation and resource links retain their height; the bottom copy stays on the black surface in both appearances. Sidebar keyboard focus uses yellow against that fixed background. On mobile, the footer brand and description stack, and the queue count gets its own row above sorting so neither becomes a narrow column of broken text.
+
 ## Shared screens
 
 - **Bounty detail:** large issue title with type/status context, rounded description/timeline panels and a sticky escrow action panel with a yellow edge. Mobile places escrow and the next action first. Repository, PR, deadline, claimant, poster and verification routing remain explicit.

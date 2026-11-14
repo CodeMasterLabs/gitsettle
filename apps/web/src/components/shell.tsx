@@ -80,7 +80,7 @@ export function Shell({ children }: { children: ReactNode }) {
         <TransactionNotice />
         {children}
       </main>
-      <footer className="footer"><span>GitSettle <span className="footer-divider" />Contribution infrastructure for open source.</span><nav className="footer-links" aria-label="Resources"><a href="https://github.com/CodeMasterLabs/gitsettle/blob/main/docs/CLI.md" target="_blank" rel="noreferrer"><Terminal size={14} aria-hidden="true" />Command line <ArrowUpRight size={13} aria-hidden="true" /></a><a href="https://github.com/CodeMasterLabs/gitsettle#trust-model-and-limitations" target="_blank" rel="noreferrer">Settlement rules <ArrowUpRight size={13} aria-hidden="true" /></a></nav></footer>
+      <footer className="footer"><div className="footer-brand"><span className="footer-name">GitSettle</span><span className="footer-description">Contribution infrastructure for open source.</span></div><nav className="footer-links" aria-label="Resources"><a href="https://github.com/CodeMasterLabs/gitsettle/blob/main/docs/CLI.md" target="_blank" rel="noreferrer"><Terminal size={14} aria-hidden="true" />Command line <ArrowUpRight size={13} aria-hidden="true" /></a><a href="https://github.com/CodeMasterLabs/gitsettle#trust-model-and-limitations" target="_blank" rel="noreferrer">Settlement rules <ArrowUpRight size={13} aria-hidden="true" /></a></nav></footer>
     </div>
   </div>;
 }
