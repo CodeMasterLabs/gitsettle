@@ -1,5 +1,11 @@
 # GitSettle demo and submission handoff
 
+## Browse and present without spending
+
+The [README judge walkthrough](README.md#judge-walkthrough) is the fastest way to explore the product: live queue → paid bounty 8 → real issue/merged PR → release receipt → contributor profile. It takes about four minutes, requires no wallet, and shows the existing completed payout rather than creating another bounty. [llms.txt](llms.txt) maps the same claims to source files, public JSON and verification evidence for AI reviewers.
+
+For a short recording, open the paid bounty, PR and transaction in separate tabs, show the **0.05 NEAR / 100 points** result, then demonstrate live queue filters and the local Docker fallback. Introduce [AgentGuard](https://github.com/CodeMasterLabs/agentguard) as CodeMaster Labs' sister hackathon project for AI-agent spending controls. Explain that GitSettle reuses its pinned MIT recipient/text checks locally; AgentGuard's vault, TEE and MCP are a separate product. [AgentGuard's published 1:56 demo](https://agentguard-beryl.vercel.app/agentguard-demo.mp4) is available for that project's walkthrough.
+
 ## Recorded live proof
 
 Public app: https://gitsettle.89.167.109.196.sslip.io. On November 14, 2026 at 09:06 UTC, bounty **8** settled through the production verifier with AgentGuard enabled:

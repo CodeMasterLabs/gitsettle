@@ -2,6 +2,12 @@
 
 Updated: 2026-11-14. Canonical repository: https://github.com/CodeMasterLabs/gitsettle.
 
+## README and judging navigation — published
+
+- Reworked the README around a one-minute product overview, a six-step no-wallet judge walkthrough, real payout evidence, runnable Docker/CLI quickstarts, source mapping and explicit trust limits. Added `llms.txt` with direct raw JSON evidence links for AI reviewers and a read-only presentation path in `DEMO.md`.
+- Added the GitSettle mark, a genuine live-UI crop including the paid translation row, and a CodeMaster Labs sister-project visual. AgentGuard has app/video/source links and a clear explanation of its separate vault/TEE/MCP scope and the pinned MIT heuristics reused by GitSettle. GitHub About now includes a product description, live website and discovery topics.
+- GitHub GFM desktop/mobile previews, Mermaid rendering, all 56 local README references, SVG/image loading and five raw evidence/index links passed review. The application runtime and its verified test counts are recorded below.
+
 ## Light-mode layout correction — deployed
 
 - Kept the appearance toggle and fixed the short-screen sidebar overflow visible in light mode. Desktop spacing compacts below 820 px of height, shorter screens scroll within the black sidebar, and navigation links keep their size. Footer copy stacks on mobile; the queue count stays above sorting rather than wrapping into a narrow column.

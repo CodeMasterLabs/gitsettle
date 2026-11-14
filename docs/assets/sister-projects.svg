@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="440" viewBox="0 0 1200 440" role="img" aria-labelledby="title description">
+  <title id="title">GitSettle and AgentGuard by CodeMaster Labs</title>
+  <desc id="description">GitSettle provides contribution escrow for GitHub work on NEAR. AgentGuard provides owner-controlled spending vaults for AI agents, with on-chain limits, human approval queues and optional signed TEE risk verdicts. Their shared baseline is pinned MIT recipient and text checks, which GitSettle applies locally. AgentGuard vault, TEE and MCP components remain separate.</desc>
+  <rect width="1200" height="440" rx="26" fill="#080808"/>
+  <g fill="#1A1A1A" stroke="#353530">
+    <rect x="24" y="24" width="564" height="278" rx="22"/>
+    <rect x="612" y="24" width="564" height="278" rx="22"/>
+  </g>
+  <circle cx="80" cy="82" r="32" fill="#F0D957"/>
+  <g transform="translate(61 63) scale(1.6)" fill="none" stroke="#080808" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="18" cy="18" r="3"/>
+    <circle cx="6" cy="6" r="3"/>
+    <path d="M6 21V9a9 9 0 0 0 9 9"/>
+  </g>
+  <!-- GitSettle branching geometry: Lucide GitMerge, ISC License.
+  Copyright (c) 2026 Lucide Icons and Contributors
+  Permission to use, copy, modify, and/or distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+  -->
+  <circle cx="668" cy="82" r="32" fill="#F0D957"/>
+  <path d="M668 62l16 7v13c0 12-7 20-16 24-9-4-16-12-16-24V69z" fill="none" stroke="#080808" stroke-width="3.5" stroke-linejoin="round"/>
+  <path d="M660 82l6 6 11-13" fill="none" stroke="#080808" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <g font-family="Arial, Helvetica, sans-serif">
+    <g fill="#F7F7F2" font-size="40" font-weight="700">
+      <text x="130" y="96">GitSettle</text>
+      <text x="718" y="96">AgentGuard</text>
+    </g>
+    <g fill="#F0D957" font-size="24">
+      <text x="48" y="151">Contribution escrow</text>
+      <text x="636" y="151">Spending firewall for AI agents</text>
+    </g>
+    <g fill="#E9E9E2" font-size="23">
+      <text x="48" y="198">Fund GitHub issues on NEAR.</text>
+      <text x="48" y="232">Verify the merge and settle the reward.</text>
+      <text x="636" y="198">Owner-controlled vaults and on-chain limits.</text>
+      <text x="636" y="232">Human approval queues; optional signed</text>
+      <text x="636" y="266">TEE risk verdicts.</text>
+    </g>
+    <text x="48" y="352" fill="#F7F7F2" font-size="23">Shared baseline: pinned MIT recipient and text checks.</text>
+    <text x="48" y="385" fill="#AAA9A2" font-size="20">GitSettle applies them locally; AgentGuard vaults, TEE and MCP remain separate.</text>
+    <text x="48" y="418" fill="#AAA9A2" font-size="18">Built by CodeMaster Labs</text>
+  </g>
+</svg>
