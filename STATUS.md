@@ -2,6 +2,13 @@
 
 Updated: 2026-11-14. Canonical repository: https://github.com/CodeMasterLabs/gitsettle.
 
+## Full-viewport layout — deployed
+
+- Removed the outer yellow canvas, page margins, maximum shell width and outer rounded corners. The application reaches all four viewport edges in both themes; mobile short pages use the full available height.
+- Runtime source: `09b644a6dff716df02886a1b42cb1b63159d138c`, published and deployed from the clean public clone. Both services use image `sha256:aef4ccc04c203647e02d7e6bfae978b60ab8dd0a1ad4cdd4f9b81fb53971d18c` with zero restarts; web health passed.
+- Production build and 27 existing layout/accessibility/browser checks passed. Geometry inspection passed 24 theme/page/viewport combinations at 320, 375, 940, 1180, 1440 and 2560 px. All seven public routes, the mobile queue and provider picker were checked and recaptured with no outer gaps, page overflow or runtime errors.
+- CI: [43617582625](https://github.com/CodeMasterLabs/gitsettle/actions/runs/43617582625) passed all contract, application and container jobs, including the full 143-check browser suite. The performance observations below record their original source.
+
 ## Completed and verified
 
 - **Contract:** near-sdk 5.30.2, Rust 1.97.1. All 41 unit tests, fmt, Clippy and locked Wasm build pass. Deployed artifact SHA-256: `88a9d6824ff7b09f107bf7682dea477bd1352dbdb11ab5520abd8cae56170137`. The contract is unchanged by support/AI additions.
@@ -16,7 +23,7 @@ Updated: 2026-11-14. Canonical repository: https://github.com/CodeMasterLabs/git
 - **Initial real support proof:** at 09:22 UTC, `scripts/verify-support.ts` passed against public HTTPS using actual finalized testnet FullAccess keys. It verified NEP-413 signatures, nonce replay, CSRF, session-derived identity, unrelated-wallet isolation, ticket reply/resolution and logout. No NEAR transactions sent. Evidence: `docs/COMMUNITY_E2E.json`.
 - **Original containers:** clean public clone `9ca2b56` built and started on VPS using Docker Compose without credentials, with persistent SQLite and HTTPS verified. Details: `docs/DOCKER_VERIFICATION.md`. Latest live checks are recorded alongside that baseline.
 
-## Reference dApp / multi-wallet release — deployed
+## Earlier reference dApp / multi-wallet release
 
 - **Design:** the supplied black/yellow dashboard composition now spans all main routes, with real escrow/category/locale summaries, global search, a default dark appearance and a saved light choice. Mobile category labels stay inside their scroll region; maintainer amounts occupy a full-width metric. All main route and wallet screenshots reviewed.
 - **Wallets:** custom accessible MyNearWallet, Meteor, Intear and Nightly picker; lazy provider SDK loading, account management, Testnet identity connection without new function-call keys, pinned sandbox executors and preserved transaction recovery. Intear supports escrow only; its complete callback-bound support message is unavailable. Provider/site and fixture verification limits are in `docs/WALLETS.md`.
