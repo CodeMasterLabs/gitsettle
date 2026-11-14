@@ -105,6 +105,8 @@ All money stays in integer yoctoNEAR strings/BigInt. Contract times are Unix sec
 
 ## Private sessions, community and AI
 
+The custom wallet dialog opens without loading signing SDKs. Provider selection lazily initializes Wallet Selector and the selected MyNearWallet/Nightly module or the Meteor/Intear NEAR Connect sandbox bridge. The bridge uses an explicit pinned provider manifest, requests no function-call key, and retains signer-bound transaction confirmation. Account changes invalidate the private support session. Intear does not support the complete callback-bound message required here, so it is available for escrow only. Provider storage, external executor trust, legacy-key migration and third-party licenses are documented in [docs/WALLETS.md](docs/WALLETS.md).
+
 `packages/community` uses five-minute browser/domain/account-bound NEP-413 challenges and finalized FullAccess-key verification. Challenges are consumed atomically, sessions use hashed opaque tokens and HttpOnly cookies, and each request rechecks key revocation. Exact-origin CSRF rules protect mutations. `APP_ORIGIN` is mandatory in production. See [docs/COMMUNITY.md](docs/COMMUNITY.md) for access rules, rate limits, persistence and real API proof.
 
 Support messages stay in SQLite and are accessible only to their creator and configured support admins. An appeal additionally allows its immutable bounty poster; only the real claimant of Submitted/Rejected on-chain work can create it. Resolution is a conversation state, never an escrow transition. Rate limits, duplicate-message checks and writes run in the same immediate transaction.
@@ -112,5 +114,7 @@ Support messages stay in SQLite and are accessible only to their creator and con
 `packages/triage` performs public bounded issue checks without using the verifier token. Billable LLM review/chat requires a wallet session and an atomic daily quota. The provider has no tools or signing capability and receives only selected context on an explicit AI request. AI answers are not persisted. Provider settings are server-only; supported API shape, output validation, privacy and quota details are in [docs/TRIAGE.md](docs/TRIAGE.md). `TRUST_PROXY_HEADERS` defaults false; enable only behind a proxy that replaces forwarding headers, with the app bound to loopback.
 
 ## Extending safely
+
+The presentation tokens and reference-based layout are in [docs/DESIGN.md](docs/DESIGN.md). `Shell` owns global navigation/search and appearance; the board derives its escrow, category and locale summaries from the same public response used by the queue. These are current-state aggregates, not transaction history or price charts. The dark appearance is the first-visit default, and a saved light/dark choice survives navigation. Financial amounts continue to use integer arithmetic regardless of their visual formatting.
 
 Change the contract API, shared types, worker policy, and wallet transaction preview together. Re-run access-control and callback tests for financial changes. Add SQLite migrations rather than dropping tables. Follow `docs/DESIGN.md` for new UI and cover empty/error/disconnected/pending states. Before deployment, read `STATUS.md`, verify the Wasm hash, and prepare an explicit migration for any existing escrow state; the convenience deploy script refuses to overwrite funded code.

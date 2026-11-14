@@ -6,7 +6,7 @@ const baseURL = externalServer || 'http://127.0.0.1:3000';
 
 export default defineConfig({
   testDir: './tests',
-  testMatch: ['**/ui.spec.ts', '**/community.ui.spec.ts', '**/performance.ui.spec.ts'],
+  testMatch: ['**/ui.spec.ts', '**/community.ui.spec.ts', '**/performance.ui.spec.ts', '**/wallet.ui.spec.ts', '**/wallet-bridge.ui.spec.ts'],
   timeout: 45_000,
   expect: { timeout: 10_000 },
   fullyParallel: true,

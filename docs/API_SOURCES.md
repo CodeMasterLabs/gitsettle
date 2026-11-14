@@ -8,8 +8,9 @@ Checked on **2026-11-14**, before implementing the corresponding integrations. V
 | --- | --- | --- |
 | `near-api-js` | `7.5.3` | Node **22.22.2+**; use the v7 single-package API for server-side signing. |
 | `@near-wallet-selector/core` | `10.1.4` | v10 requires NEAR action objects, not v9 plain action descriptors. |
-| `@near-wallet-selector/modal-ui` | `10.1.4` | Declares React peer `>=18`; its own modal uses React 18.3.1. |
-| `@near-wallet-selector/my-near-wallet` | `10.1.4` | Browser redirect wallet; testnet URL is `https://testnet.mynearwallet.com`. |
+| `@near-wallet-selector/my-near-wallet` | `10.1.4` | Popup wallet; testnet URL is `https://testnet.mynearwallet.com`. |
+| `@near-wallet-selector/nightly` | `10.1.4` | Browser extension; native signing uses the configured Testnet RPC. |
+| `@hot-labs/near-connect` | `0.12.0` | Lazy sandbox bridge for Meteor and Intear; fixed provider manifest and no function-call key requested. |
 | `next` | `16.4.6` | Node `>=20.9`; React 19 is supported. |
 | `react`, `react-dom` | `19.3.1` | Application React version. |
 | `tailwindcss`, `@tailwindcss/postcss` | `4.3.5` | v4 PostCSS package is separate. |
@@ -57,37 +58,45 @@ const outcome = await verifier.callFunctionRaw({
 
 The library does not read environment credentials itself. Private keys stay in service/script environment variables; never expose them through Next.js public config.
 
-### Wallet Selector v10
+### Wallet Selector v10 and NEAR Connect
 
-Sources:
+Sources verified again for the multiwallet revision on November 14, 2026:
 
 - [v10 migration guide](https://github.com/near/wallet-selector/blob/main/MIGRATION-v10.md)
 - [Core setup](https://github.com/near/wallet-selector/blob/main/packages/core/README.md)
-- [Modal setup/styles](https://github.com/near/wallet-selector/blob/main/packages/modal-ui/README.md)
-- [My NEAR Wallet options](https://github.com/near/wallet-selector/blob/main/packages/my-near-wallet/README.md)
-- Published `@near-wallet-selector/core@10.1.4` types: `src/lib/wallet/wallet.types.d.ts`, `src/lib/store.types.d.ts`.
+- [MyNearWallet adapter](https://github.com/near/wallet-selector/tree/main/packages/my-near-wallet)
+- [Nightly adapter](https://github.com/near/wallet-selector/tree/main/packages/nightly)
+- [NEAR Connect documentation](https://github.com/hot-dao/near-selector)
+- Published `@near-wallet-selector/core@10.1.4` types: `src/lib/wallet/wallet.types.d.ts`, `src/lib/store.types.d.ts` and the corresponding `index.js` implementations.
+- Published `@near-wallet-selector/nightly@10.1.4` `src/lib/injected-nightly.d.ts`; `signMessage` takes the complete core `SignMessageParams`.
+- Published `@hot-labs/near-connect@0.12.0` `build/NearConnector.d.ts`, `build/SandboxedWallet/index.js`, `build/types/index.d.ts`, and package-shipped `skills/near-connect-quickstart/SKILL.md`. Types/source take precedence over the skill's older version header.
+
+GitSettle retains Wallet Selector for account state and its v10 NEAR action objects. The custom accessible modal is independent of signing libraries. Provider metadata renders without loading any wallet SDK; selecting or restoring one provider lazily loads that provider's implementation. `selector.store.observable` updates account identity; disconnect and account changes also invalidate the separate private support session.
 
 ```ts
-import { actionCreators, setupWalletSelector } from '@near-wallet-selector/core';
-import { setupModal } from '@near-wallet-selector/modal-ui';
-import { setupMyNearWallet } from '@near-wallet-selector/my-near-wallet';
-import '@near-wallet-selector/modal-ui/styles.css';
-
-const selector = await setupWalletSelector({
-  network: 'testnet',
-  modules: [setupMyNearWallet()],
-});
-const modal = setupModal(selector, { contractId, theme: 'light' });
-modal.show();
-
-const wallet = await selector.wallet();
+const wallet = await selector.wallet(providerId);
+await wallet.signIn({ contractId });
 await wallet.signAndSendTransaction({
+  signerId: accountId,
   receiverId: contractId,
   actions: [actionCreators.functionCall('claim_bounty', { id: 0 }, 100000000000000n, 0n)],
 });
 ```
 
-Initialize only in the browser. Observe `selector.store.observable` for account changes and unsubscribe on teardown. The `BrowserWallet` transaction method may return **`void`** because it redirects. Preserve pending action metadata before signing; verify `transactionHashes` from the wallet return against RPC and actual contract state before displaying confirmation. Never infer success from a redirect or URL parameter alone. A payable create transaction must attach reward **plus** the contract's storage reserve, using exact integer arithmetic.
+The app's module wrappers preserve selector's contract state but do **not** forward a contract/key request to provider sign-in. MyNearWallet's underlying `signIn({})` creates no function-call key. Meteor and Intear use `SandboxWallet.signIn({ network: 'testnet' })`, with no `addFunctionCallKey`. Nightly retains the key inside its extension. A previous MyNearWallet connection with a saved `functionCallKey` is blocked from starting new transactions until the user disconnects/reconnects; this removes the local copy through the adapter but does not revoke an older on-chain permission. The user can revoke it in wallet settings. No application UI accepts a private key or recovery phrase.
+
+| Provider | Connection | Private support authentication |
+| --- | --- | --- |
+| MyNearWallet | Testnet popup | Complete NEP-413 challenge, including callback URL |
+| Nightly | Installed browser extension | Wrapper forwards the full native `SignMessageParams`; upstream selector adapter drops `callbackUrl` |
+| Meteor Wallet | NEAR Connect sandbox / provider popup | Pinned executor forwards the full challenge, including `callbackUrl` |
+| Intear Wallet | NEAR Connect sandbox / web or mobile | Escrow only in this revision: its executor drops `callbackUrl`, so GitSettle refuses support sign-in rather than weakening server verification |
+
+The sandbox bridge uses only two explicit manifest entries with `testnet` and `signInWithoutAddKey` support. The selected `SandboxWallet` is constructed directly; untrusted injected events cannot replace the chosen executor. Provider scripts and wallet endpoints remain trusted dependencies. Intear stores a connector authentication key in browser storage, which is distinct from an on-chain NEAR signing key. Sandbox isolation is not an audit or a claim that providers hold no browser session data. Provider provenance and licenses are recorded alongside the pinned manifest/assets.
+
+The old Meteor selector adapter was considered and rejected: its SDK generates a local access key and logs the key object. The HERE adapter was also excluded; its network is not inherited automatically and its SDK creates local keys. HOT, EVM providers and WalletConnect are not advertised as generic Testnet options without verifying their exact network/capability requirements. This prevents decorative wallet logos from implying a working connection.
+
+The legacy modal-ui package is removed. Browser/popup providers may return `void` on navigation. Preserve pending unsigned action metadata before signing; verify `transactionHashes` against signer, receiver, method, arguments, finality and on-chain state before reporting success. Do not infer success from a popup closing or a URL parameter. Recover pending intent before optional wallet modules load, and keep it when a hash does not prove the original action. Payable create attaches reward **plus** storage reserve using exact integer arithmetic.
 
 ## GitHub REST API
 

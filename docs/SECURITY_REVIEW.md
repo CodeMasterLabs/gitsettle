@@ -97,7 +97,7 @@ at maximum bounds, and an external contract audit.
 
 ## Dependency audit
 
-`npm audit --json` reported **11 low-severity findings, zero moderate/high/critical**
+`npm audit --json` reported **12 low-severity findings, zero moderate/high/critical**
 on 2026-11-14. These are one underlying advisory propagated through the browser
 wallet dependency tree:
 
@@ -126,6 +126,19 @@ and rerun connection, signing, transaction-return, production build and dependen
 checks. Keep the advisory visible as an unresolved dependency review item.
 
 ## CLI and performance revision
+
+The dApp wallet revision retains account/signer-bound transaction confirmation,
+adds connection/signing concurrency guards and invalidates support sessions on
+provider-driven account changes. New logins do not request function-call keys.
+A legacy MyNearWallet browser key blocks signing until reconnection; on-chain
+revocation remains an explicit wallet action. The four selected integrations and
+their storage/third-party execution boundaries are described in [WALLETS.md](WALLETS.md).
+Intear is refused for support authentication because its adapter omits the
+callback URL; server-side NEP-413 validation is unchanged. The pinned remote
+Meteor executor and local standalone Intear executor are separate third-party
+programs. Their browser dependency contents are not fully covered by the npm
+audit of GitSettle's installed packages. Source review and sandbox isolation do
+not constitute an external security audit.
 
 The current Node suite has 182 passing tests, including 25 CLI cases. CLI signing requires an explicit `--yes`, a validated testnet endpoint and a protected local Ed25519 credential. A duplicate create requires a separate `--allow-duplicate` acknowledgement; failed duplicate lookups prevent signing. CLI reads and dry runs were checked against the deployed contract and hosted API without new transactions (`CLI_E2E.json`).
 

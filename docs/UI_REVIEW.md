@@ -1,8 +1,8 @@
 # Browser and visual review
 
-**Verified November 14, 2026: 96 of 96 browser checks passed in 2.3 minutes** against the final premium Next.js production build, using Playwright 1.65.1 and Chromium. The build completed without warnings.
+**Verified November 14, 2026: all 143 executed browser checks pass** against the dApp Next.js production build, using Playwright 1.65.1 and Chromium. Playwright discovers 144 scenarios; the desktop global-search scenario is intentionally skipped on mobile, which has its own queue search. The final local full run passed 140 checks in 2.4 minutes; after correcting a case-sensitive test locator, all three affected category checks passed in a focused rerun. No application code changed between those runs. The production build completed without warnings.
 
-The suite uses clearly labeled demo data. Wallet selector checks open its modal but do not connect a real wallet or sign transactions. Confirmation, support-session, ticket, signature callback and AI responses are explicit fixtures. The connected-header layout check substitutes public account markup only; it proves responsive layout, not wallet ownership. Real authentication and settlement evidence are recorded separately in [COMMUNITY_E2E.json](COMMUNITY_E2E.json) and [LIVE_E2E.json](LIVE_E2E.json).
+The suite uses clearly labeled demo data. Wallet checks use the real selector modules and NEAR Connect sandbox with injected Nightly, popup-boundary and sandbox-executor fixtures; they do not approve a real account or sign transactions. Confirmation, support-session, ticket, signature callback and AI responses are explicit fixtures. The connected-header layout check substitutes public account markup only; it proves responsive layout, not wallet ownership. Real HTTP authentication and settlement evidence are recorded separately in [COMMUNITY_E2E.json](COMMUNITY_E2E.json) and [LIVE_E2E.json](LIVE_E2E.json).
 
 ## Coverage and final design review
 
@@ -13,13 +13,17 @@ The suite uses clearly labeled demo data. Wallet selector checks open its modal 
 - Private support sign-in, appeal drafts, accessible/inaccessible threads, replies, resolution, expired sessions, NEP-413 callback validation and fragment scrubbing.
 - Duplicate-funding acknowledgement, payout-cap disclosure, optional AI unavailable/failure/reply states.
 - Deferred wallet-code loading, recovery despite a failed optional chunk download, and preservation of a pending action after a mismatched return hash.
+- Four-provider connection dialog, account management, cancellation/retry, no-key MyNearWallet connection, Nightly account changes and complete NEP-413 challenge fields.
+- Meteor/Intear sandbox network and identity requests, explicit Intear support limitations, and refusal to sign while a wallet switch is unfinished.
+- Startup/cancellation of the shipped Intear executable, stale signature rejection after extension account changes, and revocation of delayed session responses after disconnect.
+- Reward-category totals excluding expired work, translation discovery resetting filters, shared global search, and persisted appearance selection.
 - Keyboard skip navigation, visible focus, serious/critical Axe WCAG A/AA findings and page overflow.
 
 Main layouts were tested at **1440 × 960**, **375 × 812**, and dark desktop appearance. An additional connected-wallet layout regression checks **320 px and 375 px** in each appearance: header elements cannot overlap, account/theme/disconnect targets are at least 44 px high, form values use at least 16 px text to avoid iOS focus zoom, and testnet identification remains visible.
 
-The premium revision uses a graphite navigation rail, Manrope headings and financial values, Source Sans body text, forest-green actions, a continuous escrow overview, and structured queue/form/inbox surfaces. The final visual pass inspected every main desktop capture plus the mobile queue, connected header, form and support states. Sidebar, breadcrumb, table-column and action alignment are consistent. Mobile navigation scrolls within its own region, the overview uses compact spacing, and the account controls wrap beneath the breadcrumb when necessary. The page itself does not scroll horizontally. Long comparative leaderboard columns retain a labeled, keyboard-focusable scroll region.
+The dApp revision follows the user's reference: a yellow canvas around a rounded black frame, integrated navigation, charcoal workspace, black inset queue and a yellow translation panel. Manrope carries headings and financial values; Source Sans carries body text. Escrow, category and locale summaries come from real queue data. The first visit uses dark appearance; a saved light choice persists. Mobile navigation and category tiles scroll within their own regions, account controls wrap beneath the breadcrumb, and the comparative leaderboard retains a labeled, keyboard-focusable scroll region.
 
-The refreshed captures include **78 demo/fixture PNGs**. Each full-page capture scrolls to the top first, preventing sticky navigation and the offscreen skip link from appearing at a misleading scrolled position. No further spacing correction was needed after the final production build.
+The refreshed captures include **90 demo/fixture PNGs**. Each full-page capture scrolls to the top first, preventing sticky navigation and the offscreen skip link from appearing at a misleading scrolled position. Native dialogs use viewport captures because their top-layer backdrop covers the viewport. The visual review inspected all seven main routes, both desktop appearances, mobile layouts, 320 px layouts and long-account wallet dialogs. It corrected hidden-label overflow in the category strip and a split decimal in mobile maintainer totals; the final checks verify the corrected layout.
 
 Automated accessibility checks cannot replace a complete assistive-technology audit. Browser fixture results must not be presented as real escrow or provider activity. The separate `screenshots/live/` directory records the public deployment and is updated independently during deployment verification.
 
@@ -38,6 +42,8 @@ Automated accessibility checks cannot replace a complete assistive-technology au
 | Appeal draft fixture | [View](screenshots/desktop/support-appeal-draft-fixture.png) | [View](screenshots/mobile/support-appeal-draft-fixture.png) | [View](screenshots/dark/support-appeal-draft-fixture.png) |
 | Duplicate and payout-cap fixture | [View](screenshots/desktop/post-duplicate-and-cap-fixture.png) | [View](screenshots/mobile/post-duplicate-and-cap-fixture.png) | [View](screenshots/dark/post-duplicate-and-cap-fixture.png) |
 | Connected header at 375 px (layout fixture) | [View](screenshots/desktop/connected-wallet-layout-fixture.png) | [View](screenshots/mobile/connected-wallet-layout-fixture.png) | [View](screenshots/dark/connected-wallet-layout-fixture.png) |
+| Wallet provider picker | [View](screenshots/desktop/wallet-provider-picker.png) | [View](screenshots/mobile/wallet-provider-picker.png) | [View](screenshots/dark/wallet-provider-picker.png) |
+| Wallet account fixture | [View](screenshots/desktop/wallet-account-modal-fixture.png) | [View](screenshots/mobile/wallet-account-modal-fixture.png) | [View](screenshots/dark/wallet-account-modal-fixture.png) |
 | AI reply fixture | [View](screenshots/desktop/support-ai-reply-fixture.png) | [View](screenshots/mobile/support-ai-reply-fixture.png) | [View](screenshots/dark/support-ai-reply-fixture.png) |
 
 Each appearance directory also contains `review-bounty`, `empty-filter-results`,
@@ -55,7 +61,7 @@ npm run test:ui
 
 Playwright starts a demo-mode server. An existing server must also report demo mode; the browser tests do not target live signing. For a separately started QA server, set `PLAYWRIGHT_BASE_URL`. Screenshots are written to `docs/screenshots/` by appearance. Failure traces and the HTML report remain local artifacts.
 
-The suite lives in `tests/ui.spec.ts`, `tests/community.ui.spec.ts`, and `tests/performance.ui.spec.ts`. Viewport, browser and server configuration is in `playwright.config.ts`. Repeated runs overwrite review captures. Run a single meaningful subset when investigating a regression, for example:
+The suite lives in `tests/ui.spec.ts`, `tests/community.ui.spec.ts`, `tests/performance.ui.spec.ts`, `tests/wallet.ui.spec.ts`, and `tests/wallet-bridge.ui.spec.ts`. Viewport, browser and server configuration is in `playwright.config.ts`. Repeated runs overwrite review captures. Run a single meaningful subset when investigating a regression, for example:
 
 ```sh
 npx playwright test --grep 'narrow connected-wallet header'

@@ -1,8 +1,9 @@
 'use client';
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
-import type { SignMessageParams, SignedMessage, WalletSelector } from '@near-wallet-selector/core';
-import type { WalletSelectorModal } from '@near-wallet-selector/modal-ui';
+import type { InjectedWallet, SignMessageParams, SignedMessage, WalletSelector } from '@near-wallet-selector/core';
+import { walletDefinition, type WalletId } from '@/lib/wallet-catalog';
+import { WalletModal } from './wallet-modal';
 import type { PublicConfig } from '@gitsettle/shared/types';
 
 type Method = 'create_bounty' | 'claim_bounty' | 'submit_pr' | 'release' | 'refund';
@@ -16,7 +17,8 @@ type Transaction = {
 type PendingAction = { method: Method; accountId: string; bountyId?: number; expectedArgs: Record<string, unknown>; createdAt: number; txHash?: string };
 type WalletContextValue = {
   config: PublicConfig | null; accountId: string | null; ready: boolean; error: string | null;
-  transaction: Transaction | null; connect: () => void; disconnect: () => Promise<void>;
+  transaction: Transaction | null; connect: () => void; manageWallet: () => void; disconnect: () => Promise<void>;
+  walletName: string | null; connectionPending: boolean;
   transact: (method: Method, args: Record<string, unknown>, deposit?: string) => Promise<void>;
   clearTransaction: () => void; retryConfirmation: () => void;
   recoverTransaction: (hash: string) => void; dismissUnsent: () => void;
@@ -25,7 +27,8 @@ type WalletContextValue = {
 const WalletContext = createContext<WalletContextValue | null>(null);
 const PENDING_KEY = 'gitsettle.pending.v1';
 
-/** Wallet keys remain inside the wallet. Only unsigned action metadata is kept across redirects. */
+/** New connections delegate NEAR transaction signing to the wallet provider.
+ * This component persists only unsigned action metadata across redirects. */
 export function WalletProvider({ children }: { children: ReactNode }) {
   const [config, setConfig] = useState<PublicConfig | null>(null);
   const [accountId, setAccountId] = useState<string | null>(null);
@@ -33,7 +36,14 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const [transaction, setTransaction] = useState<Transaction | null>(null);
   const selector = useRef<WalletSelector | null>(null);
-  const modal = useRef<WalletSelectorModal | null>(null);
+  const [walletModalOpen, setWalletModalOpen] = useState(false);
+  const [walletModalView, setWalletModalView] = useState<'providers' | 'account'>('providers');
+  const [walletError, setWalletError] = useState<string | null>(null);
+  const [selectedWalletId, setSelectedWalletId] = useState<string | null>(null);
+  const [accounts, setAccounts] = useState<string[]>([]);
+  const [connectingId, setConnectingId] = useState<WalletId | null>(null);
+  const connecting = useRef(false);
+  const signing = useRef(false);
   const confirming = useRef(false);
   const loadWallet = useRef<(() => Promise<void>) | null>(null);
 
@@ -91,17 +101,22 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         const initializeWallet = () => {
           if (walletInitialization) return walletInitialization;
           walletInitialization = (async () => {
-            const [{ setupWalletSelector }, { setupModal }, { setupMyNearWallet }] = await Promise.all([
-              import('@near-wallet-selector/core'), import('@near-wallet-selector/modal-ui'), import('@near-wallet-selector/my-near-wallet'),
-            ]);
+            const { setupGitSettleWallets } = await import('./wallet-modules');
             if (stopped) return;
-            const instance = await setupWalletSelector({ network: 'testnet', modules: [setupMyNearWallet()] });
+            const instance = await setupGitSettleWallets(current.rpcUrl);
             if (stopped) return;
             selector.current = instance;
-            modal.current = setupModal(instance, { contractId: current.contractId!, theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light' });
+            let previousAccount: string | null = null;
             const update = () => {
               const state = instance.store.getState();
-              setAccountId(state.accounts.find(account => account.active)?.accountId || state.accounts[0]?.accountId || null);
+              const nextAccount = state.accounts.find(account => account.active)?.accountId || state.accounts[0]?.accountId || null;
+              // Clear the separate private support session on extension-driven
+              // changes as well as an explicit disconnect or provider switch.
+              if (previousAccount && previousAccount !== nextAccount) window.dispatchEvent(new Event('gitsettle:wallet-disconnected'));
+              previousAccount = nextAccount;
+              setAccountId(nextAccount);
+              setAccounts(state.accounts.map(account => account.accountId).filter(Boolean));
+              setSelectedWalletId(state.selectedWalletId);
             };
             update();
             const subscription = instance.store.observable.subscribe(update);
@@ -148,19 +163,81 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   }, [confirm]);
 
   const connect = useCallback(() => {
-    const initialize = loadWallet.current;
-    if (!initialize) return;
-    setError(null); setReady(false);
-    void initialize().then(() => modal.current?.show()).catch((reason: unknown) => {
-      setError(reason instanceof Error ? reason.message : 'Wallet setup failed. Try connecting again.');
-    }).finally(() => setReady(true));
+    if (!loadWallet.current) return;
+    setError(null); setWalletError(null); setWalletModalView('providers'); setWalletModalOpen(true);
+  }, []);
+  const manageWallet = useCallback(() => {
+    setWalletError(null); setWalletModalView(connecting.current ? 'providers' : 'account'); setWalletModalOpen(true);
   }, []);
   const disconnect = useCallback(async () => {
-    try { const wallet = await selector.current?.wallet(); await wallet?.signOut(); setAccountId(null); window.dispatchEvent(new Event('gitsettle:wallet-disconnected')); }
-    catch (reason) { setError(reason instanceof Error ? reason.message : 'Could not disconnect the wallet.'); }
+    if (connecting.current || signing.current) { setError('Finish the current wallet request before disconnecting.'); return; }
+    setError(null); setWalletError(null);
+    try {
+      const wallet = await selector.current?.wallet();
+      await wallet?.signOut();
+      setAccountId(null); setAccounts([]); setSelectedWalletId(null); setWalletModalOpen(false);
+      window.dispatchEvent(new Event('gitsettle:wallet-disconnected'));
+    } catch (reason) {
+      const message = reason instanceof Error ? reason.message : 'Could not disconnect the wallet.';
+      setError(message); setWalletError(message);
+    }
+  }, []);
+
+  const chooseWallet = useCallback(async (id: WalletId) => {
+    const initialize = loadWallet.current;
+    if (!initialize || connecting.current || !config?.contractId) return;
+    if (signing.current) { setWalletError('Finish the current wallet transaction before switching wallets.'); return; }
+    connecting.current = true; setConnectingId(id); setWalletError(null); setError(null);
+    // Hide an old private identity while changing providers. Opening the picker
+    // alone does not disrupt the active support session.
+    setReady(false);
+    try {
+      await initialize();
+      const instance = selector.current;
+      if (!instance) throw new Error('Wallet setup was interrupted. Try connecting again.');
+      const state = instance.store.getState();
+      if (state.selectedWalletId && state.accounts.length) {
+        window.dispatchEvent(new Event('gitsettle:wallet-disconnected'));
+        await (await instance.wallet()).signOut();
+      }
+      const wallet = await instance.wallet<InjectedWallet>(id);
+      // Sandboxed wallets can render pairing UI in their iframe. Release the
+      // native dialog's top layer so that provider-owned UI stays accessible.
+      if (id === 'meteor-wallet' || id === 'intear-wallet') setWalletModalOpen(false);
+      const connectedAccounts = await wallet.signIn({ contractId: config.contractId });
+      if (connectedAccounts.some(account => account.accountId)) setWalletModalOpen(false);
+      else throw new Error('No account was returned. Complete the wallet request, then try connecting again.');
+    } catch (reason) {
+      setWalletError(reason instanceof Error ? reason.message : typeof reason === 'string' ? reason : 'The wallet connection was not completed. Try again.');
+      setWalletModalOpen(true);
+    } finally { connecting.current = false; setConnectingId(null); setReady(true); }
+  }, [config]);
+
+  const switchAccount = useCallback(async (nextAccount: string) => {
+    const instance = selector.current;
+    if (connecting.current || signing.current || !instance || !instance.store.getState().accounts.some(account => account.accountId === nextAccount)) return;
+    connecting.current = true;
+    setConnectingId(walletDefinition(instance.store.getState().selectedWalletId)?.id || null);
+    setReady(false); setWalletError(null);
+    window.dispatchEvent(new Event('gitsettle:wallet-disconnected'));
+    try {
+      // Some providers keep an active account in addition to selector state.
+      const wallet = await instance.wallet();
+      if ('switchAccount' in wallet && typeof wallet.switchAccount === 'function') await wallet.switchAccount(nextAccount);
+      instance.setActiveAccount(nextAccount);
+    } catch (reason) { setWalletError(reason instanceof Error ? reason.message : 'Could not switch accounts.'); }
+    finally { connecting.current = false; setConnectingId(null); setReady(true); }
   }, []);
 
   const transact = useCallback(async (method: Method, args: Record<string, unknown>, deposit = '0') => {
+    if (signing.current) {
+      setError('Finish the current wallet signing request before sending a transaction.');
+      return;
+    }
+    if (connecting.current || !ready) {
+      setError('Finish connecting or switching your wallet before sending a transaction.');
+      return;
+    }
     if (!selector.current || !accountId || !config?.contractId || config.mode !== 'testnet') {
       setTransaction({ status: 'failed', message: 'Connect a testnet wallet before sending this transaction.' }); return;
     }
@@ -168,15 +245,24 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       setTransaction(current => current?.status === 'pending' ? current : { status: 'pending', message: 'A previous wallet request still needs verification. Check wallet activity before sending another.' });
       return;
     }
+    if (selector.current.store.getState().selectedWalletId === 'my-near-wallet' && localStorage.getItem('functionCallKey')) {
+      // Earlier app versions requested a limited key from MyNearWallet. Do not
+      // silently use or delete it. Disconnect removes the local copy; removing
+      // its on-chain permission is a separate action in the user's wallet.
+      setTransaction({ status: 'failed', message: 'Your earlier MyNearWallet connection has a saved access key. Disconnect and reconnect to approve each transaction in your wallet. You can revoke the older key in your wallet settings.' });
+      return;
+    }
     const pending: PendingAction = { method, accountId, bountyId: typeof args.id === 'number' ? args.id : undefined, expectedArgs: args, createdAt: Date.now() };
     localStorage.setItem(PENDING_KEY, JSON.stringify(pending));
     setTransaction({ status: 'pending', message: 'Review and sign the transaction in your wallet…' });
     let signingStarted = false;
+    signing.current = true;
     try {
       const { actionCreators } = await import('@near-wallet-selector/core');
       const wallet = await selector.current.wallet();
       signingStarted = true;
       const result = await wallet.signAndSendTransaction({
+        signerId: accountId,
         receiverId: config.contractId,
         actions: [actionCreators.functionCall(method, args, 100000000000000n, BigInt(deposit))],
       });
@@ -188,7 +274,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         void confirm(pending);
       }
     } catch (reason) {
-      const message = reason instanceof Error ? reason.message : 'The wallet request was interrupted.';
+      const message = reason instanceof Error ? reason.message : typeof reason === 'string' ? reason : 'The wallet request was interrupted.';
       if (!signingStarted || /(?:user.{0,20}(?:reject|cancel|denied|declin)|(?:reject|cancel|declin).{0,20}(?:user|request)|UserRejected)/i.test(message)) {
         localStorage.removeItem(PENDING_KEY);
         setTransaction({ status: 'failed', message });
@@ -197,8 +283,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         // label the transfer failed; reconcile the hash with chain receipts.
         setTransaction({ status: 'pending', message: 'The wallet request was interrupted. Check your wallet activity before retrying; the transaction may already have been submitted.' });
       }
-    }
-  }, [accountId, config, transaction?.status, confirm]);
+    } finally { signing.current = false; }
+  }, [accountId, config, ready, transaction?.status, confirm]);
 
   const clearTransaction = useCallback(() => setTransaction(null), []);
   const retryConfirmation = useCallback(() => {
@@ -219,15 +305,33 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     setTransaction({ status: 'failed', message: 'Pending request cleared after your wallet check. Your draft is preserved.' });
   }, []);
   const signAuthMessage = useCallback(async (params: SignMessageParams) => {
-    if (!selector.current || !accountId) throw new Error('Connect your NEAR wallet before signing in to support.');
-    const wallet = await selector.current.wallet();
-    if (!wallet.signMessage) throw new Error('This wallet does not support message signing. Use a wallet with NEP-413 support to open a private ticket.');
-    // Message signing proves account control for a short-lived web session. It
-    // does not call the escrow contract, spend tokens, or share transaction state.
-    return wallet.signMessage(params);
-  }, [accountId]);
+    if (connecting.current || !ready) throw new Error('Finish switching wallets before signing in to support.');
+    if (signing.current) throw new Error('Finish the current wallet signing request before signing in to support.');
+    const instance = selector.current;
+    if (!instance || !accountId) throw new Error('Connect your NEAR wallet before signing in to support.');
+    const state = instance.store.getState();
+    const activeAccount = state.accounts.find(account => account.active)?.accountId || state.accounts[0]?.accountId;
+    if (activeAccount !== accountId) throw new Error('Your wallet account changed. Wait for the new account, then sign in again.');
+    const providerId = state.selectedWalletId;
+    const selected = walletDefinition(providerId);
+    if (selected && !selected.support) throw new Error(`${selected.name}'s current adapter cannot sign the complete support challenge. Switch to MyNearWallet, Meteor Wallet, or Nightly for private support.`);
+    signing.current = true;
+    try {
+      const wallet = await instance.wallet();
+      if (!wallet.signMessage) throw new Error('This wallet does not support message signing. Use a wallet with NEP-413 support to open a private ticket.');
+      // Keep the provider stable while its message window is open. Extension-
+      // driven account changes remain possible, so discard their stale result.
+      const result = await wallet.signMessage(params);
+      const nextState = instance.store.getState();
+      const nextAccount = nextState.accounts.find(account => account.active)?.accountId || nextState.accounts[0]?.accountId;
+      if (nextState.selectedWalletId !== providerId || nextAccount !== accountId || (result && result.accountId !== accountId)) {
+        throw new Error('Your wallet account changed during signing. Sign in again with the active account.');
+      }
+      return result;
+    } finally { signing.current = false; }
+  }, [accountId, ready]);
 
-  return <WalletContext.Provider value={{ config, accountId, ready, error, transaction, connect, disconnect, transact, clearTransaction, retryConfirmation, recoverTransaction, dismissUnsent, signAuthMessage }}>{children}</WalletContext.Provider>;
+  return <WalletContext.Provider value={{ config, accountId, ready, error, transaction, connect, manageWallet, walletName: walletDefinition(selectedWalletId)?.name || null, connectionPending: Boolean(connectingId), disconnect, transact, clearTransaction, retryConfirmation, recoverTransaction, dismissUnsent, signAuthMessage }}>{children}<WalletModal open={walletModalOpen} view={walletModalView} accountId={accountId} accounts={accounts} selectedWalletId={selectedWalletId} connectingId={connectingId} error={walletError} onClose={() => setWalletModalOpen(false)} onChoose={id => { void chooseWallet(id); }} onSwitch={() => { setWalletError(null); setWalletModalView('providers'); }} onDisconnect={() => { void disconnect(); }} onAccount={id => { void switchAccount(id); }} /></WalletContext.Provider>;
 }
 
 export function useWallet() {

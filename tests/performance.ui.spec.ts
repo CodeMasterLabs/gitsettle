@@ -7,14 +7,22 @@ async function configure(page: Page) {
   await page.route('**/api/config', route => route.fulfill({ contentType: 'application/json', body: JSON.stringify(config) }));
 }
 
-/** This opens only the selector modal; no wallet, key, or transaction is used. */
-test('ordinary browsing defers wallet code until Connect is requested', async ({ page }) => {
+/** The native injection rejects connection before signing; no key or transaction is used. */
+test('browsing and opening the picker defer wallet SDKs until a provider is selected', async ({ page }) => {
   await configure(page);
+  await page.addInitScript(() => Object.assign(window, { nightly: { near: {
+    account: { accountId: '', publicKey: { toString: () => 'fixture-public-key' } }, isConnected: false,
+    async connect() { throw new Error('User rejected the connection request'); },
+  } } }));
   await page.goto('/', { waitUntil: 'networkidle' });
   const before = await page.evaluate(() => performance.getEntriesByType('resource').filter(entry => /\.js(?:\?|$)/.test(entry.name)).length);
   await expect(page.getByRole('button', { name: 'Connect wallet', exact: true }).first()).toBeEnabled();
   await page.getByRole('button', { name: 'Connect wallet', exact: true }).first().click();
   await expect(page.getByText('MyNearWallet', { exact: true }).first()).toBeVisible();
+  const picker = await page.evaluate(() => performance.getEntriesByType('resource').filter(entry => /\.js(?:\?|$)/.test(entry.name)).length);
+  expect(picker, 'Opening the picker must not load signing SDKs').toBe(before);
+  await page.getByRole('button', { name: /^Connect with Nightly/ }).click();
+  await expect(page.getByRole('dialog').getByRole('alert')).toContainText('User rejected the connection request');
   const after = await page.evaluate(() => performance.getEntriesByType('resource').filter(entry => /\.js(?:\?|$)/.test(entry.name)).length);
   expect(after).toBeGreaterThan(before);
   expect(await page.evaluate(() => localStorage.getItem('gitsettle.pending.v1'))).toBeNull();

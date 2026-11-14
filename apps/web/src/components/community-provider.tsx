@@ -32,18 +32,36 @@ export function CommunityProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<AuthStatus>('loading');
   const [error, setError] = useState<string | null>(null);
   const initialized = useRef(false);
+  // Wallet/account changes invalidate every older HTTP and signature response.
+  // Keep one sign-in operation active until stale-session cleanup has completed.
+  const authGeneration = useRef(0);
+  const authenticating = useRef(false);
 
   const refreshSession = useCallback(async () => {
+    const generation = authGeneration.current;
     try {
       const result = await communityRequest<{ session: CommunitySession | null }>('/api/auth/session');
+      if (generation !== authGeneration.current) return;
       setSession(result.session); setStatus(result.session ? 'authenticated' : 'signed_out');
-    } catch (reason) { setSession(null); setError(reason instanceof Error ? reason.message : 'Support sign-in could not be checked.'); setStatus('signed_out'); }
+    } catch (reason) {
+      if (generation !== authGeneration.current) return;
+      setSession(null); setError(reason instanceof Error ? reason.message : 'Support sign-in could not be checked.'); setStatus('signed_out');
+    }
   }, []);
 
-  const establish = useCallback(async (signed: { challengeId: string; accountId: string; publicKey: string; signature: string }) => {
+  const establish = useCallback(async (signed: { challengeId: string; accountId: string; publicKey: string; signature: string }, generation: number) => {
+    if (generation !== authGeneration.current) return false;
     const result = await communityRequest<{ session: CommunitySession }>('/api/auth/session', { method: 'POST', body: JSON.stringify(signed) });
+    if (generation !== authGeneration.current) {
+      // The response may have set its HttpOnly cookie after an earlier logout.
+      // Revoke it before permitting another sign-in; never paint stale identity.
+      try { await communityRequest('/api/auth/session', { method: 'DELETE' }); }
+      catch { setError('Server sign-out failed after the cancelled sign-in. Retry sign-out before leaving this browser.'); }
+      return false;
+    }
     sessionStorage.removeItem(AUTH_KEY);
     setSession(result.session); setStatus('authenticated'); setError(null);
+    return true;
   }, []);
 
   useEffect(() => {
@@ -66,14 +84,19 @@ export function CommunityProvider({ children }: { children: ReactNode }) {
           sessionStorage.removeItem(AUTH_KEY); setError('The wallet sign-in response did not match this browser’s request. Sign in again.'); setStatus('signed_out'); return;
         }
         setStatus('signing');
+        const generation = ++authGeneration.current;
+        authenticating.current = true;
         try {
-          await establish({ challengeId: state, accountId: pending.accountId, publicKey: fragment.get('publicKey')!, signature });
-          if (pending.returnTo) {
+          const established = await establish({ challengeId: state, accountId: pending.accountId, publicKey: fragment.get('publicKey')!, signature }, generation);
+          if (established && pending.returnTo) {
             const destination = new URL(pending.returnTo, window.location.origin);
             if (destination.origin === window.location.origin && destination.pathname !== '/support') window.location.replace(destination.href);
           }
         }
-        catch (reason) { sessionStorage.removeItem(AUTH_KEY); setError(reason instanceof Error ? reason.message : 'The wallet signature could not be verified.'); setStatus('signed_out'); }
+        catch (reason) {
+          if (generation === authGeneration.current) { sessionStorage.removeItem(AUTH_KEY); setError(reason instanceof Error ? reason.message : 'The wallet signature could not be verified.'); setStatus('signed_out'); }
+        }
+        finally { authenticating.current = false; }
         return;
       }
       if ((fragment.has('error') || fragment.has('errorCode')) && sessionStorage.getItem(AUTH_KEY)) {
@@ -90,17 +113,18 @@ export function CommunityProvider({ children }: { children: ReactNode }) {
   }, [establish, refreshSession]);
 
   const logout = useCallback(async () => {
+    const generation = ++authGeneration.current;
+    sessionStorage.removeItem(AUTH_KEY); setSession(null); setStatus('signed_out'); setError(null);
     try {
       await communityRequest('/api/auth/session', { method: 'DELETE' });
-      sessionStorage.removeItem(AUTH_KEY); setSession(null); setStatus('signed_out'); setError(null);
     } catch {
-      setSession(null); setStatus('signed_out');
+      if (generation !== authGeneration.current) return;
       setError('Server sign-out failed. Your support session may still be active; retry sign-out before leaving this browser.');
     }
   }, []);
 
   useEffect(() => {
-    const expired = () => { setSession(null); setStatus('signed_out'); setError('Your support session expired. Sign a fresh message to continue.'); };
+    const expired = () => { authGeneration.current += 1; sessionStorage.removeItem(AUTH_KEY); setSession(null); setStatus('signed_out'); setError('Your support session expired. Sign a fresh message to continue.'); };
     const disconnected = () => { void logout(); };
     window.addEventListener('gitsettle:session-expired', expired);
     window.addEventListener('gitsettle:wallet-disconnected', disconnected);
@@ -113,18 +137,24 @@ export function CommunityProvider({ children }: { children: ReactNode }) {
 
   const authenticate = useCallback(async () => {
     if (!accountId) { setError('Connect your wallet before signing in to support.'); return; }
+    if (authenticating.current) { setError('Finish the previous support sign-in request before trying again.'); return; }
+    authenticating.current = true;
+    const generation = ++authGeneration.current;
     setError(null); setStatus('signing');
     try {
       const { challenge } = await communityRequest<{ challenge: AuthChallenge }>('/api/auth/challenge', { method: 'POST', body: JSON.stringify({ accountId }) });
+      if (generation !== authGeneration.current) return;
       sessionStorage.setItem(AUTH_KEY, JSON.stringify({ challengeId: challenge.challengeId, accountId, returnTo: `${window.location.pathname}${window.location.search}` }));
       const result = await signAuthMessage({ message: challenge.message, nonce: Buffer.from(challenge.nonce, 'base64'), recipient: challenge.recipient, callbackUrl: challenge.callbackUrl, state: challenge.state });
-      if (result) await establish({ challengeId: challenge.challengeId, accountId: result.accountId, publicKey: result.publicKey, signature: result.signature });
+      if (generation !== authGeneration.current) return;
+      if (result) await establish({ challengeId: challenge.challengeId, accountId: result.accountId, publicKey: result.publicKey, signature: result.signature }, generation);
       // A redirecting wallet returns void. The independent callback above owns
       // verification; no signature or session token is saved in localStorage.
     } catch (reason) {
+      if (generation !== authGeneration.current) return;
       sessionStorage.removeItem(AUTH_KEY); setStatus('signed_out');
       setError(reason instanceof Error ? reason.message : 'The support sign-in message was not completed.');
-    }
+    } finally { authenticating.current = false; }
   }, [accountId, establish, signAuthMessage]);
 
   // Do not paint a previous wallet's private session while the wallet selector

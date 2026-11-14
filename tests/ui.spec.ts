@@ -105,6 +105,36 @@ test('quick bounty views change the working set without losing the table control
   await expect(page.locator('.bounty-row')).toHaveCount(8);
 });
 
+test('reward category tiles exclude expired work and translation discovery resets prior filters', async ({ page }) => {
+  await page.goto('/');
+  const bugs = page.getByRole('button', { name: /^Browse open bug fixes/i });
+  await expect(bugs).toContainText('12.00');
+  await bugs.click();
+  await expect(page.getByLabel('Work type', { exact: true })).toHaveValue('Bug');
+  await expect(page.getByLabel('Status', { exact: true })).toHaveValue('Open');
+  await expect(page.locator('.bounty-row')).toHaveCount(1);
+  await expect(page.locator('.bounty-title')).toHaveText('Prevent stale balances after a confirmed payout');
+  await page.getByRole('button', { name: /^Browse open security audits/i }).click();
+  await expect(page.getByRole('heading', { name: 'No bounties match these filters.' })).toBeVisible();
+  await page.getByLabel('Find an issue', { exact: true }).fill('unmatched search');
+  await page.getByRole('button', { name: 'Explore translations', exact: true }).click();
+  await expect(page.getByLabel('Find an issue', { exact: true })).toHaveValue('');
+  await expect(page.getByLabel('Work type', { exact: true })).toHaveValue('Translation');
+  await expect(page.getByLabel('Status', { exact: true })).toHaveValue('all');
+  await expect(page.locator('.bounty-row')).toHaveCount(3);
+});
+
+test('global bounty search carries the query into the work queue', async ({ page }, info) => {
+  test.skip(info.project.name === 'mobile', 'The mobile queue has its own visible search input.');
+  await page.goto('/leaderboard');
+  await page.getByLabel('Search all bounties', { exact: true }).fill('Bengali');
+  await page.getByRole('button', { name: 'Search bounties', exact: true }).click();
+  await expect(page).toHaveURL(/\/\?q=Bengali$/);
+  await expect(page.getByLabel('Find an issue', { exact: true })).toHaveValue('Bengali');
+  await expect(page.locator('.bounty-row')).toHaveCount(1);
+  await expect(page.locator('.bounty-title')).toHaveText('Bring the contributor guide to Bengali');
+});
+
 test('settled bounties do not show active claiming or payout-routing instructions', async ({ page }) => {
   await page.route('**/api/bounties/6', async (route) => {
     const response = await route.fetch();

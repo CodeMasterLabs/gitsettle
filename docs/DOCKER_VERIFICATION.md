@@ -122,3 +122,33 @@ Public config, nine real bounties, the Released translation bounty, leaderboard,
 [GitHub CI run 43599590656](https://github.com/CodeMasterLabs/gitsettle/actions/runs/43599590656) passed all contract, application and container jobs on the exact runtime revision. Its container job independently built from a fresh public checkout/empty volume and verified default demo startup and credential isolation. Final live performance and support proofs are in `PERFORMANCE_LIVE.json` and `COMMUNITY_E2E.json`.
 
 The deployed premium image ID is `sha256:5c3d5bb7943a138202590c8e33911e88ffbcf8dfee6ae9d1165aa51c56586ef9`. Later documentation-only commits do not change that verified runtime.
+
+## dApp and wallet revision: local container verification
+
+On November 14, 2026 at **16:11 UTC**, the updated working tree built successfully
+with the repository Dockerfile and locked dependencies. The isolated image
+`gitsettle:resume-check` has ID
+`sha256:fa3227303f482f1dde9f4bee4dfdc282cd51942cd1c6c85eb33f478dcf5c3f3f`.
+The digest of application/runtime source, public assets, manifests and build
+configuration was
+`d0529e812f63b8876170e7f036a3918a9fd06b13319b65c23b5d3168846ecdc5`;
+documentation, screenshots and test files were excluded from that digest.
+All **95 checked runtime source files** matched the settled workspace.
+
+The disposable demo container used UID/GID `1000:1000`, a read-only root
+filesystem, dropped capabilities, `no-new-privileges`, separate temporary data,
+and loopback port **3016**. Health, config, bounty and leaderboard APIs returned
+HTTP 200; config identified demo mode with no configured contract. The work queue,
+bounty detail, posting, contributor, leaderboard, maintainer and support pages
+also returned HTTP 200. `npm run cli -- --help` completed successfully.
+
+The web runtime contained no NEAR private key or GitHub token. The image
+excluded the known private `.env`, `.env.testnet` and `.secrets` paths, local data,
+and the user's design-reference image. The served Intear executor matched
+SHA-256 `b820dd8c6cfed1a3ff72312cba66e6885a8aa2ffe272f0369664702538e3b8f5`;
+rebuilding its checked-in source with the documented `__NEARCONNECT__` flag
+produced that exact hash.
+
+The disposable container was stopped and removed after verification. Existing
+local and VPS services were preserved. These checks exercised demo startup and
+read-only routes; no NEAR transaction or real wallet approval was performed.

@@ -16,7 +16,15 @@ Updated: 2026-11-14. Canonical repository: https://github.com/CodeMasterLabs/git
 - **Initial real support proof:** at 09:22 UTC, `scripts/verify-support.ts` passed against public HTTPS using actual finalized testnet FullAccess keys. It verified NEP-413 signatures, nonce replay, CSRF, session-derived identity, unrelated-wallet isolation, ticket reply/resolution and logout. No NEAR transactions sent. Evidence: `docs/COMMUNITY_E2E.json`.
 - **Original containers:** clean public clone `9ca2b56` built and started on VPS using Docker Compose without credentials, with persistent SQLite and HTTPS verified. Details: `docs/DOCKER_VERIFICATION.md`. Latest live checks are recorded alongside that baseline.
 
-## Premium workspace / CLI release — complete
+## Reference dApp / multi-wallet release — validated locally
+
+- **Design:** the supplied black/yellow dashboard composition now spans all main routes, with real escrow/category/locale summaries, global search, a default dark appearance and a saved light choice. Mobile category labels stay inside their scroll region; maintainer amounts occupy a full-width metric. All main route and wallet screenshots reviewed.
+- **Wallets:** custom accessible MyNearWallet, Meteor, Intear and Nightly picker; lazy provider SDK loading, account management, Testnet identity connection without new function-call keys, pinned sandbox executors and preserved transaction recovery. Intear supports escrow only; its complete callback-bound support message is unavailable. Provider/site and fixture verification limits are in `docs/WALLETS.md`.
+- **Safety fixes:** the shipped Intear executor uses its required upstream compile-time flag. Message signing locks wallet switching, rejects stale account results, and delayed HTTP authentication cannot recreate a signed-out private identity.
+- **Validation:** TypeScript and production build pass; **182 Node tests** and **143 executed browser checks** pass (144 discovered, one intentional mobile global-search skip). The final full local run passed 140; a test-only case correction was verified by rerunning the three category checks. Local isolated Docker startup, CLI, credential isolation, source matching and executable hash checks pass. Contract/backend/CLI behavior is unchanged.
+- **Release checkpoint:** publication and VPS upgrade are the next steps. The existing premium deployment below remains the deployed baseline until that upgrade is recorded. No funded contract, account or bounty was recreated.
+
+## Earlier premium workspace / CLI release — complete
 
 - **Runtime source:** `85c4c3bab27f37d1fce19d5987d2f8913e88a42c`, committed and published as CodeMasterLabs, deployed from the public clone to the VPS. Subsequent commits contain handoff documentation/evidence only.
 - **Design:** Manrope/Source Sans, graphite navigation, forest-green actions, structured queues/forms/inbox, mobile layouts, light/dark themes and CLI documentation links. Production build passed. **96/96 browser checks** pass, including connected-wallet layout at 320/375 px. All main-screen screenshots are reviewed; current public captures are in `docs/screenshots/live/`.
