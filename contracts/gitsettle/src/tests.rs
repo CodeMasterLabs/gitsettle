@@ -461,7 +461,10 @@ fn oracle_rejection_allows_corrected_submission() {
     assert_eq!(rejected.status, BountyStatus::Rejected);
     assert!(rejected.rejection_reason.is_some());
     context(CLAIMANT, 0, START + 4);
-    let corrected = contract.submit_pr(0, "https://github.com/CodeMasterLabs/gitsettle/pull/24".into());
+    let corrected = contract.submit_pr(
+        0,
+        "https://github.com/CodeMasterLabs/gitsettle/pull/24".into(),
+    );
     assert_eq!(corrected.status, BountyStatus::Submitted);
     assert!(corrected.rejection_reason.is_none());
     assert_eq!(corrected.submitted_at, Some(START + 4));
