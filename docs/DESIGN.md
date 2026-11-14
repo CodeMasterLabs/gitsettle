@@ -4,9 +4,9 @@ Updated November 14, 2026. The reference-led dApp revision uses the `frontend-de
 
 ## Direction and design review
 
-The supplied reference sets the composition: a yellow outer canvas around a rounded black application, integrated dark navigation, a charcoal working area, black inset surfaces, large financial typography, and one yellow vertical panel. GitSettle translates the financial dashboard into a contribution workspace. Its overview shows the actual escrow balance, open work, submitted PRs, and paid rewards. Work-type tiles summarize currently claimable NEAR. The highlighted panel shows the languages represented in the bounty queue.
+GitSettle fills the viewport with integrated dark navigation, a charcoal working area, black inset surfaces, large financial typography, and one yellow vertical panel. The supplied reference guides these interior surfaces and accents. The application shell reaches every viewport edge, with square outer corners and no surrounding border or gutter. Its overview shows the actual escrow balance, open work, submitted PRs, and paid rewards. Work-type tiles summarize currently claimable NEAR. The highlighted panel shows the languages represented in the bounty queue.
 
-The composition uses a visibly framed application, asymmetric locale/queue columns, stronger financial scale, circular work-type markers, and a yellow translation surface. Search, category shortcuts, wallet actions, support conversations, and financial controls work within this layout. Every financial value and summary comes from the returned bounty data.
+The composition uses asymmetric locale/queue columns, stronger financial scale, circular work-type markers, and a yellow translation surface. Search, category shortcuts, wallet actions, support conversations, and financial controls work within this layout. Every financial value and summary comes from the returned bounty data.
 
 Forest green is the semantic success color in light mode; mint serves the same role in dark mode. The default appearance is dark to match the reference. An explicitly selected light appearance remains available and persists across navigation.
 
@@ -14,8 +14,7 @@ Forest green is the semantic success color in light mode; mint serves the same r
 
 | Role | Dark/default | Light |
 | --- | --- | --- |
-| Outer canvas | `#FFEA79` | `#FFEA79` |
-| Application frame | `#080808` | `#FDFDF9` |
+| Page and application shell | `#080808` | `#FDFDF9` |
 | Workspace | `#1A1A1A` | `#EFEFE9` |
 | Inset surface | `#0A0A0A` | `#FFFFFF` |
 | Primary ink | `#F7F7F2` | `#191B16` |
@@ -28,16 +27,15 @@ The navigation stays black in both appearances. The yellow locale panel uses `#1
 
 - **Manrope 600/700:** headings, navigation, issue titles, actions, balances and rankings. The leading escrow balance is 48 px at wide desktop sizes; ordinary page titles are 30 px. Financial values use tabular numerals and intentionally stronger scale than supporting copy.
 - **Source Sans 3 400/600:** descriptions, labels, metadata, forms and support messages. Both typefaces are bundled locally.
-- **Spacing:** 4, 8, 12, 16, 20, 24, 28 and 32 px. Desktop frame gutter is 28 px; mobile is 8 px. Prose stays left aligned and financial comparison columns right aligned.
-- **Shape:** 36 px application frame, 28 px workspace, 24 px board panels, 20–22 px inset surfaces, 12 px controls, circular type/avatar marks and pill status labels. Shape communicates containment and role rather than using one radius everywhere.
+- **Spacing:** 4, 8, 12, 16, 20, 24, 28 and 32 px within the application. Outer viewport gutters are 0 px at every width. Prose stays left aligned and financial comparison columns right aligned.
+- **Shape:** square outer application corners, 28 px workspace, 24 px board panels, 20–22 px inset surfaces, 12 px controls, circular type/avatar marks and pill status labels. Rounded interior surfaces communicate containment and role.
 - **Motion:** pending transaction feedback and actual rank changes only; reduced-motion preferences are respected. No ambient charts or entrance animation.
 - **Icons:** Lucide throughout. Icons supplement visible labels; purely decorative icons have `aria-hidden`.
 
 ## Layout
 
 ```text
-Yellow canvas
-+------------------ black application frame -------------------------+
++-------------------- full-viewport application ---------------------+
 | GitSettle        | Location       Find your next contribution Wallet |
 |                  | +--------------- charcoal workspace -----------+ |
 | Work queue       | | Work queue                     Post a bounty | |

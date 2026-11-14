@@ -39,7 +39,7 @@ The public address is usable for browsing; operating its verifier requires its p
 
 - Rust escrow with exact native NEAR deposits, bounded storage, claim/submission deadlines, authorized release/refund, asynchronous transfer recovery, and a top-100 reputation view.
 - Next.js App Router UI: dense work queue, type/status/reward filters, locale badges, bounty detail, wallet-funded posting, claim/submit, contributor profiles, leaderboard with observed rank movement, and maintainer dashboard.
-- A dark dApp workspace with a yellow canvas, inset work queue, real escrow totals, reward-category filters and a locale panel; an explicit light appearance is also available. Global issue search and every summary shortcut use actual bounty data.
+- A full-viewport dark dApp workspace with an inset work queue, real escrow totals, reward-category filters and a yellow locale panel; an explicit light appearance is also available. Global issue search and every summary shortcut use actual bounty data.
 - A custom wallet picker for MyNearWallet, Meteor, Intear and Nightly, combining Wallet Selector v10 with pinned NEAR Connect executors. A wallet redirect alone never marks a payment confirmed. [Wallet setup and capabilities](docs/WALLETS.md).
 - A Node verifier that checks PR merge, repository, exact issue reference, claimant binding and translation paths before signing `release`.
 - Drizzle/SQLite metadata, verification audit and daily leaderboard snapshots; light/dark themes; responsive and keyboard-accessible states.
