@@ -1,6 +1,6 @@
 # GitSettle system guide
 
-GitSettle pays native NEAR for GitHub contributions. The repository is a small npm workspace plus an independent Rust contract. The contract owns escrow and reputation. SQLite stores descriptive metadata, verification results, and leaderboard snapshots; it cannot authorize a payment.
+GitSettle pays native NEAR for GitHub contributions. The repository is a small npm workspace plus an independent Rust contract. The contract owns escrow and reputation. SQLite stores descriptive metadata, verification results, leaderboard snapshots, wallet sessions, support conversations and AI quotas; it cannot authorize a payment.
 
 ```mermaid
 flowchart LR
@@ -10,7 +10,13 @@ flowchart LR
   W --> DB[(SQLite / Drizzle)]
   W -->|finalized views| C
   V[Verifier worker] -->|read merged PR / issue / files| G[GitHub REST API]
-  V -->|release or reject| C
+  V --> R[Duplicate PR + AgentGuard gate]
+  R -->|authorized release| C
+  V -->|definite invalid evidence only| C
+  W --> A[NEP-413 sessions and private support]
+  A --> DB
+  W --> T[Deterministic triage / optional AI]
+  T -->|explicit authenticated request| L[Operator LLM provider]
   V --> DB
   C -->|successful transfer callback| P[Contributor NEAR and points]
 ```
@@ -27,9 +33,14 @@ flowchart LR
 | `packages/shared/src/data.ts` | Explicit demo dataset and live read-model assembly |
 | `packages/shared/src/transactions.ts` | Wallet-return transaction verification, without signing |
 | `services/verifier/src/github.ts` | GitHub evidence policy, pagination, timeouts, rate limits |
+| `packages/shared/src/dedupe.ts` | Canonical issue/PR identities and active duplicate matching |
+| `packages/community/src` | NEP-413 authentication, hashed sessions, ticket ACLs and spam limits |
+| `packages/triage/src` | Advisory issue checks, bounded provider API and persistent wallet quotas |
+| `services/verifier/src/agentguard.ts` | Pinned local risk rules and exact per-release amount cap |
+| `vendor/agentguard` | Unmodified MIT upstream rules/types, license and hash manifest |
 | `services/verifier/src/near.ts` | Dedicated testnet signer adapter |
 | `services/verifier/src/worker.ts` | Serial verification loop and final-state reconciliation |
-| `apps/web/src/app/api` | Read-only public APIs and wallet transaction status checking |
+| `apps/web/src/app/api` | Public chain APIs, wallet receipt checks, authenticated community/AI routes |
 | `apps/web/src/components` | Interactive screens, wallet context, display states |
 | `scripts` | Local wallet provisioning, atomic deployment, seeds, live-loop evidence |
 | `docs/CONTRACT_API.md` | Canonical method signatures, limits, currency/time units |
@@ -68,6 +79,8 @@ GitSettle: <contract-account>/<bounty-id>/<claimant-account>
 
 Translation bounties additionally require a changed, non-removed file in a supported locale path, such as `locales/es/messages.json` or `src/i18n/bn/common.json`. The worker fetches all file pages and checks completeness; uncertain data never authorizes payment. See service tests for exact matching rules. It re-reads the bounty before changing it and verifies terminal state after the transfer callback.
 
+Before release, the worker also pauses a PR already attached to another Submitted/Releasing/Released bounty and runs AgentGuard recipient/text rules plus the configured reward cap. A hold leaves the bounty Submitted and does not grant a refund path. Raw PR context is ephemeral, not persisted. See [docs/AGENTGUARD.md](docs/AGENTGUARD.md).
+
 An unmerged PR stays pending even after the submission deadline. An API outage, missing permissions, or incomplete response is an operational error, not proof of an invalid submission. Definite invalid evidence can be rejected; a claimant can resubmit before the deadline. After expiry, a rejected bounty can be refunded by its poster. The immutable verifier can unlock invalid submissions, so its operation is a liveness dependency.
 
 ## Trust and isolation
@@ -75,7 +88,7 @@ An unmerged PR stays pending even after the submission deadline. An API outage, 
 - The verifier is a trusted oracle, not a cryptographic GitHub proof or a quality judge. PR bodies are editable by authors and authorized maintainers. Locale paths do not establish translation correctness.
 - The poster may release any submitted bounty without the worker's checks. `merged_count` therefore means an authorized paid contribution, not independent proof of GitHub merge.
 - The deployed contract account retains a full-access key. Its owner can upgrade code; the immutable verifier field does not make the deployment immutable. Document this in demos and operate only testnet funds.
-- Keys live in ignored local files or the VPS environment. The web container receives neither the verifier private key nor GitHub token. No API accepts a private key or signs transactions.
+- Keys live in ignored local files or the VPS environment. The web container receives neither the verifier private key nor GitHub token. No API accepts a NEAR private key or signs transactions. The web may receive an optional LLM API key, which never reaches the client.
 - GitHub requests use a fixed API origin and refuse redirects. URLs are parsed, not fetched with a token from arbitrary user input.
 - Run one worker per deployment. Its scan lock avoids overlap within one process; on-chain intermediate/terminal states prevent duplicate payout across processes. Multiple workers waste gas and are not the supported configuration.
 
@@ -86,6 +99,14 @@ SQLite uses WAL and a five-second busy timeout. Both services share one data vol
 The leaderboard captures its first observed snapshot per UTC day. Movement compares with the most recent earlier day. New instances show no previous snapshot instead of fabricated movement. Do not remove the persistent volume if history matters; it can be rebuilt for metadata and audit, but historical rank observations cannot be recovered from the current contract state alone.
 
 All money stays in integer yoctoNEAR strings/BigInt. Contract times are Unix seconds; browser timestamps and SQLite metadata timestamps are milliseconds except verification `checked_at`, which is seconds. Testnet-only guards prevent accidental mainnet execution in supplied deployment tools.
+
+## Private sessions, community and AI
+
+`packages/community` uses five-minute browser/domain/account-bound NEP-413 challenges and finalized FullAccess-key verification. Challenges are consumed atomically, sessions use hashed opaque tokens and HttpOnly cookies, and each request rechecks key revocation. Exact-origin CSRF rules protect mutations. `APP_ORIGIN` is mandatory in production. See [docs/COMMUNITY.md](docs/COMMUNITY.md) for access rules, rate limits, persistence and real API proof.
+
+Support messages stay in SQLite and are accessible only to their creator and configured support admins. An appeal additionally allows its immutable bounty poster; only the real claimant of Submitted/Rejected on-chain work can create it. Resolution is a conversation state, never an escrow transition. Rate limits, duplicate-message checks and writes run in the same immediate transaction.
+
+`packages/triage` performs public bounded issue checks without using the verifier token. Billable LLM review/chat requires a wallet session and an atomic daily quota. The provider has no tools or signing capability and receives only selected context on an explicit AI request. AI answers are not persisted. Provider settings are server-only; supported API shape, output validation, privacy and quota details are in [docs/TRIAGE.md](docs/TRIAGE.md). `TRUST_PROXY_HEADERS` defaults false; enable only behind a proxy that replaces forwarding headers, with the app bound to loopback.
 
 ## Extending safely
 

@@ -5,6 +5,12 @@ bounties, checks GitHub REST evidence, and signs `release` or `reject_submission
 as the immutable verifier configured in the contract. The service does not merge
 pull requests, hold the escrow, grade code, or call an LLM.
 
+Before automatic payout, the default-enabled [AgentGuard local gate](../../docs/AGENTGUARD.md)
+adds recipient/text-risk checks and a GitSettle per-payout cap of 5 NEAR. Review,
+deny or error holds leave the submission intact for poster review; they never
+turn otherwise valid work into a refundable rejection. This uses pinned local
+rules, not AgentGuard vault custody or a TEE oracle.
+
 ## Run
 
 From the repository root after `npm ci`:
@@ -46,8 +52,10 @@ The policy checks:
 
 1. Canonical issue and PR URLs in the bounty repository; requests go only to
    `https://api.github.com` and do not follow redirects.
-2. GitHub reports the submitted PR as merged and provides a merge timestamp and
-   commit SHA; its base repository and PR number match the bounty. The merge
+2. GitHub reports the submitted PR as merged and provides a merge timestamp;
+   its base repository and PR number match the bounty. If the optional audit
+   commit SHA is absent, the dedicated merge endpoint must independently return
+   HTTP 204, and audit evidence honestly keeps `merge_sha: null`. The merge
    cannot precede bounty funding. An older open PR may still finish funded work.
 3. The body contains the exact account/contract/bounty binding and issue
    reference; the referenced resource is a real issue, not a PR.
@@ -104,9 +112,17 @@ deployment as production custody.
 
 - `github.ts`: API transport, URL/binding/issue/locale policy and bounded pagination.
 - `worker.ts`: injected chain/policy/audit ports, fresh-state check and settlement.
+- `agentguard.ts`: pinned upstream risk rules plus exact GitSettle payout cap; holds preserve escrow.
 - `near.ts`: pinned `near-api-js` v7 transport, finalized views and transactions.
 - `index.ts`: environment, SQLite audit wiring, polling and graceful shutdown.
-- `github.test.ts`, `worker.test.ts`: policy and settlement failure-path tests.
+- `github.test.ts`, `worker.test.ts`, `agentguard.test.ts`: evidence, risk, provenance and settlement failure-path tests.
+
+`WorkerOptions.onlyBountyIds` restricts processing for the live demonstration.
+The chain adapter still lists every bounty so duplicate-PR detection sees work
+already submitted or paid elsewhere. Filtering the chain list itself would hide
+that evidence. Duplicate holds and AgentGuard remain off-chain safeguards; the
+contract prevents repeat settlement of one bounty, while posters retain their
+documented manual release authority.
 
 ```sh
 npm test --workspace @gitsettle/verifier

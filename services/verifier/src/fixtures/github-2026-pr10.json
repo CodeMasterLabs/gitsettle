@@ -1,0 +1,38 @@
+{
+  "source": "https://api.github.com/repos/CodeMasterLabs/gitsettle/pulls/10",
+  "api_version": "2026-03-10",
+  "captured_at": "2026-11-14T08:59:10.746598+00:00",
+  "sanitization": "Only verification metadata, public evidence lines, and file summaries retained; no token, raw PR body, patch, or headers.",
+  "pull_request": {
+    "number": 10,
+    "html_url": "https://github.com/CodeMasterLabs/gitsettle/pull/10",
+    "merged": true,
+    "merged_at": "2026-11-14T08:23:02Z",
+    "changed_files": 2,
+    "body": "Fixes #9\nGitSettle: gitsettle-ac1b0f23f4.testnet/8/contributor.gitsettle-ac1b0f23f4.testnet",
+    "user": {
+      "login": "CodeMasterLabs"
+    },
+    "base": {
+      "repo": {
+        "full_name": "CodeMasterLabs/gitsettle"
+      }
+    }
+  },
+  "issue": {
+    "number": 9,
+    "html_url": "https://github.com/CodeMasterLabs/gitsettle/issues/9"
+  },
+  "files": [
+    {
+      "filename": "README.md",
+      "status": "modified",
+      "changes": 2
+    },
+    {
+      "filename": "locales/es/contributing.md",
+      "status": "added",
+      "changes": 40
+    }
+  ]
+}

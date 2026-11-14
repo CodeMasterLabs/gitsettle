@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
-import type { WalletSelector } from '@near-wallet-selector/core';
+import type { SignMessageParams, SignedMessage, WalletSelector } from '@near-wallet-selector/core';
 import type { WalletSelectorModal } from '@near-wallet-selector/modal-ui';
 import type { PublicConfig } from '@gitsettle/shared/types';
 
@@ -20,6 +20,7 @@ type WalletContextValue = {
   transact: (method: Method, args: Record<string, unknown>, deposit?: string) => Promise<void>;
   clearTransaction: () => void; retryConfirmation: () => void;
   recoverTransaction: (hash: string) => void; dismissUnsent: () => void;
+  signAuthMessage: (params: SignMessageParams) => Promise<SignedMessage | void>;
 };
 const WalletContext = createContext<WalletContextValue | null>(null);
 const PENDING_KEY = 'gitsettle.pending.v1';
@@ -120,7 +121,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   const connect = useCallback(() => modal.current?.show(), []);
   const disconnect = useCallback(async () => {
-    try { const wallet = await selector.current?.wallet(); await wallet?.signOut(); setAccountId(null); }
+    try { const wallet = await selector.current?.wallet(); await wallet?.signOut(); setAccountId(null); window.dispatchEvent(new Event('gitsettle:wallet-disconnected')); }
     catch (reason) { setError(reason instanceof Error ? reason.message : 'Could not disconnect the wallet.'); }
   }, []);
 
@@ -177,8 +178,16 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem(PENDING_KEY);
     setTransaction({ status: 'failed', message: 'Pending request cleared after your wallet check. Your draft is preserved.' });
   }, []);
+  const signAuthMessage = useCallback(async (params: SignMessageParams) => {
+    if (!selector.current || !accountId) throw new Error('Connect your NEAR wallet before signing in to support.');
+    const wallet = await selector.current.wallet();
+    if (!wallet.signMessage) throw new Error('This wallet does not support message signing. Use a wallet with NEP-413 support to open a private ticket.');
+    // Message signing proves account control for a short-lived web session. It
+    // does not call the escrow contract, spend tokens, or share transaction state.
+    return wallet.signMessage(params);
+  }, [accountId]);
 
-  return <WalletContext.Provider value={{ config, accountId, ready, error, transaction, connect, disconnect, transact, clearTransaction, retryConfirmation, recoverTransaction, dismissUnsent }}>{children}</WalletContext.Provider>;
+  return <WalletContext.Provider value={{ config, accountId, ready, error, transaction, connect, disconnect, transact, clearTransaction, retryConfirmation, recoverTransaction, dismissUnsent, signAuthMessage }}>{children}</WalletContext.Provider>;
 }
 
 export function useWallet() {

@@ -9,7 +9,8 @@
     "./db": "./src/db.ts",
     "./near": "./src/near.ts",
     "./data": "./src/data.ts",
-    "./transactions": "./src/transactions.ts"
+    "./transactions": "./src/transactions.ts",
+    "./dedupe": "./src/dedupe.ts"
   },
   "dependencies": {
     "better-sqlite3": "13.1.1",

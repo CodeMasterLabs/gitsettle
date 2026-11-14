@@ -5,6 +5,7 @@ import { recordVerification } from '@gitsettle/shared/db';
 import { GitHubClient } from './github.js';
 import { NearGateway } from './near.js';
 import { VerifierWorker } from './worker.js';
+import { AgentGuardReleaseGuard, agentGuardConfigFromEnv } from './agentguard.js';
 
 // Normalize local SQLite against the repository, irrespective of npm's workspace cwd.
 const repositoryRoot = fileURLToPath(new URL('../../../', import.meta.url));
@@ -30,6 +31,7 @@ process.on('SIGTERM', stop);
 process.on('SIGINT', stop);
 
 async function main() {
+  const releaseGuard = new AgentGuardReleaseGuard(agentGuardConfigFromEnv());
   if (demoMode) {
     console.info('GitSettle verifier: demo mode; no GitHub verification or transactions are performed.');
     if (!once) timer = setInterval(() => {}, 60_000);
@@ -51,7 +53,7 @@ async function main() {
   }), (record) => {
     recordVerification(record);
     console.info(JSON.stringify({ service: 'gitsettle-verifier', ...record }));
-  }, { dryRun, rejectInvalid: process.env.VERIFIER_REJECT_INVALID !== 'false' });
+  }, { dryRun, rejectInvalid: process.env.VERIFIER_REJECT_INVALID !== 'false', releaseGuard });
 
   async function scan() {
     try {
@@ -70,7 +72,7 @@ async function main() {
 }
 
 main().catch((error: unknown) => {
-  console.error(error instanceof Error && /Configure |does not match|requires named|Use HTTPS/.test(error.message)
+  console.error(error instanceof Error && /Configure |does not match|requires named|Use HTTPS|AGENTGUARD_|AgentGuard /.test(error.message)
     ? error.message : 'GitSettle verifier could not start. Check the testnet account, key, contract and RPC configuration.');
   process.exitCode = 1;
 });

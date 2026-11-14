@@ -55,6 +55,8 @@ enter the web process. Likewise, `.dockerignore` excludes local secrets, SQLite,
 wallet credentials and build output from the image context. Public settings are
 read at runtime rather than baking deployment keys or account IDs into a build.
 
+Set `APP_ORIGIN` to the exact browser origin (for example `https://your-domain.example`) and `SUPPORT_ADMIN_ACCOUNTS` to comma-separated NEAR support accounts; an empty list defaults to the configured contract account. Optional `LLM_BASE_URL`, `LLM_API_KEY`, and `LLM_MODEL` enable advisory AI in the web service. No LLM key is needed for ordinary support or deterministic preflight. See [TRIAGE.md](TRIAGE.md).
+
 The contract deployer/seed keys are not needed by either long-running container.
 Keep those in a separate protected operator environment. Container environment
 variables are visible to host root and Docker administrators; secure host access
@@ -73,12 +75,10 @@ The prepared Ubuntu VPS uses:
 
 `/opt/gitsettle/env` is root-owned mode 0700. Docker Engine 29.9.3 and Compose
 5.7.1 were installed from Docker's official Ubuntu apt repository on Ubuntu
-26.04.1, and `hello-world` succeeded. This preparation did not itself deploy the
-application. Live deployment and external reachability belong in `STATUS.md`.
+26.04.1, and `hello-world` succeeded. Live deployment and external reachability are recorded in `STATUS.md`.
 
-After copying the tested source tree, create the protected environment from
-`deploy/vps.env.example`. It defaults to port 80 and the persistent host data
-directory. Supply the actual verifier configuration separately. Run on the VPS:
+Clone the public repository at the reviewed revision, then create the protected environment from
+`deploy/vps.env.example`. Use loopback port 3000 behind Caddy and the persistent host data directory. Supply the actual verifier configuration separately. Run on the VPS:
 
 ```sh
 bash /opt/gitsettle/source/deploy/vps-up.sh
@@ -93,8 +93,7 @@ browser artifacts. Never place `production.env` below `source/`.
 An IP-only port-80 deployment provides HTTP. For a permanent public deployment,
 point a domain at the VPS, terminate HTTPS with the reverse proxy of your choice,
 and bind the web port to loopback using `APP_BIND=127.0.0.1`. Configure the wallet's
-return URL against that public HTTPS origin. The repository does not assume
-ownership of a domain or request certificates for an invented hostname.
+return URL against that public HTTPS origin. The authorized VPS uses `https://gitsettle.89.167.109.196.sslip.io` with a Caddy-managed certificate. Set `APP_ORIGIN` to that HTTPS origin and `TRUST_PROXY_HEADERS=true` only when Caddy is the sole public entry point. The published Docker app port stays on `127.0.0.1:3000`.
 
 ## Back up and recover
 

@@ -6,7 +6,7 @@ const baseURL = externalServer || 'http://127.0.0.1:3000';
 
 export default defineConfig({
   testDir: './tests',
-  testMatch: '**/ui.spec.ts',
+  testMatch: ['**/ui.spec.ts', '**/community.ui.spec.ts'],
   timeout: 45_000,
   expect: { timeout: 10_000 },
   fullyParallel: true,
@@ -37,6 +37,7 @@ export default defineConfig({
       DEMO_MODE: 'true',
       NEAR_CONTRACT_ID: '',
       DATABASE_PATH: process.env.UI_DATABASE_PATH || '/tmp/gitsettle-ui.sqlite',
+      APP_ORIGIN: baseURL,
       NEXT_TELEMETRY_DISABLED: '1',
     },
   },

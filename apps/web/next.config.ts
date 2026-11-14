@@ -10,14 +10,14 @@ const environmentFiles = new Set([resolve(repositoryRoot, '.env'), resolve(proce
 for (const file of environmentFiles) {
   if (!existsSync(file)) continue;
   const values = parseEnv(readFileSync(file, 'utf8'));
-  for (const key of ['DEMO_MODE', 'NEAR_CONTRACT_ID', 'NEAR_RPC_URL', 'DATABASE_PATH']) {
+  for (const key of ['DEMO_MODE', 'NEAR_CONTRACT_ID', 'NEAR_RPC_URL', 'DATABASE_PATH', 'AGENTGUARD_ENABLED', 'AGENTGUARD_MAX_PAYOUT_NEAR', 'APP_ORIGIN', 'TRUST_PROXY_HEADERS', 'SUPPORT_ADMIN_ACCOUNTS', 'LLM_BASE_URL', 'LLM_API_KEY', 'LLM_MODEL']) {
     if (process.env[key] === undefined && values[key] !== undefined) process.env[key] = values[key];
   }
 }
 process.env.DATABASE_PATH = resolve(repositoryRoot, process.env.DATABASE_PATH || 'data/gitsettle.sqlite');
 
 const nextConfig: NextConfig = {
-  transpilePackages: ['@gitsettle/shared'],
+  transpilePackages: ['@gitsettle/shared', '@gitsettle/community', '@gitsettle/triage'],
   serverExternalPackages: ['better-sqlite3'],
   poweredByHeader: false,
 };

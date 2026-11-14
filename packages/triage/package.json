@@ -1,0 +1,20 @@
+{
+  "name": "@gitsettle/triage",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Advisory spam, duplicate and optional LLM triage for GitSettle",
+  "repository": "https://github.com/CodeMasterLabs/gitsettle",
+  "exports": {
+    "./types": "./src/types.ts",
+    "./core": "./src/core.ts",
+    "./llm": "./src/llm.ts",
+    "./http": "./src/http.ts"
+  },
+  "dependencies": {
+    "@gitsettle/shared": "*",
+    "@gitsettle/community": "*",
+    "better-sqlite3": "13.1.1"
+  },
+  "devDependencies": { "@types/better-sqlite3": "9.6.0" }
+}

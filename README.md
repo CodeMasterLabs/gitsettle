@@ -2,9 +2,11 @@
 
 Self-hosted GitHub contribution escrow on NEAR. Maintainers fund an issue; a contributor claims it and submits a PR; a verifier checks the merge and pays the contributor. Translation bounties also check that the PR changes the requested locale. Native NEAR escrow and reputation live on-chain.
 
-Repository: **https://github.com/CodeMasterLabs/gitsettle**. Built for **NEAR HACKATHON**, November 2026. Tracks: **Social Money (`social`)**, **Open Innovation (`open`)**, and **Agent Economy (`agents`)** for the autonomous verification/payout worker. The worker uses deterministic rules, not an LLM. No Sputnik DAO, Trezu, or NEAR Intents integration is claimed; an original NEAR contract is eligible under Q-011.
+Repository: **https://github.com/CodeMasterLabs/gitsettle**. Built for **NEAR HACKATHON**, November 2026. Tracks: **Social Money (`social`)**, **Open Innovation (`open`)**, and **Agent Economy (`agents`)** for the autonomous verification/payout worker. The payout worker uses deterministic rules with an AgentGuard risk gate; optional bring-your-own-LLM triage and chat provide advice without payment authority. No Sputnik DAO, Trezu, or NEAR Intents integration is claimed; an original NEAR contract is eligible under Q-011.
 
 ## Try it
+
+**Live testnet app: https://gitsettle.89.167.109.196.sslip.io**. The contract address and reproducible transaction evidence are below.
 
 Contributor quick starts: [English](locales/en/contributing.md) · [Español](locales/es/contributing.md).
 
@@ -16,7 +18,7 @@ docker compose up --build
 
 Open **http://localhost:3000**. With no environment file, this opens a clearly labeled demo queue. Filter Translation to see `es`, `bn`, and `ja` work; open a bounty to see its escrow lifecycle; browse contributor profiles and the leaderboard. Demo rewards are examples and signing is disabled. SQLite data persists in the `gitsettle-data` volume. Stop with `docker compose down`; do not add `-v` if you want to retain history.
 
-To connect a real deployment, copy `.env.example` to `.env`, set `DEMO_MODE=false`, `NEAR_CONTRACT_ID`, `NEAR_VERIFIER_ACCOUNT_ID`, and `NEAR_VERIFIER_PRIVATE_KEY`, then restart Compose. The web container receives only public network configuration. The verifier key and optional GitHub token go only to the worker. `GITHUB_TOKEN` needs read access to the bounty repositories; unauthenticated public GitHub requests are subject to a low hourly rate limit.
+To connect a real deployment, copy `.env.example` to `.env`, set `DEMO_MODE=false`, `NEAR_CONTRACT_ID`, `NEAR_VERIFIER_ACCOUNT_ID`, and `NEAR_VERIFIER_PRIVATE_KEY`, then restart Compose. Set `APP_ORIGIN` to the exact browser origin for support sign-in. The verifier key and optional GitHub token go only to the worker. The web receives public network settings and, if enabled, its own server-side LLM credential; no NEAR private key. `GITHUB_TOKEN` needs read access to the bounty repositories; unauthenticated public GitHub requests are subject to a low hourly rate limit.
 
 Testnet deployment:
 
@@ -29,7 +31,7 @@ Testnet deployment:
 | Deployment transaction | [Cd741zywcPRe1npNGp4wgxTFbZhHKqncnfoBFww3LYRZ](https://testnet.nearblocks.io/txns/Cd741zywcPRe1npNGp4wgxTFbZhHKqncnfoBFww3LYRZ) |
 | Artifact/config evidence | [docs/DEPLOYMENT.json](docs/DEPLOYMENT.json) |
 
-The public address is usable for browsing; operating its verifier requires its private development credentials. Self-hosters should deploy their own contract and verifier. A deployment address is not proof that a full PR payout demo has run: see [STATUS.md](STATUS.md) and the recorded live-loop evidence there.
+The public address is usable for browsing; operating its verifier requires its private development credentials. Self-hosters should deploy their own contract and verifier. See [STATUS.md](STATUS.md) for completed checks and [docs/LIVE_E2E.json](docs/LIVE_E2E.json) for the real issue → merged translation PR → payout → reputation proof.
 
 ## What is included
 
@@ -38,6 +40,10 @@ The public address is usable for browsing; operating its verifier requires its p
 - Wallet Selector v10 with real wallet signatures and transaction receipt validation. A wallet redirect alone never marks a payment confirmed.
 - A Node verifier that checks PR merge, repository, exact issue reference, claimant binding and translation paths before signing `release`.
 - Drizzle/SQLite metadata, verification audit and daily leaderboard snapshots; light/dark themes; responsive and keyboard-accessible states.
+- Canonical issue/type/locale duplicate warnings before funding, duplicate-PR payout holds, and deterministic spam checks. Intentional duplicate funding remains possible with an explicit acknowledgment.
+- [AgentGuard](docs/AGENTGUARD.md) recipient/text checks and a configurable 5 NEAR automatic-payout cap. Review holds protect submitted funds while the poster investigates.
+- Wallet-authenticated private support tickets, appeal threads and conversation replies, with ACLs, replay protection and persistent spam limits.
+- Optional operator-configured OpenAI-compatible LLM for advisory triage/review and AI help. No API key is required for escrow, deterministic checks or ordinary support.
 
 ## How escrow works
 
@@ -53,6 +59,7 @@ sequenceDiagram
   D->>G: PR with issue reference and account marker
   D->>C: submit_pr
   V->>G: Check merge, repo, issue, claimant, locale
+  V->>V: Check duplicate PR and AgentGuard policy
   V->>C: release
   C->>D: Transfer exact reward
   C->>C: Successful callback records points and earnings
@@ -67,6 +74,16 @@ GitSettle: <contract-account>/<bounty-id>/<claimant-account>
 ```
 
 For Translation, change a file such as `locales/es/messages.json`, `src/i18n/bn/common.json`, or `public/locales/ja/ui.json`. The locale must match exactly; `es` does not match `es-MX`. Removed-only files do not qualify. Merge after the bounty is funded. The worker checks all changed-file pages and leaves incomplete/API-error cases pending.
+
+## Triage, appeals and support
+
+Before funding, **Check issue** inspects issue identity, active duplicates and spam signals. AI review appears only when the operator configures a compatible provider and the user verifies their wallet. Automatic payment independently checks whether the PR has already been submitted/paid for another bounty; suspicious or oversized AgentGuard cases stay Submitted for review. These checks are application/worker safeguards, not contract-level uniqueness guarantees.
+
+Open **Support**, connect a wallet and sign the domain-bound NEP-413 message to start a private ticket. This signature proves account ownership and spends no NEAR. A submitted/rejected bounty's claimant can open an appeal; the claimant, bounty poster and deployment support administrators can participate. Ordinary support is visible only to its creator and support administrators. Threads can be reviewed, replied to and resolved. **Appeals do not pause deadlines, prevent eligible refunds, or adjudicate escrow.** Messages are stored in the operator's database, not end-to-end encrypted. No response time is promised.
+
+For optional AI, set `LLM_BASE_URL`, `LLM_API_KEY` and `LLM_MODEL` in the protected server environment. The endpoint must support OpenAI-compatible Chat Completions and strict JSON-schema output. Users explicitly request AI; selected questions/public issue context then go to that provider. Keys remain server-side. Each signed wallet has 20 AI attempts per UTC day. The hosted instance runs with AI disabled until a provider is configured; provider calls have been tested with controlled fixtures, not a live paid model.
+
+See [docs/TRIAGE.md](docs/TRIAGE.md) and [docs/COMMUNITY.md](docs/COMMUNITY.md) for API, configuration, privacy, quotas and limits.
 
 ## Local development and checks
 
@@ -120,23 +137,26 @@ VPS instructions and credential boundaries: [docs/SELF_HOST.md](docs/SELF_HOST.m
 
 The contract deployment retains a full-access upgrade key. Its custodian can replace the code, so the fixed verifier field does not make the deployed system immutable. This is a testnet MVP, not an audited production custody system. Native unit tests do not establish every production Wasm gas bound; live receipt evidence is recorded separately.
 
-The worker verifies evidence structure, not code quality, issue severity, review approval, or translation accuracy. A merge into a non-default branch can qualify; GitSettle checks the issue reference, not that GitHub actually closed the issue. `merged_count` counts authorized paid contributions, including poster overrides. Reputation can be farmed by colluding accounts and is not Sybil resistant.
+The payout worker verifies evidence structure, not code quality, issue severity, review approval, or translation accuracy. Optional AI advice can be wrong and never changes that authorization policy. AgentGuard runs locally in the trusted worker and can be bypassed by a compromised signer or the poster’s manual release authority; no AgentGuard vault, TEE, or on-chain risk policy is claimed. A merge into a non-default branch can qualify; GitSettle checks the issue reference, not that GitHub actually closed the issue. `merged_count` counts authorized paid contributions, including poster overrides. Reputation can be farmed by colluding accounts and is not Sybil resistant.
 
-One claimant can reserve a bounty until its deadline; there is no claim cancellation/lease. A submitted unmerged PR can protect funds indefinitely, and oracle disappearance can lock those funds. Rate limits, private/deleted repos and GitHub outages pause verification. GitHub's 3,000-file cap prevents automatic validation of larger translation PRs. The initial worker supports one process per deployment and no dispute adjudication. SQLite is for one host; use a shared server database before scaling across hosts. Rank movement appears only after a real earlier-day snapshot exists.
+One claimant can reserve a bounty until its deadline; there is no claim cancellation/lease. A submitted unmerged PR can protect funds indefinitely, and oracle disappearance can lock those funds. Rate limits, private/deleted repos and GitHub outages pause verification. GitHub's 3,000-file cap prevents automatic validation of larger translation PRs. The initial worker supports one process per deployment and no binding dispute adjudication; support appeals are off-chain conversations. SQLite is for one host; use a shared server database before scaling across hosts. Rank movement appears only after a real earlier-day snapshot exists.
 
 Dependencies, residual advisory findings and implementation review are recorded in [docs/SECURITY_REVIEW.md](docs/SECURITY_REVIEW.md).
 
 ## Roadmap
 
 - NEP-141 custom-token rewards with explicit token registration and storage handling.
-- Disputes, submission expiry policy, independent reviewers, and appeal windows.
+- Binding dispute adjudication, submission expiry policy, independent reviewers, and enforceable appeal windows.
 - Severity tiers, scoped acceptance criteria, and reviewer-attested quality.
 - DAO approvals through Sputnik DAO/Trezu, including spending caps and multi-party release.
 - Short claim leases, GitHub identity attestations, external indexer, and Postgres for multiple hosts.
-- Translation preview checks, project-defined locale policies, and optional agent triage with auditable decisions.
+- Translation preview checks, project-defined locale policies, semantic duplicate search, and quality benchmarks for optional AI advice.
+- Support notifications, retention controls, pagination, and distributed abuse prevention.
 
 ## Hackathon provenance and submission
 
-Development started from an empty workspace on November 14, 2026; no earlier application baseline was supplied. GitSettle's contract, verifier, UI, tooling and documentation were built in the hackathon window with AI coding assistance. Dependencies and templates: near-sdk, near-api-js, NEAR Wallet Selector, Next.js, React, Tailwind, Drizzle, better-sqlite3, Lucide, Source Sans 3, Newsreader, Playwright, and the `frontend-design` skill. See lockfiles for exact packages. No pre-hackathon proprietary code is included. License: [MIT](LICENSE).
+Development started from an empty workspace on November 14, 2026; no earlier application baseline was supplied. GitSettle's contract, verifier, UI, tooling and documentation were built in the hackathon window with AI coding assistance. Dependencies and templates: near-sdk, near-api-js, NEAR Wallet Selector, Next.js, React, Tailwind, Drizzle, better-sqlite3, Lucide, Source Sans 3, Newsreader, Playwright, and the `frontend-design` skill. See lockfiles for exact packages. Reused AgentGuard code is described below. No pre-hackathon proprietary code is included. License: [MIT](LICENSE).
+
+**Related project disclosure (Q-005/Q-015):** [AgentGuard](https://github.com/CodeMasterLabs/agentguard) is a separate project by the same developer. GitSettle vendors its MIT recipient/text risk rules at commit `4ec34e69bc7c6cfd17a3e027bf9727a67eab97f6` as reused baseline; these rules are not claimed as new GitSettle work. GitSettle provides contribution escrow, GitHub verification, its risk adapter, reputation, support and triage workflows; AgentGuard provides a separate vault/risk-oracle product. Exact files, license and hashes: [docs/AGENTGUARD.md](docs/AGENTGUARD.md). The user confirmed that AgentGuard is their other submitted hackathon project. Both projects disclose their relationship and distinct scope; the documentation-only reciprocal change is retained in [docs/agentguard-disclosure.patch](docs/agentguard-disclosure.patch).
 
 The deadline is **2026-11-14 23:59 UTC**. A public repo and reproducible local demo are eligible; when judges cannot open the hosted demo, the X post must include a video. The human publishes the post and supplies team/contact details, mainnet prize account, and consent. Final submission happens once, only after approval of the exact JSON payload. [DEMO.md](DEMO.md) contains the demo script and X draft. Keep the repo public through judging and the hosted demo available through November 18, ideally November 25.

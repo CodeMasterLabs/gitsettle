@@ -2,12 +2,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { GitHubApiError, GitHubClient, hasClaimantBinding, matchesLocalePath, parseGitHubUrl, referencesIssue } from './github.js';
 import { testBounty, testIssue, testPullRequest } from './fixtures.js';
+import actual2026Response from './fixtures/github-2026-pr10.json' with { type: 'json' };
 
-function clientFor(pr: unknown = testPullRequest, issue: unknown = testIssue, filePages: unknown[] = [[{ filename: 'locales/es/ui.json', status: 'modified', changes: 2 }]]) {
+function clientFor(pr: unknown = testPullRequest, issue: unknown = testIssue, filePages: unknown[] = [[{ filename: 'locales/es/ui.json', status: 'modified', changes: 2 }]], mergeStatus = 204) {
   const requests: string[] = [];
   const client = new GitHubClient({ fetch: async (input) => {
     const url = String(input);
     requests.push(url);
+    if (url.endsWith('/merge')) return new Response(null, { status: mergeStatus });
     if (url.includes('/files?')) return Response.json(filePages[Number(new URL(url).searchParams.get('page')) - 1] ?? []);
     if (url.includes('/issues/')) return Response.json(issue);
     return Response.json(pr);
@@ -21,7 +23,10 @@ test('merged bug PR verifies repository, issue, binding and merge evidence', asy
   assert.equal(decision.status, 'valid');
   assert.equal(requests.length, 2);
   assert.ok(requests.every((url) => url.startsWith('https://api.github.com/repos/CodeMasterLabs/gitsettle/')));
-  if (decision.status === 'valid') assert.equal(decision.author, 'CodeMasterLabs');
+  if (decision.status === 'valid') {
+    assert.equal(decision.author, 'CodeMasterLabs');
+    assert.equal(decision.context, testPullRequest.body, 'risk context must be the same raw body that passed GitHub verification');
+  }
 });
 
 test('non-submitted bounties make no GitHub request', async () => {
@@ -123,10 +128,42 @@ test('GitHub issue endpoint must identify a real issue rather than a PR', async 
 });
 
 test('partial or inconsistent merge/issue metadata remains an operational error', async () => {
-  for (const pr of [{ merged: true }, { ...testPullRequest, merged_at: null }, { ...testPullRequest, merged_at: 'not-a-date' }, { ...testPullRequest, merge_commit_sha: null }]) {
+  for (const pr of [{ merged: true }, { ...testPullRequest, merged_at: null }, { ...testPullRequest, merged_at: 'not-a-date' }, { ...testPullRequest, merge_commit_sha: 123 }]) {
     await assert.rejects(clientFor(pr).client.verify(testBounty, 'escrow.testnet'), GitHubApiError);
   }
   await assert.rejects(clientFor(testPullRequest, {}).client.verify(testBounty, 'escrow.testnet'), GitHubApiError);
+});
+
+test('omitted or null audit merge SHA requires independent 204 confirmation and remains honestly null', async () => {
+  for (const sha of [undefined, null]) {
+    const { client, requests } = clientFor({ ...testPullRequest, merge_commit_sha: sha });
+    const result = await client.verify(testBounty, 'escrow.testnet');
+    assert.equal(result.status, 'valid');
+    if (result.status === 'valid') assert.equal(result.merge_sha, null);
+    assert.ok(requests.some(url => url.endsWith('/pulls/25/merge')));
+  }
+  for (const status of [200, 404, 403, 500]) {
+    await assert.rejects(clientFor({ ...testPullRequest, merge_commit_sha: null }, testIssue, undefined, status).client.verify(testBounty, 'escrow.testnet'), GitHubApiError);
+  }
+});
+
+test('real API2026 PR10 fixture verifies merge, issue/account binding, and Spanish files without optional SHA', async () => {
+  assert.equal(Object.hasOwn(actual2026Response.pull_request, 'merge_commit_sha'), false);
+  const actualBounty = { ...testBounty, id: 8, claimant: 'contributor.gitsettle-ac1b0f23f4.testnet',
+    pr_url: actual2026Response.pull_request.html_url, issue_url: actual2026Response.issue.html_url,
+    // Fixture only: simulate funding before the real timestamp, without claiming chain evidence.
+    created_at: Math.floor(Date.parse(actual2026Response.pull_request.merged_at) / 1000) - 600,
+    bounty_type: 'Translation' as const, target_locale: 'es' };
+  const { client } = clientFor(actual2026Response.pull_request, actual2026Response.issue, [actual2026Response.files]);
+  const result = await client.verify(actualBounty, 'gitsettle-ac1b0f23f4.testnet');
+  assert.equal(result.status, 'valid');
+  if (result.status === 'valid') {
+    assert.equal(result.merge_sha, null);
+    assert.deepEqual(result.matching_files, ['locales/es/contributing.md']);
+  }
+  const wrongLocale = { ...actualBounty, target_locale: 'ja' };
+  assert.equal((await client.verify(wrongLocale, 'gitsettle-ac1b0f23f4.testnet')).status, 'invalid');
+  assert.equal((await client.verify({ ...actualBounty, claimant: 'attacker.testnet' }, 'gitsettle-ac1b0f23f4.testnet')).status, 'invalid');
 });
 
 test('translation checks exact locale paths with real changes', async () => {

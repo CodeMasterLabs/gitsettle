@@ -2,8 +2,15 @@ import type { Bounty } from '@gitsettle/shared/types';
 
 /** A policy decision is separate from transport failures, which must never reject a claim. */
 export type VerificationDecision =
-  | { status: 'valid'; message: string; author: string; merge_sha: string; matching_files: string[] }
-  | { status: 'pending' | 'invalid'; message: string };
+  | {
+    status: 'valid'; message: string; author: string;
+    /** Optional GitHub audit metadata; null means the merge endpoint independently returned 204. */
+    merge_sha: string | null; matching_files: string[];
+    /** Raw PR body from the verified GitHub response. Ephemeral: never log or persist it. */
+    context: string;
+  }
+  | { status: 'pending'; message: string }
+  | { status: 'invalid'; message: string };
 
 /** On-chain mutations are injected so tests can prove when a payout is forbidden. */
 export interface ChainPort {
@@ -28,3 +35,15 @@ export interface VerificationRecord {
 }
 
 export type AuditSink = (record: VerificationRecord) => void | Promise<void>;
+
+/** A local risk hold is independent of GitHub work validity and must never unlock a refund. */
+export interface ReleaseGuardDecision {
+  verdict: 'allow' | 'review' | 'deny';
+  score: number;
+  signalIds: string[];
+  message: string;
+}
+
+export interface ReleaseGuard {
+  evaluate(bounty: Bounty, evidence: Extract<VerificationDecision, { status: 'valid' }>): ReleaseGuardDecision | Promise<ReleaseGuardDecision>;
+}

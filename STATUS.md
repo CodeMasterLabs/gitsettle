@@ -4,33 +4,40 @@ Updated: 2026-11-14. Canonical repository: https://github.com/CodeMasterLabs/git
 
 ## Completed and verified
 
-- **Contract:** near-sdk 5.30.2, Rust 1.97.1. All 41 unit tests pass; formatting, Clippy and locked release Wasm build pass. Source rebuild SHA-256 matches deployed artifact: `88a9d6824ff7b09f107bf7682dea477bd1352dbdb11ab5520abd8cae56170137`.
-- **Testnet deployment:** `gitsettle-ac1b0f23f4.testnet`, atomically initialized with `verifier.gitsettle-ac1b0f23f4.testnet`. Funded contributor subaccount exists. Public receipt and config in `docs/DEPLOYMENT.json`; keys are ignored, mode-0600 files only.
-- **Verifier:** 44 tests pass for GitHub evidence, locale pagination, issue/account binding, rate limits, stale work, and callback recovery. Testnet read-only startup/config check passes. The complete root Node suite has 49 passing tests, including currency and transaction confirmation.
-- **Web:** all requested screens and wallet flows implemented; Next.js production build and TypeScript pass without warnings. Runtime config is allowlisted, and wallet-return hashes are verified before confirmation.
-- **Containers:** Docker build, empty-volume demo startup, both services running, web health and credential isolation verified locally on port 3001. Native SQLite compilation dependencies included only in the build stage.
-- **VPS preparation:** Docker and Caddy installed on authorized SSH alias `hetzner`. HTTPS certificate and redirect verified for `https://gitsettle.89.167.109.196.sslip.io`; app deployment pending publication/clean clone.
-- **Handoff:** README, architecture guide, contract/API/design/security notes, demo script and X draft are written. Final live evidence and actual browser counts still to be appended.
+- **Contract:** near-sdk 5.30.2, Rust 1.97.1. All 41 unit tests, fmt, Clippy and locked Wasm build pass. Deployed artifact SHA-256: `88a9d6824ff7b09f107bf7682dea477bd1352dbdb11ab5520abd8cae56170137`. The contract is unchanged by support/AI additions.
+- **Testnet:** contract `gitsettle-ac1b0f23f4.testnet`, verifier `verifier.gitsettle-ac1b0f23f4.testnet`, funded contributor account. Public deployment evidence in `docs/DEPLOYMENT.json`; private keys remain ignored mode-0600 files.
+- **Publication:** public repository exists. Real issues #1–#9 and merged Spanish-guide PR #10 are published. Eight initial seed bounties plus the real-loop bounty are on-chain; `docs/SEED_ISSUES.json` and `docs/SEED_RESULTS.json` contain evidence.
+- **Real end-to-end payout:** bounty **8**, issue **#9**, PR **#10** settled automatically at **2026-11-14T09:06:24Z**, using the production verifier and AgentGuard gate. Contributor balance increased by exactly **0.05 NEAR**, points by **100**, paid count by **1**, and leaderboard updated. Release: `Fe2qi4XGHsd5CvGZMdWq9Tr53MGg5WXyoce12ZnRyyCC`. Full baselines and hashes: `docs/LIVE_E2E.json`. Do not rerun preparation or create duplicate deposits.
+- **GitHub API compatibility:** current API omits `merge_commit_sha`; absent/null SHA requires an independent HTTP 204 merge confirmation. Real read-only policy and real payout passed; public evidence represents SHA as null rather than inventing one.
+- **AgentGuard:** pinned MIT risk rules, exact per-payout cap, held submissions stay protected, no raw PR text persisted. `docs/AGENTGUARD.md` documents local trust boundary and baseline reuse. Approved reciprocal README disclosure published to AgentGuard commit `fe8a64d`; user confirmed it is their other submitted hackathon project.
+- **Community and triage:** NEP-413 wallet sessions, private support/appeal conversations, ticket ACLs/status/replies, atomic spam/duplicate limits, deterministic issue preflight, duplicate-PR holds, optional BYO-LLM advice with quotas and bounded context. No LLM key configured and no live paid AI call claimed.
+- **Application checks:** combined Node suite passed 136 tests and TypeScript passed after the auth/AI review. Expanded Next production build passed. All 78 browser scenarios pass across desktop/mobile/dark; screenshots reviewed. Worker-scoped processing retains the full contract list for duplicate detection.
+- **Original containers:** clean public clone `9ca2b56` built and started on VPS using Docker Compose without credentials, with persistent SQLite and HTTPS verified. Details: `docs/DOCKER_VERIFICATION.md`. New feature/live configuration deployment is the next checkpoint.
 
 ## In progress / remaining
 
-1. Finish final 45-check browser/visual review on desktop, mobile and dark theme. Preliminary screen checks pass; a skip-link focus issue and spacing fixes are implemented. `docs/UI_REVIEW.md` owns final evidence.
-2. Publish the reviewed commits to public `CodeMasterLabs/gitsettle` after explicit permission required by the hackathon rules. User changed the original `codemaster` identity to `CodeMasterLabs` and requested GitHub-only commit identity; all commits use `CodeMasterLabs <344671343+CodeMasterLabs@users.noreply.github.com>`.
-3. Create actual demo GitHub issues, write `docs/SEED_ISSUES.json`, run the idempotent seed script, and record real testnet transactions.
-4. Run the two-phase real PR loop in `scripts/live-loop.ts`: prepare bounty/claim, merge a real translation PR, submit it, run the production oracle and prove exact payout/profile/leaderboard changes in `docs/LIVE_E2E.json`.
-5. Clone the public repository on the fresh VPS, verify default Docker startup, then apply the separately stored live environment and test the public HTTPS app. Never copy deployer/contributor keys into the web container.
-6. Human records/publishes X video and provides final team/contact/prize account fields and consent. Final submission requires review of the exact payload. No submission has been sent by this agent.
+1. Expanded browser and worker checks are complete; `docs/UI_REVIEW.md` records screenshot evidence.
+2. Commit and push tested additions under the GitHub-only identity. Rebuild Docker from that public revision and activate the minimal live environment on the VPS.
+3. Verify real NEP-413 HTTP sessions and private support flow using `scripts/verify-support.ts`, writing `docs/COMMUNITY_E2E.json` only on success. Check live board, settled bounty, leaderboard, HTTPS, containers and credential isolation.
+4. Record final clean-clone Docker and GitHub CI evidence, update this checkpoint, and publish the handoff.
+5. **User will submit manually and explicitly instructed the agent not to submit anything to the hackathon.** The human owns the X post and application. No further personal details are needed by the agent; no submission request must be sent. **No GitSettle application has been submitted by this agent.**
+
+## Deployment and credential map
+
+- Public HTTPS: https://gitsettle.89.167.109.196.sslip.io. SSH alias: `hetzner`.
+- VPS source: `/opt/gitsettle/source`; data: `/opt/gitsettle/data`; root-only runtime env: `/opt/gitsettle/env/production.env`.
+- Only the dedicated verifier private key is installed in the VPS runtime environment. Deployer/contributor keys and the local GitHub CLI token are not transferred. Web receives no NEAR key or GitHub token. Optional LLM credentials belong only to web.
+- Bind app port to `127.0.0.1:3000` behind Caddy. `APP_ORIGIN` equals the public HTTPS origin; `TRUST_PROXY_HEADERS=true` only with that isolation.
+- Local baseline demo Docker uses port 3001. Browser QA owns port 3000 temporarily. Coordinate before starting another server or rebuilding `.next`.
 
 ## Session constraints and decisions
 
-- Workspace started empty on November 14, 2026. No earlier product or baseline code was supplied.
-- Original requested repo `codemaster/gitsettle` was inaccessible. User explicitly selected `CodeMasterLabs/gitsettle` instead; do not revert that correction.
-- User authorized testnet wallet provisioning and VPS setup. User selected SSH alias `hetzner`. An automatic HTTPS hostname is used because no custom domain was supplied.
-- Commit as the GitHub account only. Never commit secrets or private keys. Local `.env.testnet` and `.secrets/` are ignored; GitHub authentication tokens must not enter images or logs.
-- Track IDs: `social`, `open`, `agents` for the shipped deterministic verification/payout worker. Read live https://nearhackathon.com/HACKATHON.md before submitting. Deadline: 2026-11-14T23:59:00Z.
-- Hackathon rules require explicit permission for publication/push and the final submission payload. Human publishes X and selects the mainnet prize account; generated wallets are testnet only.
-- Trusted oracle, poster override, retained contract upgrade key, nonrefundable storage, permanent submitted-work liveness limits, and one low-severity dependency advisory chain are documented honestly.
+- Workspace began empty on November 14, 2026. User corrected inaccessible `codemaster/gitsettle` to **CodeMasterLabs/gitsettle**; never revert it.
+- Every commit uses `CodeMasterLabs <344671343+CodeMasterLabs@users.noreply.github.com>`, without an AI coauthor. User authorized public GitSettle pushes, real demo issues/merge, testnet wallets/deployment and VPS setup. AgentGuard README-only disclosure was separately approved.
+- Testnet only. Do not create or choose the human's mainnet prize account. Never commit secrets, signatures, cookies or private submission payloads.
+- Track IDs: `social`, `open`, `agents`. Read https://nearhackathon.com/HACKATHON.md again before submission. Deadline: **2026-11-14T23:59:00Z**. AgentGuard already occupies the user's other permitted project slot; disclose both independent products and shared baseline.
+- Trusted oracle, poster override, retained upgrade key, nonrefundable storage, submitted-work liveness, off-chain/nonbinding appeals, AI/provider limits and dependency advisory chain are documented honestly.
 
 ## Resuming
 
-Read this file, `ARCHITECTURE.md`, `docs/CONTRACT_API.md`, `docs/API_SOURCES.md`, and `docs/SECURITY_REVIEW.md`. Run only the checks affected by new changes or unresolved issues. Use existing ignored wallet/live-loop checkpoints; never recreate funded accounts or duplicate deposits after an ambiguous transaction. Local fixtures and mocked API/browser tests are not a live merge/payout proof.
+Read this file, `ARCHITECTURE.md`, `docs/CONTRACT_API.md`, `docs/API_SOURCES.md`, `docs/COMMUNITY.md`, `docs/TRIAGE.md` and `docs/SECURITY_REVIEW.md`. Use existing ignored `.secrets/testnet-wallets.json`, `.env.testnet` and `.secrets/live-loop.json`; never recreate funded accounts or duplicate deposits after an ambiguous outcome. Run only checks affected by new changes or unresolved issues. Fixtures are not live wallet/LLM/payout evidence; public proof files name what actually ran.

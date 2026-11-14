@@ -107,14 +107,16 @@ function parsePullRequest(value: unknown): GitHubPullRequest {
   if (!isObject(value) || !Number.isSafeInteger(value.number)
     || typeof value.html_url !== 'string' || typeof value.merged !== 'boolean'
     || !(typeof value.merged_at === 'string' || value.merged_at === null)
-    || !(typeof value.merge_commit_sha === 'string' || value.merge_commit_sha === null)
+    // API 2026-03-10 can omit this audit field entirely (observed on real PRs).
+    // Merge authorization still requires merged_at and an independent 204 check below.
+    || !(typeof value.merge_commit_sha === 'string' || value.merge_commit_sha === null || value.merge_commit_sha === undefined)
     || !(typeof value.body === 'string' || value.body === null)
     || !isObject(value.user) || typeof value.user.login !== 'string'
     || !isObject(value.base) || !isObject(value.base.repo) || typeof value.base.repo.full_name !== 'string'
     || !Number.isSafeInteger(value.changed_files) || (value.changed_files as number) < 0) {
     throw new GitHubApiError('GitHub returned incomplete pull request metadata; verification will retry.');
   }
-  return value as unknown as GitHubPullRequest;
+  return { ...value, merge_commit_sha: value.merge_commit_sha || null } as unknown as GitHubPullRequest;
 }
 
 function parseFiles(value: unknown): GitHubFile[] {
@@ -141,7 +143,7 @@ export class GitHubClient {
     this.request = options.fetch ?? fetch;
   }
 
-  private async get(path: string): Promise<unknown> {
+  private async getResponse(path: string): Promise<Response> {
     let response: Response;
     try {
       response = await this.request(`${API_ORIGIN}${path}`, {
@@ -165,6 +167,11 @@ export class GitHubClient {
         : resetSeconds > 0 ? Math.max(0, resetSeconds * 1000 - Date.now()) : undefined;
       throw new GitHubApiError(`GitHub returned HTTP ${response.status}; check access/rate limits and retry.`, response.status, retryAfterMs);
     }
+    return response;
+  }
+
+  private async get(path: string): Promise<unknown> {
+    const response = await this.getResponse(path);
     try {
       return await response.json();
     } catch {
@@ -188,8 +195,15 @@ export class GitHubClient {
     }
     // A deadline cannot invalidate a timely submission. Even a closed PR may be reopened.
     if (!pr.merged) return { status: 'pending', message: 'Waiting for the pull request to merge. The reward remains in escrow.' };
-    if (!pr.merged_at || !Number.isFinite(Date.parse(pr.merged_at)) || !pr.merge_commit_sha) {
+    if (!pr.merged_at || !Number.isFinite(Date.parse(pr.merged_at))) {
       throw new GitHubApiError('GitHub has not returned complete merge evidence; verification will retry.');
+    }
+    if (!pr.merge_commit_sha) {
+      // A missing audit SHA is not an unmerged PR. The dedicated REST endpoint
+      // confirms membership in the merged state; any conflicting/partial result
+      // remains retryable, never an invalid-contribution rejection.
+      const merged = await this.getResponse(`/repos/${prRef.repo}/pulls/${prRef.number}/merge`);
+      if (merged.status !== 204) throw new GitHubApiError('GitHub did not independently confirm this pull request merge; verification will retry.');
     }
     // A PR opened earlier may finish bounty work; a historical merge cannot be
     // retroactively rebound by editing its body after this escrow was funded.
@@ -241,6 +255,7 @@ export class GitHubClient {
       author: pr.user.login,
       merge_sha: pr.merge_commit_sha,
       matching_files: matchingFiles,
+      context: body,
     };
   }
 }

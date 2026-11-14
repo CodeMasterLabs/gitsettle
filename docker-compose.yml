@@ -37,6 +37,14 @@ services:
       NEAR_NETWORK_ID: testnet
       NEAR_CONTRACT_ID: ${NEAR_CONTRACT_ID:-}
       NEAR_RPC_URL: ${NEAR_RPC_URL:-https://rpc.testnet.near.org}
+      AGENTGUARD_ENABLED: ${AGENTGUARD_ENABLED:-true}
+      AGENTGUARD_MAX_PAYOUT_NEAR: ${AGENTGUARD_MAX_PAYOUT_NEAR:-5}
+      APP_ORIGIN: ${APP_ORIGIN:-http://localhost:3000}
+      TRUST_PROXY_HEADERS: ${TRUST_PROXY_HEADERS:-false}
+      SUPPORT_ADMIN_ACCOUNTS: ${SUPPORT_ADMIN_ACCOUNTS:-}
+      LLM_BASE_URL: ${LLM_BASE_URL:-}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-}
       # Intentionally no env_file: a web compromise must not expose signing keys.
     tmpfs:
       - /tmp:rw,noexec,nosuid,size=64m,mode=1777
@@ -68,6 +76,10 @@ services:
       GITHUB_API_VERSION: ${GITHUB_API_VERSION:-2026-03-10}
       VERIFIER_INTERVAL_MS: ${VERIFIER_INTERVAL_MS:-15000}
       VERIFIER_REJECT_INVALID: ${VERIFIER_REJECT_INVALID:-true}
+      AGENTGUARD_ENABLED: ${AGENTGUARD_ENABLED:-true}
+      AGENTGUARD_MAX_PAYOUT_NEAR: ${AGENTGUARD_MAX_PAYOUT_NEAR:-5}
+      AGENTGUARD_DENIED_RECIPIENTS: ${AGENTGUARD_DENIED_RECIPIENTS:-}
+      AGENTGUARD_KNOWN_RECIPIENTS: ${AGENTGUARD_KNOWN_RECIPIENTS:-}
     # No ports: this worker reads GitHub/NEAR and writes only the shared audit DB.
     stop_grace_period: 90s
 

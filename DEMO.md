@@ -1,5 +1,15 @@
 # GitSettle demo and submission handoff
 
+## Recorded live proof
+
+Public app: https://gitsettle.89.167.109.196.sslip.io. On November 14, 2026 at 09:06 UTC, bounty **8** settled through the production verifier with AgentGuard enabled:
+
+- Issue [#9](https://github.com/CodeMasterLabs/gitsettle/issues/9), merged Spanish guide [PR #10](https://github.com/CodeMasterLabs/gitsettle/pull/10), file `locales/es/contributing.md`.
+- [Release transaction](https://testnet.nearblocks.io/txns/Fe2qi4XGHsd5CvGZMdWq9Tr53MGg5WXyoce12ZnRyyCC): **0.05 NEAR** exact contributor balance increase, **100 points**, one paid contribution, leaderboard updated.
+- Full transaction hashes, balance/profile baselines and final values: [docs/LIVE_E2E.json](docs/LIVE_E2E.json). GitHub API 2026 omits the merge SHA; the verifier independently confirmed merge with HTTP 204 and records the absent SHA honestly.
+
+The existing bounty is already paid. For a new live recording, create a fresh issue/bounty/PR with a separate script journal; do not replay the paid bounty or describe a recorded result as a new payment. A walkthrough can show the recorded issue, PR, on-chain transaction and final profile without spending more tokens.
+
 ## 60–90 second video script
 
 Record the live testnet deployment, not the labeled local demo. Use a pre-funded
@@ -13,7 +23,7 @@ private keys, shell history and environment files out of the recording.
 | 25–40s | Claim with the contributor wallet and submit the prepared PR URL. | “The contributor claims the work and submits a pull request. Its body references the issue and names the exact bounty and recipient account.” |
 | 40–58s | Show the actual PR, locale file and merged badge. | “The verifier checks the merge, repository, issue reference, recipient marker and Spanish locale path. This is a trusted oracle; it does not judge translation quality.” |
 | 58–75s | Return to the bounty as it becomes Released; open transaction and profile. | “The worker signs the release. NEAR transfers the reward, and only a successful transfer callback adds points and earnings.” |
-| 75–90s | Show leaderboard and repository setup command. | “Maintainers and contributors can self-host this with Docker. The contract, verifier, tests and deployment evidence are public.” |
+| 75–90s | Show leaderboard and repository setup command. | “Duplicate and spam checks help triage new work. Wallet-authenticated support handles appeals; optional AI gives advice. Anyone can self-host with Docker.” |
 
 The maintainer can also release a submitted bounty directly. Mention this if
 showing that action; do not present a manual release as automatic verification.
@@ -64,6 +74,8 @@ shorten the prose to fit the account's X character limit; keep the event mention
 
 ## Final submission checklist
 
+**The user will submit manually and instructed the agent not to submit anything to the hackathon.** The following is a human handoff, not authorization for an API request.
+
 Read https://nearhackathon.com/HACKATHON.md again immediately before submission.
 Deadline: **2026-11-14T23:59:00Z**. Submit once only; do not retry a 403 or make a
 second project link to bypass a 409. Reuse the same generated requestId for
@@ -71,12 +83,11 @@ network/503 retries. Do not commit the submission payload or personal data.
 
 Confirmed project identity: GitSettle. Repository selected by the user:
 https://github.com/CodeMasterLabs/gitsettle. Proposed track IDs:
-`["social", "open", "agents"]` (the deterministic verification/payout agent ships).
+`["social", "open", "agents"]` (the deterministic verification/payout agent ships). AgentGuard is the same developer’s already-submitted independent project; both READMEs disclose the relationship and reused baseline.
 
 The human must provide lead name, contact email, team size, their mainnet prize
 account, and the public X demo URL. The human creates/selects the prize account;
-the supplied tooling only creates testnet development wallets. Ask whether this
-repo was already submitted and whether the team has another project to disclose.
+the supplied tooling only creates testnet development wallets. Confirm that GitSettle itself has not already been submitted. The user confirmed AgentGuard is their other submitted project; the two-project limit is therefore material, and no third project should be submitted under the same person.
 
 Read this consent notice verbatim and record an affirmative answer:
 
@@ -90,8 +101,10 @@ Proposed project description for human review:
 > checks the real GitHub merge, repository, issue reference, contributor-account
 > marker and requested locale path before releasing the reward. The NEAR contract
 > controls escrow, authorized refunds, transfer recovery and contribution points.
-> A Next.js dashboard, wallet signing, SQLite audit history and Docker deployment
-> make the system reproducible. The trusted-oracle and upgrade-key limits are
+> AgentGuard rules check recipients, PR text and payout size before automatic release.
+> Duplicate/spam checks, signed-wallet appeals/support and optional bring-your-own-LLM
+> triage help participants; AI never authorizes escrow. A Next.js dashboard, wallet
+> signing, SQLite history and Docker deployment make the system reproducible. The trusted-oracle and upgrade-key limits are
 > documented, and live testnet evidence accompanies the public repository.
 
 Build the exact API JSON only from confirmed values, print it for review, and

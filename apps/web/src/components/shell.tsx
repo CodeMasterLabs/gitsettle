@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
-import { ArrowUpRight, CheckCircle2, CircleAlert, GitMerge, LayoutList, LoaderCircle, Moon, Settings2, Sun, Trophy, UserRound, Wallet, X } from 'lucide-react';
+import { ArrowUpRight, CheckCircle2, CircleAlert, GitMerge, LayoutList, LoaderCircle, MessageSquare, Moon, Settings2, Sun, Trophy, UserRound, Wallet, X } from 'lucide-react';
 import { shortAccount } from '@/lib/client';
 import { useWallet } from './wallet-provider';
 
@@ -12,6 +12,7 @@ const navigation = [
   { href: '/leaderboard', label: 'Leaderboard', icon: Trophy },
   { href: '/contributors/me', label: 'My contributions', icon: UserRound },
   { href: '/dashboard', label: 'Maintainer desk', icon: Settings2 },
+  { href: '/support', label: 'Support & appeals', icon: MessageSquare },
 ];
 
 function TransactionNotice() {

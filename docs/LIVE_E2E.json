@@ -1,0 +1,59 @@
+{
+  "network": "testnet",
+  "verified_at": "2026-11-14T09:06:24.546Z",
+  "contract_id": "gitsettle-ac1b0f23f4.testnet",
+  "bounty_id": 8,
+  "issue_url": "https://github.com/CodeMasterLabs/gitsettle/issues/9",
+  "pr_url": "https://github.com/CodeMasterLabs/gitsettle/pull/10",
+  "poster_id": "gitsettle-ac1b0f23f4.testnet",
+  "contributor_id": "contributor.gitsettle-ac1b0f23f4.testnet",
+  "verifier_id": "verifier.gitsettle-ac1b0f23f4.testnet",
+  "bounty_type": "Translation",
+  "target_locale": "es",
+  "reward_yocto": "50000000000000000000000",
+  "storage_reserve_yocto": "50000000000000000000000",
+  "final_status": "Released",
+  "github_evidence": {
+    "status": "valid",
+    "message": "Merged pull request, repository, issue and claimant binding verified; locale es matched.",
+    "author": "CodeMasterLabs",
+    "merge_sha": null,
+    "matching_files": [
+      "locales/es/contributing.md"
+    ]
+  },
+  "transactions": {
+    "create": "7PoTxGULL4AsQe3WF1gx9Gm71cBLRPgumj9z4KJEqegF",
+    "claim": "FpXxfbHwsox3bRHJHtDtKMQ8TpocxpwBoVQHojzqyJSF",
+    "submit": "GWpczpqe59Ru3Q1yrxt4weq45zUUxr7HY7Q86zt8swJH",
+    "release": "Fe2qi4XGHsd5CvGZMdWq9Tr53MGg5WXyoce12ZnRyyCC"
+  },
+  "balance_before_settlement": "499547410916133700000000",
+  "balance_after_settlement": "549547410916133700000000",
+  "balance_increase_yocto": "50000000000000000000000",
+  "profile_before": {
+    "account_id": "contributor.gitsettle-ac1b0f23f4.testnet",
+    "points": 0,
+    "merged_count": 0,
+    "total_earned": "0"
+  },
+  "profile_after": {
+    "account_id": "contributor.gitsettle-ac1b0f23f4.testnet",
+    "points": 100,
+    "merged_count": 1,
+    "total_earned": "50000000000000000000000"
+  },
+  "leaderboard_entry": {
+    "account_id": "contributor.gitsettle-ac1b0f23f4.testnet",
+    "points": 100,
+    "merged_count": 1,
+    "total_earned": "50000000000000000000000"
+  },
+  "checks": {
+    "merged_github_pr": true,
+    "automatic_verifier_release": true,
+    "exact_balance_increase": true,
+    "exact_points_increase": true,
+    "leaderboard_updated": true
+  }
+}

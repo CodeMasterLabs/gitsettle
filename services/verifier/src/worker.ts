@@ -1,11 +1,16 @@
 import type { Bounty } from '@gitsettle/shared/types';
+import { duplicatePullRequestIds } from '@gitsettle/shared/dedupe';
 import { GitHubApiError } from './github.js';
-import type { AuditSink, ChainPort, PolicyPort, VerificationRecord } from './types.js';
+import type { AuditSink, ChainPort, PolicyPort, ReleaseGuard, VerificationRecord } from './types.js';
 
 export interface WorkerOptions {
   dryRun?: boolean;
   rejectInvalid?: boolean;
   now?: () => number;
+  /** Shipped service/live-loop entrypoints always supply the default-enabled local guard. */
+  releaseGuard?: ReleaseGuard;
+  /** Limit which bounties may mutate, while retaining the full list for duplicate-PR evidence. */
+  onlyBountyIds?: readonly number[];
 }
 
 /** Compare the immutable evidence snapshot immediately before a mutating transaction. */
@@ -48,6 +53,7 @@ export class VerifierWorker {
     try {
       const bounties = await this.chain.listBounties();
       for (const bounty of bounties) {
+        if (this.options.onlyBountyIds && !this.options.onlyBountyIds.includes(bounty.id)) continue;
         if (bounty.status !== 'Submitted') continue;
         inspected += 1;
         try {
@@ -56,10 +62,10 @@ export class VerifierWorker {
             await this.record({ bounty_id: bounty.id, outcome: 'pending', message: decision.message });
             continue;
           }
-          if (this.options.dryRun) {
+          if (this.options.dryRun && decision.status === 'invalid') {
             await this.record({
               bounty_id: bounty.id, outcome: 'pending',
-              message: `Dry run: ${decision.status === 'valid' ? 'eligible for payout' : 'invalid evidence'}. ${decision.message}`,
+              message: `Dry run: invalid evidence. ${decision.message}`,
             });
             continue;
           }
@@ -78,6 +84,38 @@ export class VerifierWorker {
             await this.record({ bounty_id: bounty.id, outcome: 'rejected', message: decision.message, tx_hash: result.txHash });
             continue;
           }
+          const duplicates = duplicatePullRequestIds(bounty, bounties);
+          if (duplicates.length) {
+            await this.record({ bounty_id: bounty.id, outcome: 'pending', message: `Duplicate pull request also appears on bounty ${duplicates.map(id => `#${id}`).join(', ')}. Automatic payout is held for maintainer review; escrow remains submitted.` });
+            continue;
+          }
+          let guardMessage = '';
+          if (this.options.releaseGuard) {
+            try {
+              const guard = await this.options.releaseGuard.evaluate(bounty, decision);
+              if (!guard || !['allow', 'review', 'deny'].includes(guard.verdict)
+                || !Number.isFinite(guard.score) || guard.score < 0 || typeof guard.message !== 'string') {
+                throw new Error('Invalid release-guard result');
+              }
+              guardMessage = guard.message;
+              if (guard.verdict !== 'allow') {
+                await this.record({ bounty_id: bounty.id, outcome: 'pending', message: guardMessage });
+                continue;
+              }
+            } catch {
+              // A broken risk gate cannot authorize a payout or reject valid GitHub work.
+              await this.record({ bounty_id: bounty.id, outcome: 'error', message: 'AgentGuard local checks could not finish. Reward remains in escrow; retry or ask the poster to review.' });
+              continue;
+            }
+          }
+          if (this.options.dryRun) {
+            await this.record({ bounty_id: bounty.id, outcome: 'pending', message: `Dry run: eligible for payout. ${decision.message} ${guardMessage}`.trim() });
+            continue;
+          }
+          if (this.options.releaseGuard && !sameSubmission(bounty, await this.chain.getBounty(bounty.id))) {
+            await this.record({ bounty_id: bounty.id, outcome: 'pending', message: 'Submission changed during the local risk check; the next scan will check fresh evidence.' });
+            continue;
+          }
           const result = await this.chain.release(bounty.id);
           const final = await this.chain.getBounty(bounty.id);
           if (final?.status !== 'Released') {
@@ -87,7 +125,7 @@ export class VerifierWorker {
             });
             continue;
           }
-          await this.record({ bounty_id: bounty.id, outcome: 'released', message: decision.message, tx_hash: result.txHash });
+          await this.record({ bounty_id: bounty.id, outcome: 'released', message: `${decision.message} ${guardMessage}`.trim(), tx_hash: result.txHash });
         } catch (error) {
           await this.record({
             bounty_id: bounty.id, outcome: 'error',

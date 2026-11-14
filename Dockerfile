@@ -18,6 +18,8 @@ RUN apt-get update \
 COPY package.json package-lock.json ./
 COPY apps/web/package.json ./apps/web/package.json
 COPY packages/shared/package.json ./packages/shared/package.json
+COPY packages/community/package.json ./packages/community/package.json
+COPY packages/triage/package.json ./packages/triage/package.json
 COPY services/verifier/package.json ./services/verifier/package.json
 RUN npm ci
 

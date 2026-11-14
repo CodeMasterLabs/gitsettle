@@ -8,6 +8,7 @@ import '@near-wallet-selector/modal-ui/styles.css';
 import './globals.css';
 import { WalletProvider } from '@/components/wallet-provider';
 import { Shell } from '@/components/shell';
+import { CommunityProvider } from '@/components/community-provider';
 
 export const metadata: Metadata = {
   title: { default: 'GitSettle — Open work. Settled rewards.', template: '%s | GitSettle' },
@@ -15,5 +16,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return <html lang="en" suppressHydrationWarning><head><script dangerouslySetInnerHTML={{ __html: "try{document.documentElement.dataset.theme=localStorage.getItem('gitsettle.theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')}catch(e){}" }} /></head><body><WalletProvider><Shell>{children}</Shell></WalletProvider></body></html>;
+  return <html lang="en" suppressHydrationWarning><head><script dangerouslySetInnerHTML={{ __html: "try{document.documentElement.dataset.theme=localStorage.getItem('gitsettle.theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')}catch(e){}" }} /></head><body><WalletProvider><CommunityProvider><Shell>{children}</Shell></CommunityProvider></WalletProvider></body></html>;
 }

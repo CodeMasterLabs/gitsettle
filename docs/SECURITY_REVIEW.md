@@ -3,8 +3,7 @@
 Reviewed on 2026-11-14. This is an implementation review and regression-test
 checkpoint, not an independent audit or a claim of production readiness.
 
-Scope: `contracts/gitsettle/src/lib.rs`, the contract transition tests, and
-`services/verifier`. The deployed contract was read but **not changed** during
+Scope: `contracts/gitsettle/src/lib.rs`, contract transition tests, `services/verifier`, `packages/community`, and `packages/triage`. The deployed contract was read but **not changed** during
 this review. Deployment identity and Wasm digest are in `DEPLOYMENT.json`.
 
 ## Findings fixed in the verifier
@@ -16,7 +15,8 @@ this review. Deployment identity and Wasm digest are in `DEPLOYMENT.json`.
 | Malformed changed-file status and path components were too permissive. | Unknown statuses fail as operational errors; removed/unchanged files cannot qualify; URL `.`/`..` segments are rejected. Exact locale boundaries and full pagination already had regression coverage. |
 | A `.testnet` account suffix alone did not verify the configured network. | Service startup checks RPC `chain_id === "testnet"` before checking the configured verifier or signing. |
 
-The verifier suite now has **44 passing tests**, including nested cases. Root
+The verifier suite now has **64 passing tests**, including nested cases and the
+AgentGuard integration described below. Root
 TypeScript checking also passed after these changes. The suite covers canonical
 URL/host/number boundaries, other-repository references, claimant/contract/bounty
 binding, unmerged PRs beyond deadline, malformed/rate-limited API responses,
@@ -24,6 +24,22 @@ locale paths, complete pagination/3000-file cap, stale submissions, overlapping
 scans, dry runs, failed transfer callbacks and retries. External services are
 mocked by these tests; live transaction proof belongs in `LIVE_E2E.json` only
 after the real loop passes.
+
+The subsequent [AgentGuard integration](AGENTGUARD.md) runs pinned local recipient
+and text-risk checks before automatic release, plus a separate exact per-payout
+cap. Review/deny/error holds never call `reject_submission`; they preserve
+Submitted state and poster review. Raw PR context is not persisted. This adds no
+on-chain AgentGuard custody, TEE attestation, cumulative budget guarantee or
+protection against a compromised verifier key. Legitimate security/localization
+text can require manual review.
+
+## Community and AI review
+
+The complete Node suite passes 136 tests (64 verifier, 32 community, 33 triage and 7 shared). Authentication uses genuine NEP-413 signatures, browser/domain/account binding, single-use challenges, finalized key checks and hashed sessions. Ticket identities are session-derived, mutations require exact origin, and unauthorized resources return 404.
+
+Two additional review findings were fixed with regressions: rotating invented account IDs could bypass the per-account challenge limit, so issuance now has an atomic 120/minute deployment ceiling and actual-expiry pruning; chat history could retain extra nested fields, so provider context is projected to only `role` and `content`. SQLite transactions cover support quotas/duplicates/writes and AI daily quotas across connections.
+
+Optional LLM context and output are bounded, provider redirects/tool calls are refused, errors redact credentials, and AI has no financial authority. IP throttles require correctly configured proxy trust; wallet quotas cannot defeat Sybil wallets. Support text is plaintext in the operator database; AI requests use the configured external provider's privacy policy. Provider behavior is fixture-tested; no paid live LLM test is claimed. See [COMMUNITY.md](COMMUNITY.md) and [TRIAGE.md](TRIAGE.md).
 
 ## Contract paths reviewed
 
@@ -70,8 +86,7 @@ condition will complete within its budget.
   leave funds pending. A generic timeout retry after an unknown transfer outcome
   would risk double payment, so it is intentionally absent.
 - **Reputation:** multiple explicitly funded bounties may reward the same merged
-  PR if each was created before merge and each has matching evidence. Points are
-  neither Sybil-resistant nor a quality guarantee. No global PR uniqueness is claimed.
+  PR if each was created before merge and each has matching evidence. The worker now holds reused PRs across Submitted/Releasing/Released bounties, but posters can override it and the contract does not enforce global PR uniqueness. Points are neither Sybil-resistant nor a quality guarantee.
 - **Operations:** run one worker replica per contract, keep keys out of the web
   process, and use the audit store only as a read model. On-chain finalized state
   remains authoritative after a restart or failed SQLite write.

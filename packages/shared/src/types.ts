@@ -21,7 +21,10 @@ export interface BountyView extends Bounty {
   title: string; description: string; verification: VerificationRecord | null; expired: boolean;
 }
 export interface RankedContributor extends Contributor { rank: number; previous_rank: number | null; movement: number | null }
-export interface PublicConfig { mode: 'demo' | 'testnet'; contractId: string | null; rpcUrl: string; network: 'testnet' }
+export interface PublicConfig {
+  mode: 'demo' | 'testnet'; contractId: string | null; rpcUrl: string; network: 'testnet';
+  automation?: { agentGuardEnabled: boolean; maxAutomaticPayoutYocto: string };
+}
 export interface BoardData extends PublicConfig { config: ContractConfig; bounties: BountyView[]; updatedAt: number }
 
 export const BOUNTY_TYPES: BountyType[] = ['Bug', 'Feature', 'Audit', 'Translation', 'Other'];

@@ -118,3 +118,13 @@ All inputs have visible labels. Per-field errors associate through `aria-describ
 Before completion, capture desktop and mobile screenshots of the queue, detail, post, contributor, leaderboard, and maintainer screens. Capture dark mode and at least one error/empty/transaction state. Check that no horizontal page overflow appears at 375 px; text wrapping does not hide amounts or actions; keyboard focus reaches and activates every control; modal focus is contained and restored; reduced-motion mode stops the progress animation; and primary text/control contrasts meet WCAG AA.
 
 Store the review notes and screenshot locations in `docs/UI_REVIEW.md`. Browser evidence must distinguish fixture/demo interactions from signed testnet transactions. A screenshot of a fake transaction is not evidence of settlement.
+
+## Support and review extension
+
+The support desk extends the same work-desk pattern: a compact conversation list beside a readable message thread. A signed wallet message opens a private web session; it is visually separate from an escrow transaction and does not use transaction progress messages. Creator, bounty poster, and authorized support maintainers are the only intended readers. A ticket includes explicit open, in-review, and resolved states; a resolved conversation remains readable and cannot accept new replies.
+
+Appeal links appear for a claimant on submitted or rejected work. Every appeal entry point explains that it is an off-chain request and does not pause expiry, refunds, or reverse payments. The UI does not portray a support ticket as a dispute court.
+
+Post review includes deterministic preflight findings, links to matching bounties, and a separate acknowledgement before deliberately funding an already matched issue. Optional AI review requires an explicit request and authenticated session. The AI helper uses the same quiet surface and text hierarchy; it never receives a private ticket automatically, never asks for an API key, and cannot authorize payouts. An unconfigured AI provider is an explicit available-support state, not a broken chat input.
+
+Automated payout limits are shown in the escrow review when they affect the reward and on the bounty detail. A reward above the configured limit clearly requires maintainer approval. This disclosure does not imply that a lower reward is guaranteed to pass other risk checks.

@@ -1,5 +1,6 @@
 import { JsonRpcProvider } from 'near-api-js';
 import type { Bounty, ContractConfig, Contributor, PublicConfig } from './types.ts';
+import { parseNear } from './format.ts';
 
 /** Runtime config is allowlisted explicitly; private signer variables never enter web responses. */
 export function publicConfig(): PublicConfig {
@@ -7,7 +8,14 @@ export function publicConfig(): PublicConfig {
   const demo = process.env.DEMO_MODE === 'true' || (process.env.DEMO_MODE !== 'false' && !contractId);
   if (!demo && !contractId) throw new Error('NEAR_CONTRACT_ID is required when DEMO_MODE=false.');
   if (contractId && !contractId.endsWith('.testnet')) throw new Error('This build supports NEAR testnet accounts only.');
-  return { mode: demo ? 'demo' : 'testnet', contractId, rpcUrl: process.env.NEAR_RPC_URL || 'https://rpc.testnet.near.org', network: 'testnet' };
+  const enabled = process.env.AGENTGUARD_ENABLED || 'true';
+  if (!['true', 'false'].includes(enabled)) throw new Error('AGENTGUARD_ENABLED must be true or false.');
+  const maxAutomaticPayoutYocto = parseNear(process.env.AGENTGUARD_MAX_PAYOUT_NEAR || '5');
+  if (BigInt(maxAutomaticPayoutYocto) <= 0n || BigInt(maxAutomaticPayoutYocto) > 1_000_000n * 10n ** 24n) throw new Error('Invalid automatic payout cap.');
+  return {
+    mode: demo ? 'demo' : 'testnet', contractId, rpcUrl: process.env.NEAR_RPC_URL || 'https://rpc.testnet.near.org', network: 'testnet',
+    automation: { agentGuardEnabled: enabled === 'true', maxAutomaticPayoutYocto },
+  };
 }
 
 export function getProvider() { return new JsonRpcProvider({ url: publicConfig().rpcUrl }); }

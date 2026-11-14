@@ -1,0 +1,66 @@
+[
+  {
+    "issue_url": "https://github.com/CodeMasterLabs/gitsettle/issues/1",
+    "title": "Translate the wallet connection flow into Spanish",
+    "description": "Add Spanish copy for wallet connection, escrow review, and transaction recovery in locales/es. Keep account identifiers and NEAR amounts unchanged. Include a screenshot of the completed flow.",
+    "bounty_type": "Translation",
+    "target_locale": "es",
+    "reward_near": "0.18"
+  },
+  {
+    "issue_url": "https://github.com/CodeMasterLabs/gitsettle/issues/2",
+    "title": "Prevent stale balances after a confirmed payout",
+    "description": "Refresh the contributor balance and bounty state after finalized transaction receipts. Cover a slow RPC response and preserve the previous view while refreshing.",
+    "bounty_type": "Bug",
+    "target_locale": null,
+    "reward_near": "0.12"
+  },
+  {
+    "issue_url": "https://github.com/CodeMasterLabs/gitsettle/issues/3",
+    "title": "Audit deadline and refund authorization",
+    "description": "Review the escrow expiry boundary and verify that pending submissions cannot be refunded. Include a reproducible regression test with any proposed fix.",
+    "bounty_type": "Audit",
+    "target_locale": null,
+    "reward_near": "0.35"
+  },
+  {
+    "issue_url": "https://github.com/CodeMasterLabs/gitsettle/issues/4",
+    "title": "Bring the contributor guide to Bengali",
+    "description": "Translate the contribution guide and work queue labels under locales/bn. Explain how to reference an issue and add the contributor account marker.",
+    "bounty_type": "Translation",
+    "target_locale": "bn",
+    "reward_near": "0.20"
+  },
+  {
+    "issue_url": "https://github.com/CodeMasterLabs/gitsettle/issues/5",
+    "title": "Export the maintainer ledger as CSV",
+    "description": "Add an accessible CSV export of posted bounties, rewards, claimants, and settlement status. Amounts must retain exact decimal precision.",
+    "bounty_type": "Feature",
+    "target_locale": null,
+    "reward_near": "0.24"
+  },
+  {
+    "issue_url": "https://github.com/CodeMasterLabs/gitsettle/issues/6",
+    "title": "Add Japanese transaction status messages",
+    "description": "Add complete Japanese translations under locales/ja for pending, confirmed, failed, and cancelled wallet transactions.",
+    "bounty_type": "Translation",
+    "target_locale": "ja",
+    "reward_near": "0.16"
+  },
+  {
+    "issue_url": "https://github.com/CodeMasterLabs/gitsettle/issues/7",
+    "title": "Document recovery from a GitHub API outage",
+    "description": "Write an operator runbook covering rate limits, retries, verifier logs, and safe restart. Include an example that leaves a timely submitted PR protected.",
+    "bounty_type": "Other",
+    "target_locale": null,
+    "reward_near": "0.08"
+  },
+  {
+    "issue_url": "https://github.com/CodeMasterLabs/gitsettle/issues/8",
+    "title": "Keep issue filters when returning from a bounty",
+    "description": "Preserve type, locale, reward and status filters during navigation so contributors can compare work without resetting the queue.",
+    "bounty_type": "Bug",
+    "target_locale": null,
+    "reward_near": "0.10"
+  }
+]

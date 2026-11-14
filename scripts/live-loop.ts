@@ -6,6 +6,7 @@ import { BOUNTY_TYPES, type Bounty, type BountyType, type ContractConfig, type C
 import { GitHubClient, parseGitHubUrl } from '../services/verifier/src/github.js';
 import { NearGateway } from '../services/verifier/src/near.js';
 import { VerifierWorker } from '../services/verifier/src/worker.js';
+import { AgentGuardReleaseGuard, agentGuardConfigFromEnv } from '../services/verifier/src/agentguard.js';
 import type { ChainPort, VerificationDecision } from '../services/verifier/src/types.js';
 import { assertTestnet, loadEnvironment, readWallets, safeError, testnetProvider, walletFile, type DevelopmentWallets } from './support.js';
 
@@ -13,6 +14,15 @@ const JOURNAL = '.secrets/live-loop.json';
 const EVIDENCE = 'docs/LIVE_E2E.json';
 const REPOSITORY = 'CodeMasterLabs/gitsettle';
 const REWARD = nearToYocto('0.05').toString();
+type PublicGitHubEvidence = Omit<Extract<VerificationDecision, { status: 'valid' }>, 'context'>;
+
+/** Allowlist public evidence fields so raw PR context never enters journals or artifacts. */
+export function publicGitHubEvidence(evidence: PublicGitHubEvidence): PublicGitHubEvidence {
+  return {
+    status: 'valid', message: evidence.message, author: evidence.author,
+    merge_sha: evidence.merge_sha, matching_files: evidence.matching_files,
+  };
+}
 
 interface SigningIdentity { accountId: string; privateKey: KeyPairString }
 interface LoopJournal {
@@ -34,7 +44,7 @@ interface LoopJournal {
   bounty_id?: number;
   profile_before?: Contributor;
   balance_before_settlement?: string;
-  github_evidence?: Extract<VerificationDecision, { status: 'valid' }>;
+  github_evidence?: PublicGitHubEvidence;
   transactions: { create?: string; claim?: string; submit?: string; release?: string };
   completed_at?: string;
 }
@@ -90,6 +100,7 @@ async function run() {
   const phase = arguments_[0];
   loadEnvironment();
   if (existsSync('.env.testnet')) process.loadEnvFile('.env.testnet');
+  const releaseGuard = new AgentGuardReleaseGuard(agentGuardConfigFromEnv());
   const wallets: DevelopmentWallets | undefined = existsSync(walletFile) ? readWallets() : undefined;
   const poster = identity('POSTER', wallets?.contract);
   const contributor = identity('CONTRIBUTOR', wallets?.contributor);
@@ -123,6 +134,7 @@ async function run() {
       && journal.poster_id === poster.accountId && journal.contributor_id === contributor.accountId
       && journal.verifier_id === verifier.accountId, 'Existing live-loop checkpoint belongs to different accounts/deployment; inspect it before proceeding.');
     requireCondition(!process.env.LIVE_ISSUE_URL || process.env.LIVE_ISSUE_URL === journal.issue_url, 'LIVE_ISSUE_URL differs from the existing checkpoint.');
+    if (journal.github_evidence) journal.github_evidence = publicGitHubEvidence(journal.github_evidence);
   } else {
     requireCondition(phase === '--prepare', 'Run --prepare first. No live-loop checkpoint exists.');
     const issueUrl = process.env.LIVE_ISSUE_URL ?? '';
@@ -217,7 +229,8 @@ async function run() {
     // Check real GitHub evidence before submitting so a typo cannot lock the proof bounty.
     const decision = await policy.verify({ ...bounty, status: 'Submitted', pr_url: prUrl }, contractId);
     requireCondition(decision.status === 'valid', `GitHub evidence is not ready: ${decision.message}`);
-    journal.github_evidence = decision;
+    // Keep raw GitHub context ephemeral even in the ignored recovery checkpoint.
+    journal.github_evidence = publicGitHubEvidence(decision);
     if (!journal.profile_before) journal.profile_before = await getProfile();
     saveJournal(journal);
     if (bounty.status === 'Claimed' || bounty.status === 'Rejected') {
@@ -234,7 +247,9 @@ async function run() {
     }
     const scopedChain: ChainPort = {
       contractId,
-      listBounties: async () => { const current = await getBounty(journal.bounty_id!); return current ? [current] : []; },
+      // Scope mutation in the worker, never the evidence list: another bounty
+      // can already have submitted/paid this PR and must remain visible to dedupe.
+      listBounties: () => gateway.listBounties(),
       getBounty: (id) => gateway.getBounty(id),
       release: async (id) => {
         const result = await gateway.release(id);
@@ -244,7 +259,7 @@ async function run() {
       },
       reject: (id, reason) => gateway.reject(id, reason),
     };
-    const worker = new VerifierWorker(scopedChain, policy, (record) => { recordVerification(record); }, { rejectInvalid: false });
+    const worker = new VerifierWorker(scopedChain, policy, (record) => { recordVerification(record); }, { rejectInvalid: false, releaseGuard, onlyBountyIds: [journal.bounty_id] });
     await worker.tick();
     bounty = await getBounty(journal.bounty_id);
     requireCondition(bounty?.status === 'Released', `Payout is not finalized as Released. ${getVerification(journal.bounty_id)?.message ?? 'Inspect the verifier/RPC and rerun --settle.'}`);

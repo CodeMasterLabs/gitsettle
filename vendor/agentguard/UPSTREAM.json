@@ -1,0 +1,12 @@
+{
+  "repository": "https://github.com/CodeMasterLabs/agentguard",
+  "commit": "4ec34e69bc7c6cfd17a3e027bf9727a67eab97f6",
+  "license": "MIT",
+  "retrieved_at": "2026-11-14",
+  "files": {
+    "LICENSE": "715fc00ca2ea4891f96d1b24acd4d3fcf0cfed506de2445ad85c597c1dd6b41c",
+    "oracle/src/rules.ts": "0ccc46d4febb336285c07a4ec32fc2d6a71a392bbe67b5c304e58384eb60b5de",
+    "oracle/src/injection.ts": "78ede71f55428eaa066561e2608205b18c2ae2b80d68b95951a8f2fee2279351",
+    "sdk/src/types.ts": "b73c9f92563e8baf70c5ba7ff432a4ac686fd1a45f98996113d01e23bb57471c"
+  }
+}

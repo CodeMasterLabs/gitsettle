@@ -1,0 +1,54 @@
+{
+  "contract_id": "gitsettle-ac1b0f23f4.testnet",
+  "seeded_at": "2026-11-14T07:38:48.165Z",
+  "bounties": [
+    {
+      "id": 0,
+      "issue_url": "https://github.com/CodeMasterLabs/gitsettle/issues/1",
+      "reward": "180000000000000000000000",
+      "transaction_hash": "6he6X9XqCwcBv9J95DbTZWXrfR5uceUoxAbe39vsW1f"
+    },
+    {
+      "id": 1,
+      "issue_url": "https://github.com/CodeMasterLabs/gitsettle/issues/2",
+      "reward": "120000000000000000000000",
+      "transaction_hash": "JBMaTPqwgMKiFeKGQhvcqaBcgXP2BzA7NgxWvjJyqhgV"
+    },
+    {
+      "id": 2,
+      "issue_url": "https://github.com/CodeMasterLabs/gitsettle/issues/3",
+      "reward": "350000000000000000000000",
+      "transaction_hash": "Br7vxG7cV287DSXQ4JZNL8oLU6X5DjQBQwXEZTDWRWxL"
+    },
+    {
+      "id": 3,
+      "issue_url": "https://github.com/CodeMasterLabs/gitsettle/issues/4",
+      "reward": "200000000000000000000000",
+      "transaction_hash": "6PPtDYHSYnW8MJZU1LYYSJ87Bi2rhvVJ1hc2vXpaBeXM"
+    },
+    {
+      "id": 4,
+      "issue_url": "https://github.com/CodeMasterLabs/gitsettle/issues/5",
+      "reward": "240000000000000000000000",
+      "transaction_hash": "BcTWrvQ4ARikdvJMr1ar1busLH6xaxtph8CQNk9hts1e"
+    },
+    {
+      "id": 5,
+      "issue_url": "https://github.com/CodeMasterLabs/gitsettle/issues/6",
+      "reward": "160000000000000000000000",
+      "transaction_hash": "87oS1Jo4HmDLyA1tMGcQpoRUyeU5gMBgi44NZtSdfYLe"
+    },
+    {
+      "id": 6,
+      "issue_url": "https://github.com/CodeMasterLabs/gitsettle/issues/7",
+      "reward": "80000000000000000000000",
+      "transaction_hash": "BCtCBYqJRwRoK4frZBFyxLjy5MeRDvbk56L1g5VjjoKT"
+    },
+    {
+      "id": 7,
+      "issue_url": "https://github.com/CodeMasterLabs/gitsettle/issues/8",
+      "reward": "100000000000000000000000",
+      "transaction_hash": "D731fKX5QFNKKmoZTRtHX3aeqrKnYsAXRo1V2qVjjUQ5"
+    }
+  ]
+}
