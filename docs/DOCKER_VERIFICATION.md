@@ -152,3 +152,24 @@ produced that exact hash.
 The disposable container was stopped and removed after verification. Existing
 local and VPS services were preserved. These checks exercised demo startup and
 read-only routes; no NEAR transaction or real wallet approval was performed.
+
+## dApp and wallet revision: public deployment
+
+Published source `a63ff25c6d69733ce253da15546c22b3142150c2` was pulled with
+`git pull --ff-only` in the existing clean VPS checkout and deployed with the
+documented Compose script. Both services use image
+`sha256:6e2c9fc6f20b11a5469027f27789a7663817c5fbd2223b6057c9e7a56c4137d0`.
+Web started at **16:19:58 UTC**, verifier at **16:20:04 UTC** on November 14,
+2026; both have zero restarts and read-only root filesystems. Web health passed,
+its port remained `127.0.0.1:3000`, and its environment contained no NEAR signer
+or GitHub token. The runtime CLI returned version `0.1.0`. Shared persistent data
+was retained; no contract redeployment or funding occurred.
+
+The actual signed HTTPS support flow passed on this revision, including
+finalized-key ownership, nonce replay, CSRF, account isolation, private reply,
+resolution and logout. Public evidence is in `COMMUNITY_E2E.json`.
+[GitHub run 43614903721](https://github.com/CodeMasterLabs/gitsettle/actions/runs/43614903721)
+passed contract, application and container jobs, independently verifying the
+locked production build, full browser suite and default Docker startup from a
+fresh checkout with an empty volume. The local and public image IDs differ;
+each section records the image that actually ran its checks.

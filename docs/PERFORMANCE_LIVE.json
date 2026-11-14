@@ -1,8 +1,8 @@
 {
   "version": 1,
   "origin": "https://gitsettle.89.167.109.196.sslip.io",
-  "started_at": "2026-11-14T13:29:01.209Z",
-  "completed_at": "2026-11-14T13:29:06.732Z",
+  "started_at": "2026-11-14T16:26:52.779Z",
+  "completed_at": "2026-11-14T16:26:58.204Z",
   "method": "Five sequential rounds; each round GETs config, board, bounty #8, leaderboard. First request may include DNS/TLS setup. No forced server cache reset; warm transport is reused. Times are diagnostic samples, not load-test percentiles.",
   "sample_count_per_endpoint": 5,
   "timeout_ms": 15000,
@@ -11,16 +11,16 @@
   "endpoints": [
     {
       "path": "/api/config",
-      "median_ms": 225,
-      "min_ms": 219,
-      "max_ms": 1071,
+      "median_ms": 252,
+      "min_ms": 205,
+      "max_ms": 922,
       "successful_samples": 5,
       "samples": [
         {
           "sample": 1,
           "status": 200,
-          "headers_ms": 1049,
-          "total_ms": 1071,
+          "headers_ms": 908,
+          "total_ms": 922,
           "server_timing": {},
           "summary": {
             "mode": "testnet",
@@ -31,8 +31,8 @@
         {
           "sample": 2,
           "status": 200,
-          "headers_ms": 225,
-          "total_ms": 228,
+          "headers_ms": 203,
+          "total_ms": 205,
           "server_timing": {},
           "summary": {
             "mode": "testnet",
@@ -43,8 +43,8 @@
         {
           "sample": 3,
           "status": 200,
-          "headers_ms": 221,
-          "total_ms": 225,
+          "headers_ms": 223,
+          "total_ms": 227,
           "server_timing": {},
           "summary": {
             "mode": "testnet",
@@ -55,8 +55,8 @@
         {
           "sample": 4,
           "status": 200,
-          "headers_ms": 218,
-          "total_ms": 220,
+          "headers_ms": 250,
+          "total_ms": 252,
           "server_timing": {},
           "summary": {
             "mode": "testnet",
@@ -67,8 +67,8 @@
         {
           "sample": 5,
           "status": 200,
-          "headers_ms": 217,
-          "total_ms": 219,
+          "headers_ms": 251,
+          "total_ms": 253,
           "server_timing": {},
           "summary": {
             "mode": "testnet",
@@ -80,24 +80,24 @@
     },
     {
       "path": "/api/bounties",
-      "median_ms": 222,
-      "min_ms": 220,
-      "max_ms": 318,
+      "median_ms": 251,
+      "min_ms": 204,
+      "max_ms": 297,
       "successful_samples": 5,
       "samples": [
         {
           "sample": 1,
           "status": 200,
-          "headers_ms": 313,
-          "total_ms": 318,
+          "headers_ms": 291,
+          "total_ms": 297,
           "server_timing": {
-            "readmodel": 86.9
+            "readmodel": 73.6
           },
           "summary": {
             "mode": "testnet",
             "network": "testnet",
             "contract_id": "gitsettle-ac1b0f23f4.testnet",
-            "snapshot_age_ms": 132,
+            "snapshot_age_ms": 133,
             "bounty_count": 9,
             "bounty_statuses": {
               "Open": 8,
@@ -108,8 +108,8 @@
         {
           "sample": 2,
           "status": 200,
-          "headers_ms": 221,
-          "total_ms": 223,
+          "headers_ms": 202,
+          "total_ms": 204,
           "server_timing": {
             "readmodel": 0.1
           },
@@ -117,7 +117,7 @@
             "mode": "testnet",
             "network": "testnet",
             "contract_id": "gitsettle-ac1b0f23f4.testnet",
-            "snapshot_age_ms": 1151,
+            "snapshot_age_ms": 994,
             "bounty_count": 9,
             "bounty_statuses": {
               "Open": 8,
@@ -128,8 +128,8 @@
         {
           "sample": 3,
           "status": 200,
-          "headers_ms": 219,
-          "total_ms": 222,
+          "headers_ms": 220,
+          "total_ms": 223,
           "server_timing": {
             "readmodel": 0.1
           },
@@ -137,7 +137,7 @@
             "mode": "testnet",
             "network": "testnet",
             "contract_id": "gitsettle-ac1b0f23f4.testnet",
-            "snapshot_age_ms": 2053,
+            "snapshot_age_ms": 1865,
             "bounty_count": 9,
             "bounty_statuses": {
               "Open": 8,
@@ -148,8 +148,8 @@
         {
           "sample": 4,
           "status": 200,
-          "headers_ms": 219,
-          "total_ms": 221,
+          "headers_ms": 261,
+          "total_ms": 262,
           "server_timing": {
             "readmodel": 0.1
           },
@@ -157,7 +157,7 @@
             "mode": "testnet",
             "network": "testnet",
             "contract_id": "gitsettle-ac1b0f23f4.testnet",
-            "snapshot_age_ms": 2938,
+            "snapshot_age_ms": 2853,
             "bounty_count": 9,
             "bounty_statuses": {
               "Open": 8,
@@ -168,16 +168,16 @@
         {
           "sample": 5,
           "status": 200,
-          "headers_ms": 217,
-          "total_ms": 220,
+          "headers_ms": 250,
+          "total_ms": 251,
           "server_timing": {
-            "readmodel": 0.1
+            "readmodel": 0.2
           },
           "summary": {
             "mode": "testnet",
             "network": "testnet",
             "contract_id": "gitsettle-ac1b0f23f4.testnet",
-            "snapshot_age_ms": 3817,
+            "snapshot_age_ms": 3889,
             "bounty_count": 9,
             "bounty_statuses": {
               "Open": 8,
@@ -189,24 +189,24 @@
     },
     {
       "path": "/api/bounties/8",
-      "median_ms": 221,
-      "min_ms": 221,
-      "max_ms": 282,
+      "median_ms": 233,
+      "min_ms": 206,
+      "max_ms": 265,
       "successful_samples": 5,
       "samples": [
         {
           "sample": 1,
           "status": 200,
-          "headers_ms": 278,
-          "total_ms": 282,
+          "headers_ms": 224,
+          "total_ms": 227,
           "server_timing": {
-            "readmodel": 54.2
+            "readmodel": 17.8
           },
           "summary": {
             "mode": "testnet",
             "network": "testnet",
             "contract_id": "gitsettle-ac1b0f23f4.testnet",
-            "snapshot_age_ms": 128,
+            "snapshot_age_ms": 118,
             "bounty_id": 8,
             "bounty_status": "Released"
           }
@@ -214,8 +214,8 @@
         {
           "sample": 2,
           "status": 200,
-          "headers_ms": 225,
-          "total_ms": 228,
+          "headers_ms": 205,
+          "total_ms": 206,
           "server_timing": {
             "readmodel": 0.1
           },
@@ -223,7 +223,7 @@
             "mode": "testnet",
             "network": "testnet",
             "contract_id": "gitsettle-ac1b0f23f4.testnet",
-            "snapshot_age_ms": 1093,
+            "snapshot_age_ms": 957,
             "bounty_id": 8,
             "bounty_status": "Released"
           }
@@ -231,8 +231,8 @@
         {
           "sample": 3,
           "status": 200,
-          "headers_ms": 219,
-          "total_ms": 221,
+          "headers_ms": 231,
+          "total_ms": 233,
           "server_timing": {
             "readmodel": 0.1
           },
@@ -240,7 +240,7 @@
             "mode": "testnet",
             "network": "testnet",
             "contract_id": "gitsettle-ac1b0f23f4.testnet",
-            "snapshot_age_ms": 1988,
+            "snapshot_age_ms": 1855,
             "bounty_id": 8,
             "bounty_status": "Released"
           }
@@ -248,8 +248,8 @@
         {
           "sample": 4,
           "status": 200,
-          "headers_ms": 219,
-          "total_ms": 221,
+          "headers_ms": 263,
+          "total_ms": 265,
           "server_timing": {
             "readmodel": 0.1
           },
@@ -257,7 +257,7 @@
             "mode": "testnet",
             "network": "testnet",
             "contract_id": "gitsettle-ac1b0f23f4.testnet",
-            "snapshot_age_ms": 2872,
+            "snapshot_age_ms": 2875,
             "bounty_id": 8,
             "bounty_status": "Released"
           }
@@ -265,8 +265,8 @@
         {
           "sample": 5,
           "status": 200,
-          "headers_ms": 218,
-          "total_ms": 221,
+          "headers_ms": 233,
+          "total_ms": 236,
           "server_timing": {
             "readmodel": 0.1
           },
@@ -274,7 +274,7 @@
             "mode": "testnet",
             "network": "testnet",
             "contract_id": "gitsettle-ac1b0f23f4.testnet",
-            "snapshot_age_ms": 3752,
+            "snapshot_age_ms": 3882,
             "bounty_id": 8,
             "bounty_status": "Released"
           }
@@ -284,47 +284,31 @@
     {
       "path": "/api/leaderboard",
       "median_ms": 225,
-      "min_ms": 220,
-      "max_ms": 285,
+      "min_ms": 210,
+      "max_ms": 267,
       "successful_samples": 5,
       "samples": [
         {
           "sample": 1,
           "status": 200,
-          "headers_ms": 282,
-          "total_ms": 285,
+          "headers_ms": 223,
+          "total_ms": 225,
           "server_timing": {
-            "readmodel": 54.5
+            "readmodel": 16.8
           },
           "summary": {
             "mode": "testnet",
             "network": "testnet",
             "contract_id": "gitsettle-ac1b0f23f4.testnet",
-            "snapshot_age_ms": 128,
+            "snapshot_age_ms": 117,
             "contributor_count": 1
           }
         },
         {
           "sample": 2,
           "status": 200,
-          "headers_ms": 218,
-          "total_ms": 226,
-          "server_timing": {
-            "readmodel": 0
-          },
-          "summary": {
-            "mode": "testnet",
-            "network": "testnet",
-            "contract_id": "gitsettle-ac1b0f23f4.testnet",
-            "snapshot_age_ms": 1035,
-            "contributor_count": 1
-          }
-        },
-        {
-          "sample": 3,
-          "status": 200,
-          "headers_ms": 220,
-          "total_ms": 222,
+          "headers_ms": 213,
+          "total_ms": 214,
           "server_timing": {
             "readmodel": 0.1
           },
@@ -332,43 +316,60 @@
             "mode": "testnet",
             "network": "testnet",
             "contract_id": "gitsettle-ac1b0f23f4.testnet",
-            "snapshot_age_ms": 1925,
+            "snapshot_age_ms": 946,
+            "contributor_count": 1
+          }
+        },
+        {
+          "sample": 3,
+          "status": 200,
+          "headers_ms": 240,
+          "total_ms": 241,
+          "server_timing": {
+            "readmodel": 0.1
+          },
+          "summary": {
+            "mode": "testnet",
+            "network": "testnet",
+            "contract_id": "gitsettle-ac1b0f23f4.testnet",
+            "snapshot_age_ms": 1871,
             "contributor_count": 1
           }
         },
         {
           "sample": 4,
           "status": 200,
-          "headers_ms": 218,
-          "total_ms": 220,
+          "headers_ms": 265,
+          "total_ms": 267,
           "server_timing": {
-            "readmodel": 0
+            "readmodel": 0.1
           },
           "summary": {
             "mode": "testnet",
             "network": "testnet",
             "contract_id": "gitsettle-ac1b0f23f4.testnet",
-            "snapshot_age_ms": 2808,
+            "snapshot_age_ms": 2917,
             "contributor_count": 1
           }
         },
         {
           "sample": 5,
           "status": 200,
-          "headers_ms": 216,
-          "total_ms": 225,
+          "headers_ms": 208,
+          "total_ms": 210,
           "server_timing": {
-            "readmodel": 0
+            "readmodel": 0.1
           },
           "summary": {
             "mode": "testnet",
             "network": "testnet",
             "contract_id": "gitsettle-ac1b0f23f4.testnet",
-            "snapshot_age_ms": 3692,
+            "snapshot_age_ms": 3867,
             "contributor_count": 1
           }
         }
       ]
     }
-  ]
+  ],
+  "source_revision": "a63ff25c6d69733ce253da15546c22b3142150c2"
 }

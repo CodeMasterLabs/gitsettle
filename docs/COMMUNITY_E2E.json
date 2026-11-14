@@ -1,16 +1,16 @@
 {
   "version": 1,
-  "completed_at": "2026-11-14T13:29:23.954Z",
+  "completed_at": "2026-11-14T16:21:14.565Z",
   "target_origin": "https://gitsettle.89.167.109.196.sslip.io",
   "network": "testnet",
   "contract_id": "gitsettle-ac1b0f23f4.testnet",
   "creator_account": "contributor.gitsettle-ac1b0f23f4.testnet",
   "unrelated_account": "verifier.gitsettle-ac1b0f23f4.testnet",
   "finalized_key_blocks": {
-    "contributor": 277663121,
-    "verifier": 277663127
+    "contributor": 277680876,
+    "verifier": 277680877
   },
-  "ticket_id": "444bf1d5-ced3-4d6c-a8f8-7e55f929e4cb",
+  "ticket_id": "930df7ad-556a-4a4d-840b-84d716b7977a",
   "final_ticket_status": "resolved",
   "authorized_message_count": 2,
   "checks": {

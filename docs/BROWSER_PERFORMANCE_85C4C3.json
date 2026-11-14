@@ -1,0 +1,10 @@
+{
+  "measured_at": "2026-11-14T13:32:24.805Z",
+  "source_revision": "85c4c3bab27f37d1fce19d5987d2f8913e88a42c",
+  "origin": "https://gitsettle.89.167.109.196.sslip.io",
+  "method": "Fresh local Chromium profile; first visible bounty row, then resource totals after network idle. Single diagnostic observation, not a load-test percentile.",
+  "first_bounty_row_ms": 3092,
+  "script_requests": 16,
+  "script_transfer_bytes": 199312,
+  "script_decoded_bytes": 638666
+}
