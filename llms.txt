@@ -28,7 +28,8 @@
 - [DEPLOYMENT.json](https://raw.githubusercontent.com/CodeMasterLabs/gitsettle/main/docs/DEPLOYMENT.json): contract deployment/configuration evidence.
 - [COMMUNITY_E2E.json](https://raw.githubusercontent.com/CodeMasterLabs/gitsettle/main/docs/COMMUNITY_E2E.json): actual finalized-key NEP-413 authentication, replay/CSRF controls, ticket ACLs, replies, resolution and logout; no NEAR payment was sent by this support check.
 - [CLI_E2E.json](https://raw.githubusercontent.com/CodeMasterLabs/gitsettle/main/docs/CLI_E2E.json): real read-only CLI checks, separated from mutation fixtures.
-- [CI run 43619439586](https://github.com/CodeMasterLabs/gitsettle/actions/runs/43619439586): contract, application and clean-container jobs passed on the recorded runtime source.
+- [Final verification report](https://github.com/CodeMasterLabs/gitsettle/blob/main/docs/FINAL_VERIFICATION.md) and [machine-readable results](https://raw.githubusercontent.com/CodeMasterLabs/gitsettle/main/docs/FINAL_VERIFICATION.json): fresh GitHub/CI/runtime/claims audit, finalized payout receipts, 42 live route checks and 11 interaction checks; limitations stated explicitly.
+- [CI run 43627688560](https://github.com/CodeMasterLabs/gitsettle/actions/runs/43627688560): contract, application and clean-container jobs passed on audited GitHub commit 5b3b1146d13c63d78db10f03d5a7619edb0fbc74; application code is identical to the deployed runtime source.
 - [Public config JSON](https://gitsettle.89.167.109.196.sslip.io/api/config): identifies live/demo mode, network and contract. Health alone establishes database readiness, not settlement correctness.
 - [Paid bounty JSON](https://gitsettle.89.167.109.196.sslip.io/api/bounties/8) and [leaderboard JSON](https://gitsettle.89.167.109.196.sslip.io/api/leaderboard): credential-free public reads. Site display reads may use a short cache; CLI reads default to finalized RPC.
 

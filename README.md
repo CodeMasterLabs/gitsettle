@@ -59,7 +59,7 @@
 | 3 | Follow [issue #9](https://github.com/CodeMasterLabs/gitsettle/issues/9) and [merged PR #10](https://github.com/CodeMasterLabs/gitsettle/pull/10). | The actual issue reference, bounty/account marker and changed `locales/es/contributing.md` file. |
 | 4 | Open the [release transaction](https://testnet.nearblocks.io/txns/Fe2qi4XGHsd5CvGZMdWq9Tr53MGg5WXyoce12ZnRyyCC) and [payout evidence](docs/LIVE_E2E.json). | Finalized transfer evidence and the exact **0.05 NEAR** contributor balance increase. |
 | 5 | Open the [contributor profile](https://gitsettle.89.167.109.196.sslip.io/contributors/contributor.gitsettle-ac1b0f23f4.testnet) and [leaderboard](https://gitsettle.89.167.109.196.sslip.io/leaderboard). | **100 points**, **0.05 NEAR earned**, and one paid contribution from the recorded run. |
-| 6 | Browse [posting](https://gitsettle.89.167.109.196.sslip.io/bounties/new) and [support](https://gitsettle.89.167.109.196.sslip.io/support), then inspect [CI](https://github.com/CodeMasterLabs/gitsettle/actions/runs/43619439586). | Escrow review and support entry points; mutation and private-session actions require a wallet. CI records the reproducible test/build/container layers. |
+| 6 | Browse [posting](https://gitsettle.89.167.109.196.sslip.io/bounties/new) and [support](https://gitsettle.89.167.109.196.sslip.io/support), then inspect [CI](https://github.com/CodeMasterLabs/gitsettle/actions/runs/43627688560). | Escrow review and support entry points; mutation and private-session actions require a wallet. CI records the reproducible test/build/container layers. |
 
 If the hosted app is unavailable, use the [local demo](#quick-start), [live screenshots](docs/UI_REVIEW.md#final-public-deployment-captures), and recorded chain/GitHub evidence. [DEMO.md](DEMO.md) includes the presentation script and instructions for reproducing a fresh payout.
 
@@ -144,16 +144,16 @@ NEAR is authoritative for funds and reputation; SQLite stores off-chain metadata
 
 ## Verification and evidence
 
-**Verified November 14, 2026.** [CI run 43619439586](https://github.com/CodeMasterLabs/gitsettle/actions/runs/43619439586) passed on deployed application source `5c8dc527b3d6d29f6773ff6ac402c5886083f512`.
+**Verified November 14, 2026.** [Final claims and live verification](docs/FINAL_VERIFICATION.md) confirms the documented testnet capabilities and records remaining limits. [CI run 43627688560](https://github.com/CodeMasterLabs/gitsettle/actions/runs/43627688560) passed on audited GitHub source `5b3b1146d13c63d78db10f03d5a7619edb0fbc74`, with identical runtime code to deployed `5c8dc527b3d6d29f6773ff6ac402c5886083f512`.
 
 | Claim | Evidence | What it establishes |
 | --- | --- | --- |
 | Real GitHub → NEAR settlement | [LIVE_E2E.json](docs/LIVE_E2E.json), [issue #9](https://github.com/CodeMasterLabs/gitsettle/issues/9), [PR #10](https://github.com/CodeMasterLabs/gitsettle/pull/10), [release receipt](https://testnet.nearblocks.io/txns/Fe2qi4XGHsd5CvGZMdWq9Tr53MGg5WXyoce12ZnRyyCC) | Automatic verifier release, exact balance increase, points and leaderboard updates. |
-| Contract behavior | [41 Rust tests in CI](https://github.com/CodeMasterLabs/gitsettle/actions/runs/43619439586), [contract tests](contracts/gitsettle/src/lib.rs) | State/access-control checks and transfer recovery; separate live evidence covers the deployed flow. |
-| Application and adversarial checks | [182 Node tests in CI](https://github.com/CodeMasterLabs/gitsettle/actions/runs/43619439586) | Exact currency, GitHub policy, wallet-return races, support access controls and CLI fixtures. |
-| Browser layouts and accessibility | [146 passed, 1 skipped](https://github.com/CodeMasterLabs/gitsettle/actions/runs/43619439586), [UI review](docs/UI_REVIEW.md) | Main screens and relevant WCAG checks; actual light/dark toggles checked at nine additional sizes. |
+| Contract behavior | [41 Rust tests in CI](https://github.com/CodeMasterLabs/gitsettle/actions/runs/43627688560), [contract tests](contracts/gitsettle/src/lib.rs) | State/access-control checks and transfer recovery; separate live evidence covers the deployed flow. |
+| Application and adversarial checks | [182 Node tests in CI](https://github.com/CodeMasterLabs/gitsettle/actions/runs/43627688560) | Exact currency, GitHub policy, wallet-return races, support access controls and CLI fixtures. |
+| Browser layouts and accessibility | [146 passed, 1 skipped](https://github.com/CodeMasterLabs/gitsettle/actions/runs/43627688560), [UI review](docs/UI_REVIEW.md) | Main screens and relevant WCAG checks; actual light/dark toggles checked at nine additional sizes. |
 | Real support authentication | [COMMUNITY_E2E.json](docs/COMMUNITY_E2E.json) | Finalized-key NEP-413 signatures, replay/CSRF checks, ticket isolation, replies, resolution and logout. |
-| CLI reads and Docker startup | [CLI_E2E.json](docs/CLI_E2E.json), [Docker verification](docs/DOCKER_VERIFICATION.md), [CI](https://github.com/CodeMasterLabs/gitsettle/actions/runs/43619439586) | Read-only CLI against testnet and clean-checkout container startup. |
+| CLI reads and Docker startup | [CLI_E2E.json](docs/CLI_E2E.json), [Docker verification](docs/DOCKER_VERIFICATION.md), [CI](https://github.com/CodeMasterLabs/gitsettle/actions/runs/43627688560) | Read-only CLI against testnet and clean-checkout container startup. |
 
 [STATUS.md](STATUS.md) records runtime revisions and verification history. Local demo data, browser response fixtures and AI/provider fixtures are labeled; they are not evidence of real wallet approvals, paid AI calls or payouts.
 

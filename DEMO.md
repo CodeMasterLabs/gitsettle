@@ -12,7 +12,7 @@ Public app: https://gitsettle.89.167.109.196.sslip.io. On November 14, 2026 at 0
 
 - Issue [#9](https://github.com/CodeMasterLabs/gitsettle/issues/9), merged Spanish guide [PR #10](https://github.com/CodeMasterLabs/gitsettle/pull/10), file `locales/es/contributing.md`.
 - [Release transaction](https://testnet.nearblocks.io/txns/Fe2qi4XGHsd5CvGZMdWq9Tr53MGg5WXyoce12ZnRyyCC): **0.05 NEAR** exact contributor balance increase, **100 points**, one paid contribution, leaderboard updated.
-- Full transaction hashes, balance/profile baselines and final values: [docs/LIVE_E2E.json](docs/LIVE_E2E.json). GitHub API 2026 omits the merge SHA; the verifier independently confirmed merge with HTTP 204 and records the absent SHA honestly.
+- Full transaction hashes, balance/profile baselines and final values: [docs/LIVE_E2E.json](docs/LIVE_E2E.json). During the recorded payout, the PR response requested with GitHub REST version `2026-03-10` omitted the merge SHA. The verifier independently confirmed merge with HTTP 204; historical evidence preserves that observed null even though the default API response can return the same PR's merge SHA.
 
 The existing bounty is already paid. For a new live recording, create a fresh issue/bounty/PR with a separate script journal; do not replay the paid bounty or describe a recorded result as a new payment. A walkthrough can show the recorded issue, PR, on-chain transaction and final profile without spending more tokens.
 

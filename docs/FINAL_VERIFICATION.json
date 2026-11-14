@@ -1,0 +1,635 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-11-14T18:50:37.796Z",
+  "repository": "https://github.com/CodeMasterLabs/gitsettle",
+  "report": "docs/FINAL_VERIFICATION.md",
+  "scope": "Functional and claims verification of the documented testnet MVP. No guarantee of all external providers or future conditions.",
+  "auditedGitHubCommit": "5b3b1146d13c63d78db10f03d5a7619edb0fbc74",
+  "deployedApplicationCommit": "5c8dc527b3d6d29f6773ff6ac402c5886083f512",
+  "runtimeCodeEquivalent": true,
+  "ci": {
+    "url": "https://github.com/CodeMasterLabs/gitsettle/actions/runs/43627688560",
+    "headSha": "5b3b1146d13c63d78db10f03d5a7619edb0fbc74",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "name": "application",
+        "conclusion": "success",
+        "url": "https://github.com/CodeMasterLabs/gitsettle/actions/runs/43627688560/job/132547152761"
+      },
+      {
+        "name": "contract",
+        "conclusion": "success",
+        "url": "https://github.com/CodeMasterLabs/gitsettle/actions/runs/43627688560/job/132547153004"
+      },
+      {
+        "name": "containers",
+        "conclusion": "success",
+        "url": "https://github.com/CodeMasterLabs/gitsettle/actions/runs/43627688560/job/132547856929"
+      }
+    ],
+    "testCounts": {
+      "rustPassed": 41,
+      "nodePassed": 182,
+      "browserPassed": 146,
+      "browserIntentionallySkipped": 1,
+      "browserFailed": 0
+    },
+    "checks": [
+      "TypeScript",
+      "production build",
+      "Rust fmt and Clippy",
+      "locked Wasm build",
+      "clean-checkout Docker with empty volume and credential isolation"
+    ]
+  },
+  "infrastructure": {
+    "verifiedAt": "2026-11-14T18:39:55.898998+00:00",
+    "checkoutClean": true,
+    "services": {
+      "verifier": {
+        "imageId": "sha256:6739f4f6407dc3b99a1f5bdf2b7a285bcba1d2fd219f90ae5ef55e779a807bb4",
+        "status": "running",
+        "health": null,
+        "startedAt": "2026-11-14T17:10:00.889975043Z",
+        "restartCount": 0,
+        "user": "1000:1000",
+        "readOnly": true,
+        "capDrop": [
+          "ALL"
+        ],
+        "securityOptions": [
+          "no-new-privileges:true"
+        ],
+        "portBindings": {},
+        "dataMounts": [
+          {
+            "source": "/opt/gitsettle/data",
+            "destination": "/data"
+          }
+        ]
+      },
+      "web": {
+        "imageId": "sha256:6739f4f6407dc3b99a1f5bdf2b7a285bcba1d2fd219f90ae5ef55e779a807bb4",
+        "status": "running",
+        "health": "healthy",
+        "startedAt": "2026-11-14T17:09:55.265086612Z",
+        "restartCount": 0,
+        "user": "1000:1000",
+        "readOnly": true,
+        "capDrop": [
+          "ALL"
+        ],
+        "securityOptions": [
+          "no-new-privileges:true"
+        ],
+        "portBindings": {
+          "3000/tcp": [
+            {
+              "HostIp": "127.0.0.1",
+              "HostPort": "3000"
+            }
+          ]
+        },
+        "dataMounts": [
+          {
+            "source": "/opt/gitsettle/data",
+            "destination": "/data"
+          }
+        ]
+      }
+    },
+    "runtimeFiles": {
+      "apps/web/src/app/globals.css": {
+        "sourceSha256": "05327ca24376dfc2422700af513a38cf5c4ebcf115844a34bdcc8e1d7799cb78",
+        "imageSha256": "05327ca24376dfc2422700af513a38cf5c4ebcf115844a34bdcc8e1d7799cb78",
+        "matches": true
+      },
+      "apps/web/src/components/shell.tsx": {
+        "sourceSha256": "9eb5904a29dc753f19eb611e1d0e33d04516f6da8aa44be385e77c4fec670f39",
+        "imageSha256": "9eb5904a29dc753f19eb611e1d0e33d04516f6da8aa44be385e77c4fec670f39",
+        "matches": true
+      },
+      "apps/web/src/components/wallet-provider.tsx": {
+        "sourceSha256": "b5b851eb623cd45952dafb12dc8e4b594027aa491943db5049b7f1c4bf8044ab",
+        "imageSha256": "b5b851eb623cd45952dafb12dc8e4b594027aa491943db5049b7f1c4bf8044ab",
+        "matches": true
+      },
+      "apps/web/src/components/wallet-bridge.ts": {
+        "sourceSha256": "efa7d69db98f15f3581e3879d2dbf9b26ee6a5be0aa9fcb5f54353c85414c5a3",
+        "imageSha256": "efa7d69db98f15f3581e3879d2dbf9b26ee6a5be0aa9fcb5f54353c85414c5a3",
+        "matches": true
+      },
+      "apps/web/src/lib/wallet-manifest.json": {
+        "sourceSha256": "b983c8a20f3e9eda98dff3e5efdc626ba55b7bd7d67f37a858f5730e5946cd89",
+        "imageSha256": "b983c8a20f3e9eda98dff3e5efdc626ba55b7bd7d67f37a858f5730e5946cd89",
+        "matches": true
+      }
+    },
+    "webCredentialIsolation": true
+  },
+  "contract": {
+    "id": "gitsettle-ac1b0f23f4.testnet",
+    "network": "testnet",
+    "finality": "final",
+    "rpc": "https://test.rpc.fastnear.com",
+    "code": {
+      "codeHash": "ACUeqjcgpFDuXvE1hnKnvijhtZvycdjaG6VVt6haaMLa",
+      "viewCodeHash": "ACUeqjcgpFDuXvE1hnKnvijhtZvycdjaG6VVt6haaMLa",
+      "wasmSha256": "88a9d6824ff7b09f107bf7682dea477bd1352dbdb11ab5520abd8cae56170137",
+      "expectedWasmSha256": "88a9d6824ff7b09f107bf7682dea477bd1352dbdb11ab5520abd8cae56170137",
+      "matchesPublishedArtifact": true,
+      "wasmBytes": 418067,
+      "accountBlockHeight": 277695571,
+      "codeBlockHeight": 277695571,
+      "deployedCodeHashesAgree": true,
+      "localArtifactSha256": "88a9d6824ff7b09f107bf7682dea477bd1352dbdb11ab5520abd8cae56170137"
+    },
+    "bounty8": {
+      "id": 8,
+      "poster": "gitsettle-ac1b0f23f4.testnet",
+      "repo": "CodeMasterLabs/gitsettle",
+      "issue_url": "https://github.com/CodeMasterLabs/gitsettle/issues/9",
+      "bounty_type": "Translation",
+      "target_locale": "es",
+      "reward": "50000000000000000000000",
+      "deadline": 1794728342,
+      "status": "Released",
+      "claimant": "contributor.gitsettle-ac1b0f23f4.testnet",
+      "pr_url": "https://github.com/CodeMasterLabs/gitsettle/pull/10",
+      "created_at": 1794641956,
+      "submitted_at": 1794647135,
+      "settled_at": 1794647165,
+      "rejection_reason": null
+    },
+    "contributor": {
+      "account_id": "contributor.gitsettle-ac1b0f23f4.testnet",
+      "points": 100,
+      "merged_count": 1,
+      "total_earned": "50000000000000000000000"
+    },
+    "releaseReceipt": {
+      "transactionHash": "Fe2qi4XGHsd5CvGZMdWq9Tr53MGg5WXyoce12ZnRyyCC",
+      "executionStatus": "FINAL",
+      "successValueDecoded": "true",
+      "successfulReleaseCallback": true,
+      "matchesExpectedRelease": true,
+      "exactContributorTransferSucceeded": true
+    },
+    "successfulContributorTransfer": {
+      "receiverId": "contributor.gitsettle-ac1b0f23f4.testnet",
+      "depositYocto": "50000000000000000000000",
+      "receiptId": "Hvdyhen9ivSxmvAp8dnQPmeKHdSjSg2nYAKhaxQ12V49"
+    }
+  },
+  "github": {
+    "verifiedAt": "2026-11-14T18:39:55.772598+00:00",
+    "repo": "CodeMasterLabs/gitsettle",
+    "pr": {
+      "url": "https://github.com/CodeMasterLabs/gitsettle/pull/10",
+      "state": "closed",
+      "merged": true,
+      "mergedAt": "2026-11-14T08:23:02Z",
+      "mergeCommitSha": "84610be07ae5056a5410272a33b13d8d39a9e3b4",
+      "author": "CodeMasterLabs",
+      "baseRepository": "CodeMasterLabs/gitsettle",
+      "baseBranch": "main",
+      "changedFiles": 2,
+      "referencesIssue9": true,
+      "hasExactClaimantMarker": true
+    },
+    "files": [
+      {
+        "filename": "README.md",
+        "status": "modified",
+        "additions": 2,
+        "deletions": 0
+      },
+      {
+        "filename": "locales/es/contributing.md",
+        "status": "added",
+        "additions": 40,
+        "deletions": 0
+      }
+    ],
+    "independentMergeEndpoint": {
+      "commandExitCode": 0,
+      "successful": true
+    },
+    "writesPerformed": false,
+    "limits": [
+      "Pull-request body examined ephemerally for exact issue and claimant markers; not persisted."
+    ]
+  },
+  "githubApiVersionComparison": {
+    "checked_at": "2026-11-14T18:49:01.514736+00:00",
+    "pr_url": "https://github.com/CodeMasterLabs/gitsettle/pull/10",
+    "configured": {
+      "header": "X-GitHub-Api-Version: 2026-03-10",
+      "has_merge_commit_sha": false,
+      "merged": true,
+      "merged_at": "2026-11-14T08:23:02Z",
+      "changed_files": 2
+    },
+    "default": {
+      "client": "gh api without an API-version override",
+      "merge_commit_sha": "84610be07ae5056a5410272a33b13d8d39a9e3b4",
+      "merged": true,
+      "merged_at": "2026-11-14T08:23:02Z",
+      "changed_files": 2
+    },
+    "historical_evidence_changed": false,
+    "near_transactions_sent": 0
+  },
+  "liveBrowser": {
+    "origin": "https://gitsettle.89.167.109.196.sslip.io",
+    "startedAt": "2026-11-14T18:48:36.931Z",
+    "completedAt": "2026-11-14T18:50:37.796Z",
+    "routeChecks": [
+      {
+        "path": "/",
+        "label": "1440x960-dark",
+        "passed": true
+      },
+      {
+        "path": "/bounties/8",
+        "label": "1440x960-dark",
+        "passed": true
+      },
+      {
+        "path": "/bounties/new",
+        "label": "1440x960-dark",
+        "passed": true
+      },
+      {
+        "path": "/leaderboard",
+        "label": "1440x960-dark",
+        "passed": true
+      },
+      {
+        "path": "/contributors/contributor.gitsettle-ac1b0f23f4.testnet",
+        "label": "1440x960-dark",
+        "passed": true
+      },
+      {
+        "path": "/dashboard",
+        "label": "1440x960-dark",
+        "passed": true
+      },
+      {
+        "path": "/support",
+        "label": "1440x960-dark",
+        "passed": true
+      },
+      {
+        "path": "/",
+        "label": "1440x960-light",
+        "passed": true
+      },
+      {
+        "path": "/bounties/8",
+        "label": "1440x960-light",
+        "passed": true
+      },
+      {
+        "path": "/bounties/new",
+        "label": "1440x960-light",
+        "passed": true
+      },
+      {
+        "path": "/leaderboard",
+        "label": "1440x960-light",
+        "passed": true
+      },
+      {
+        "path": "/contributors/contributor.gitsettle-ac1b0f23f4.testnet",
+        "label": "1440x960-light",
+        "passed": true
+      },
+      {
+        "path": "/dashboard",
+        "label": "1440x960-light",
+        "passed": true
+      },
+      {
+        "path": "/support",
+        "label": "1440x960-light",
+        "passed": true
+      },
+      {
+        "path": "/",
+        "label": "375x812-dark",
+        "passed": true
+      },
+      {
+        "path": "/bounties/8",
+        "label": "375x812-dark",
+        "passed": true
+      },
+      {
+        "path": "/bounties/new",
+        "label": "375x812-dark",
+        "passed": true
+      },
+      {
+        "path": "/leaderboard",
+        "label": "375x812-dark",
+        "passed": true
+      },
+      {
+        "path": "/contributors/contributor.gitsettle-ac1b0f23f4.testnet",
+        "label": "375x812-dark",
+        "passed": true
+      },
+      {
+        "path": "/dashboard",
+        "label": "375x812-dark",
+        "passed": true
+      },
+      {
+        "path": "/support",
+        "label": "375x812-dark",
+        "passed": true
+      },
+      {
+        "path": "/",
+        "label": "320x640-light",
+        "passed": true
+      },
+      {
+        "path": "/bounties/8",
+        "label": "320x640-light",
+        "passed": true
+      },
+      {
+        "path": "/bounties/new",
+        "label": "320x640-light",
+        "passed": true
+      },
+      {
+        "path": "/leaderboard",
+        "label": "320x640-light",
+        "passed": true
+      },
+      {
+        "path": "/contributors/contributor.gitsettle-ac1b0f23f4.testnet",
+        "label": "320x640-light",
+        "passed": true
+      },
+      {
+        "path": "/dashboard",
+        "label": "320x640-light",
+        "passed": true
+      },
+      {
+        "path": "/support",
+        "label": "320x640-light",
+        "passed": true
+      },
+      {
+        "path": "/",
+        "label": "1280x720-light",
+        "passed": true
+      },
+      {
+        "path": "/bounties/8",
+        "label": "1280x720-light",
+        "passed": true
+      },
+      {
+        "path": "/bounties/new",
+        "label": "1280x720-light",
+        "passed": true
+      },
+      {
+        "path": "/leaderboard",
+        "label": "1280x720-light",
+        "passed": true
+      },
+      {
+        "path": "/contributors/contributor.gitsettle-ac1b0f23f4.testnet",
+        "label": "1280x720-light",
+        "passed": true
+      },
+      {
+        "path": "/dashboard",
+        "label": "1280x720-light",
+        "passed": true
+      },
+      {
+        "path": "/support",
+        "label": "1280x720-light",
+        "passed": true
+      },
+      {
+        "path": "/",
+        "label": "1024x600-light",
+        "passed": true
+      },
+      {
+        "path": "/bounties/8",
+        "label": "1024x600-light",
+        "passed": true
+      },
+      {
+        "path": "/bounties/new",
+        "label": "1024x600-light",
+        "passed": true
+      },
+      {
+        "path": "/leaderboard",
+        "label": "1024x600-light",
+        "passed": true
+      },
+      {
+        "path": "/contributors/contributor.gitsettle-ac1b0f23f4.testnet",
+        "label": "1024x600-light",
+        "passed": true
+      },
+      {
+        "path": "/dashboard",
+        "label": "1024x600-light",
+        "passed": true
+      },
+      {
+        "path": "/support",
+        "label": "1024x600-light",
+        "passed": true
+      }
+    ],
+    "interactionChecks": [
+      {
+        "name": "filters-1440",
+        "passed": true,
+        "rows": 9,
+        "translationRows": 4
+      },
+      {
+        "name": "shortcuts-1440",
+        "passed": true
+      },
+      {
+        "name": "sorting-1440",
+        "passed": true
+      },
+      {
+        "name": "global-search",
+        "passed": true
+      },
+      {
+        "name": "wallet-picker-1440",
+        "passed": true,
+        "providers": [
+          "MyNearWallet",
+          "Meteor Wallet",
+          "Intear Wallet",
+          "Nightly"
+        ],
+        "accountsConnected": 0,
+        "signaturesRequested": 0
+      },
+      {
+        "name": "filters-375",
+        "passed": true,
+        "rows": 9,
+        "translationRows": 4
+      },
+      {
+        "name": "shortcuts-375",
+        "passed": true
+      },
+      {
+        "name": "sorting-375",
+        "passed": true
+      },
+      {
+        "name": "wallet-picker-375",
+        "passed": true,
+        "providers": [
+          "MyNearWallet",
+          "Meteor Wallet",
+          "Intear Wallet",
+          "Nightly"
+        ],
+        "accountsConnected": 0,
+        "signaturesRequested": 0
+      },
+      {
+        "name": "support-ready-1024",
+        "passed": true,
+        "privateSession": "signed_out",
+        "aiConfigured": false
+      },
+      {
+        "name": "support-ready-320",
+        "passed": true,
+        "privateSession": "signed_out",
+        "aiConfigured": false
+      }
+    ],
+    "publicBoard": {
+      "count": 9,
+      "open": 8
+    },
+    "runtimeErrors": [],
+    "transportFailures": [],
+    "passed": true
+  },
+  "onboardingLinks": {
+    "auditedCommit": "5b3b1146d13c63d78db10f03d5a7619edb0fbc74",
+    "summary": {
+      "http_targets": 79,
+      "verified_http_targets": 76,
+      "http_failures": 3,
+      "local_targets": 45,
+      "local_anchors": 7,
+      "broken_local_targets_or_anchors": 0,
+      "published_anchor_failures": 0,
+      "content_validation_failures": 0,
+      "broken_documented_links": 0,
+      "externally_access_denied_documented_links": 2,
+      "optional_undocumented_probe_failures": 1,
+      "validated_local_images": 3,
+      "published_rendered_anchors": 7,
+      "published_rendered_anchor_failures": 0
+    },
+    "externalAccessDenied": [
+      {
+        "url": "https://testnet.nearblocks.io/address/gitsettle-ac1b0f23f4.testnet",
+        "status": 403,
+        "classification": "external_http_access_denied"
+      },
+      {
+        "url": "https://testnet.nearblocks.io/txns/Fe2qi4XGHsd5CvGZMdWq9Tr53MGg5WXyoce12ZnRyyCC",
+        "status": 403,
+        "classification": "external_http_access_denied"
+      }
+    ],
+    "indexLocation": "https://raw.githubusercontent.com/CodeMasterLabs/gitsettle/main/llms.txt",
+    "note": "Additional app /llms.txt probe returned 404; it is not a documented index URL.",
+    "finalDocumentationReferences": {
+      "checked": 125,
+      "broken": 0,
+      "scope": [
+        "README.md",
+        "DEMO.md",
+        "STATUS.md",
+        "llms.txt",
+        "docs/AGENTGUARD.md",
+        "docs/API_SOURCES.md",
+        "docs/UI_REVIEW.md",
+        "docs/FINAL_VERIFICATION.md"
+      ]
+    }
+  },
+  "dependencyAudit": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 12,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 12
+    },
+    "advisory": "GHSA-848j-6mx2-7j84",
+    "standaloneExecutorsFullyCovered": false
+  },
+  "checks": {
+    "sourceRuntimeEquivalent": true,
+    "vpsCheckoutClean": true,
+    "webHealthy": true,
+    "servicesRunningWithoutRestarts": true,
+    "runtimeSourceHashesMatch": true,
+    "webCredentialIsolation": true,
+    "cliReadsSucceeded": true,
+    "bounty8Released": true,
+    "profileReputationCorrect": true,
+    "mergedPrAndTranslationEvidence": true,
+    "liveContractCodeMatchesPublishedArtifact": true,
+    "successfulFinalReleaseAndTransfer": true,
+    "freshCiPassedOnPublishedHead": true
+  },
+  "functionalVerificationPassed": true,
+  "materialClaimMismatchFound": false,
+  "documentationCorrections": [
+    "AgentGuard recipient and pay_to use the same account with distinct string formats.",
+    "Missing GitHub merge SHA is version-specific; historical payout observation preserved."
+  ],
+  "limits": [
+    "External wallet account approvals and signing not repeated across all four providers.",
+    "Hosted AI disabled; paid provider behavior not verified live.",
+    "Real support authentication and mutations rely on separately recorded HTTP evidence and fresh adversarial fixtures.",
+    "Nearblocks automated access blocked by Cloudflare; existing payout independently checked with finalized RPC.",
+    "Trusted verifier/poster, upgrade key, potentially indefinite Submitted lock and non-Sybil-resistant reputation remain disclosed.",
+    "External hackathon submission and X permalink not supplied or inspected."
+  ],
+  "auditActions": {
+    "nearTransactionsSent": 0,
+    "walletSignaturesRequested": 0,
+    "accountsOrBountiesCreated": 0,
+    "ticketsWritten": 0,
+    "productionConfigurationChanged": false,
+    "submissionSent": false,
+    "xPostSent": false
+  }
+}

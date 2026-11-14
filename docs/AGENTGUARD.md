@@ -19,7 +19,8 @@ nor routes funds through another contract.
    and changes the expected locale path when required.
 2. Finalized on-chain state must still describe that exact submission.
 3. The adapter builds a native-NEAR `SpendRequest` with `recipient=near:<claimant>`
-   and identical `pay_to`. Its deterministic purpose contains the bounty ID, not
+   and `pay_to=<claimant>` for the same recipient account. Its deterministic
+   purpose contains the bounty ID, not
    addresses. The raw GitHub PR body is supplied only as ephemeral risk context.
 4. Exact pinned upstream `assess()` and `scanContext()` run locally. GitSettle
    separately checks the exact integer reward against its configured cap.
