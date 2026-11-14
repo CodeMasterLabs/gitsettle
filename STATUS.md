@@ -2,7 +2,14 @@
 
 Updated: 2026-11-14. Canonical repository: https://github.com/CodeMasterLabs/gitsettle.
 
-## Full-viewport layout — deployed
+## Light-mode layout correction — deployed
+
+- Kept the appearance toggle and fixed the short-screen sidebar overflow visible in light mode. Desktop spacing compacts below 820 px of height, shorter screens scroll within the black sidebar, and navigation links keep their size. Footer copy stacks on mobile; the queue count stays above sorting rather than wrapping into a narrow column.
+- Runtime source: `5c8dc527b3d6d29f6773ff6ac402c5886083f512`, published and deployed from the clean public clone. Both services use `sha256:6739f4f6407dc3b99a1f5bdf2b7a285bcba1d2fd219f90ae5ef55e779a807bb4` with zero restarts; web is healthy. Existing environment, data, testnet contract and loopback binding were preserved.
+- Production build, TypeScript and 33 relevant local browser checks passed, including a new regression for actual appearance toggling, short-screen keyboard navigation and mobile text. Independent inspection passed 72 route/theme/viewport combinations across nine sizes from 320 × 640 to 1440 × 960, both locally and on public HTTPS. Seven live routes, the mobile queue, light-mode queue captures and provider picker were verified and refreshed in `docs/screenshots/live/`.
+- CI: [43619439586](https://github.com/CodeMasterLabs/gitsettle/actions/runs/43619439586) passed application, contract and clean-container jobs on this source: 182 Node, 41 Rust and 146 browser checks passed, with one intentional mobile global-search skip.
+
+## Earlier full-viewport layout — deployed
 
 - Removed the outer yellow canvas, page margins, maximum shell width and outer rounded corners. The application reaches all four viewport edges in both themes; mobile short pages use the full available height.
 - Runtime source: `09b644a6dff716df02886a1b42cb1b63159d138c`, published and deployed from the clean public clone. Both services use image `sha256:aef4ccc04c203647e02d7e6bfae978b60ab8dd0a1ad4cdd4f9b81fb53971d18c` with zero restarts; web health passed.
