@@ -1,14 +1,17 @@
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { recordVerification } from '@gitsettle/shared/db';
 import { GitHubClient } from './github.js';
 import { NearGateway } from './near.js';
 import { VerifierWorker } from './worker.js';
 
-// npm workspace scripts use the workspace as cwd; find the root env without requiring dotenv.
-for (const path of [resolve(process.cwd(), '../../.env'), resolve(process.cwd(), '.env')]) {
+// Normalize local SQLite against the repository, irrespective of npm's workspace cwd.
+const repositoryRoot = fileURLToPath(new URL('../../../', import.meta.url));
+for (const path of [resolve(repositoryRoot, '.env')]) {
   if (existsSync(path)) process.loadEnvFile(path);
 }
+process.env.DATABASE_PATH = resolve(repositoryRoot, process.env.DATABASE_PATH || 'data/gitsettle.sqlite');
 
 const once = process.argv.includes('--once');
 const dryRun = process.argv.includes('--dry-run');

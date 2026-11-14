@@ -3,7 +3,7 @@ import { drizzle } from 'drizzle-orm/better-sqlite3';
 import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
 import { and, desc, eq, lt } from 'drizzle-orm';
 import { mkdirSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { dirname } from 'node:path';
 import { publicConfig } from './near.ts';
 import type { Contributor, RankedContributor, VerificationRecord } from './types.ts';
 
@@ -22,7 +22,10 @@ let database: ReturnType<typeof drizzle> | undefined;
 /** Lazy connection keeps Next's build phase free of filesystem mutations. WAL supports two processes. */
 export function getDatabase() {
   if (!database) {
-    const file = resolve(process.env.DATABASE_PATH || 'data/gitsettle.sqlite');
+    // Entry points normalize local paths; Docker supplies an absolute /data path.
+    // Avoid build-time path resolution here: Next's file tracer must not treat the
+    // configured database directory as application source to bundle into an image.
+    const file = process.env.DATABASE_PATH || 'data/gitsettle.sqlite';
     mkdirSync(dirname(file), { recursive: true });
     const connection = new Database(file);
     connection.pragma('journal_mode = WAL');

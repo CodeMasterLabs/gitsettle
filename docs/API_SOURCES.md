@@ -115,13 +115,18 @@ For the PR object, verify `merged === true`, non-null `merged_at`, `base.repo.fu
 
 Recognized GitHub closing words are `close`, `closes`, `closed`, `fix`, `fixes`, `fixed`, `resolve`, `resolves`, `resolved`, case-insensitive with an optional colon. Same-repository references use `#123`; qualified references use `owner/repo#123`. GitSettle may also recognize a canonical issue URL. Match number boundaries so `#12` never matches `#123`, and repository boundaries so a qualified reference cannot accidentally match another repository.
 
-A claimant cannot prove ownership by merely submitting someone else's PR URL. Require an exact standalone PR-body line:
+A claimant cannot prove ownership by merely submitting someone else's PR URL. Require an exact standalone, visible PR-body line:
 
 ```text
 GitSettle: <contract_id>/<bounty_id>/<claimant_account_id>
 ```
 
 This binds the PR to this contract, bounty, and NEAR recipient. It is evidence under the trusted-oracle model, **not a cryptographic GitHub identity proof**: PR bodies can be edited by the PR author and authorized maintainers. The oracle does not determine translation quality or security correctness.
+
+The implemented closing reference starts a plain body line or an unordered list
+item. Comments, blockquotes and code examples do not supply evidence. A merge
+timestamp must be at or after on-chain bounty creation, preventing retroactive
+rebinding of a historical merge. An older open PR can still finish funded work.
 
 Translation validation scans the returned changed-file paths for an exact expected locale segment in an allowed i18n/localization directory (for example `locales/es/messages.json`, `src/i18n/bn/common.json`, `public/locales/ja/ui.json`). It rejects removed-only changes and substring matches such as locale `es` matching `es-MX`. GitHub files pages default to 30 and cap at **3000 files total**. Fetch with `per_page=100`, verify completeness against `changed_files`, and refuse automatic payout if incomplete/over cap. Use a bounded request timeout, rate-limit-aware retries and a maximum page count.
 

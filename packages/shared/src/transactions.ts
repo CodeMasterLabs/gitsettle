@@ -63,8 +63,8 @@ function canonicalJson(value: unknown): string {
 export function validConfirmationInput(value: unknown): value is ConfirmationInput {
   if (!value || typeof value !== 'object') return false;
   const input = value as ConfirmationInput;
-  return typeof input.txHash === 'string' && /^[1-9A-HJ-NP-Za-km-z]{43,44}$/.test(input.txHash)
-    && typeof input.accountId === 'string' && input.accountId.length <= 64 && /^[a-z0-9._-]+$/.test(input.accountId)
+  return typeof input.txHash === 'string' && /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(input.txHash)
+    && typeof input.accountId === 'string' && input.accountId.length >= 2 && input.accountId.length <= 64 && /^[a-z0-9._-]+$/.test(input.accountId)
     && methods.has(input.method)
     && (input.bountyId === undefined || (Number.isSafeInteger(input.bountyId) && input.bountyId >= 0))
     && (input.expectedArgs === undefined || (input.expectedArgs !== null && typeof input.expectedArgs === 'object' && !Array.isArray(input.expectedArgs)));
