@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
-import { ArrowUpRight, CheckCircle2, CircleAlert, GitMerge, LayoutList, LoaderCircle, MessageSquare, Moon, Settings2, Sun, Trophy, UserRound, Wallet, X } from 'lucide-react';
+import { ArrowUpRight, CheckCircle2, ChevronRight, CircleAlert, Code2, GitMerge, LayoutGrid, LayoutList, LoaderCircle, MessageSquare, Moon, Settings2, ShieldCheck, Sun, Terminal, Trophy, UserRound, Wallet, X } from 'lucide-react';
 import { shortAccount } from '@/lib/client';
 import { useWallet } from './wallet-provider';
 
@@ -46,29 +46,32 @@ export function Shell({ children }: { children: ReactNode }) {
     const next = theme === 'light' ? 'dark' : 'light';
     setTheme(next); document.documentElement.dataset.theme = next; localStorage.setItem('gitsettle.theme', next);
   }
+  const location = path === '/' ? 'Work queue' : path === '/bounties/new' ? 'Create a bounty' : path.startsWith('/bounties/') ? 'Bounty details' : path.startsWith('/contributors') ? 'Contributor profile' : path === '/leaderboard' ? 'Leaderboard' : path === '/dashboard' ? 'Maintainer overview' : path === '/support' ? 'Support & appeals' : 'Workspace';
   return <div className="app-shell">
     <a className="skip-link" href="#main-content">Skip to content</a>
     <aside className="sidebar">
-      <Link href="/" className="wordmark" aria-label="GitSettle home"><span className="brand-symbol"><GitMerge size={24} aria-hidden="true" /></span>GitSettle<span className="wordmark-period">.</span></Link>
-      <p className="sidebar-description">Good work.<br />Settled on NEAR.</p>
+      <Link href="/" className="wordmark" aria-label="GitSettle home"><span className="brand-symbol"><GitMerge size={22} aria-hidden="true" /></span>GitSettle</Link>
+      <span className="sidebar-network"><span className="network-dot" />NEAR Testnet</span>
+      <div className="workspace-identity"><span className="workspace-avatar"><Code2 size={18} aria-hidden="true" /></span><div><strong>Community workspace</strong><span>Contribution escrow</span></div></div>
       <nav aria-label="Main navigation">
         {navigation.map(({ href, label, icon: Icon }) => {
           const active = href === '/' ? path === '/' || path.startsWith('/bounties') : path.startsWith(href === '/contributors/me' ? '/contributors' : href);
-          return <Link key={href} href={href} className={`nav-link${active ? ' active' : ''}`} aria-current={active ? 'page' : undefined}><Icon size={19} aria-hidden="true" />{label}</Link>;
+          return <Link key={href} href={href} className={`nav-link${active ? ' active' : ''}`} aria-current={active ? 'page' : undefined}><Icon size={18} aria-hidden="true" /><span>{label}</span>{active && <span className="nav-active-dot" aria-hidden="true" />}</Link>;
         })}
       </nav>
       <div className="sidebar-bottom">
-        <div className="network-label"><span className="network-dot" />NEAR Testnet</div>
-        <button className="theme-toggle" onClick={toggleTheme}>{theme === 'light' ? <Moon size={17} aria-hidden="true" /> : <Sun size={17} aria-hidden="true" />}{theme === 'light' ? 'Dark appearance' : 'Light appearance'}</button>
-        <a className="source-link" href="https://github.com/CodeMasterLabs/gitsettle" target="_blank" rel="noreferrer">View source <ArrowUpRight size={14} aria-hidden="true" /></a>
+        <div className="sidebar-assurance"><ShieldCheck size={20} aria-hidden="true" /><strong>Built on clear commitments.</strong><p>Fund the work. Verify the merge. Settle the reward.</p><a href="https://github.com/CodeMasterLabs/gitsettle#trust-model-and-limitations" target="_blank" rel="noreferrer">How escrow works <ArrowUpRight size={13} aria-hidden="true" /></a></div>
+        <a className="source-link" href="https://github.com/CodeMasterLabs/gitsettle" target="_blank" rel="noreferrer"><Code2 size={16} aria-hidden="true" />View source <ArrowUpRight size={13} aria-hidden="true" /></a>
+        <a className="source-link" href="https://github.com/CodeMasterLabs/gitsettle/blob/main/docs/CLI.md" target="_blank" rel="noreferrer"><Terminal size={16} aria-hidden="true" />Command line <ArrowUpRight size={13} aria-hidden="true" /></a>
+        <div className="sidebar-version"><span className="network-dot" />Self-hosted workspace</div>
       </div>
     </aside>
     <div className="workspace">
-      <header className="topbar"><span className="topbar-caption">Contribution escrow <span className="topbar-separator">/</span> <span className="caption-detail">Open source, fairly rewarded</span></span>
-        <div className="wallet-controls">{accountId ? <>
+      <header className={`topbar${accountId ? ' has-account' : ''}`}><nav className="breadcrumbs" aria-label="Breadcrumb"><Link href="/" aria-label="Workspace home"><LayoutGrid size={17} aria-hidden="true" /><span>Workspace</span></Link><ChevronRight size={14} aria-hidden="true" /><span aria-current="page">{location}</span></nav>
+        <div className="topbar-actions"><span className="network-pill"><span className="network-dot" />NEAR Testnet</span><button className="theme-toggle" onClick={toggleTheme} aria-label={theme === 'light' ? 'Dark appearance' : 'Light appearance'} title={theme === 'light' ? 'Dark appearance' : 'Light appearance'}>{theme === 'light' ? <Moon size={17} aria-hidden="true" /> : <Sun size={17} aria-hidden="true" />}</button><div className="wallet-controls">{accountId ? <>
           <Link className="account-link" href={`/contributors/${encodeURIComponent(accountId)}`} title={accountId}><span className="account-dot" />{shortAccount(accountId)}</Link>
           <button className="button button-quiet compact" onClick={() => void disconnect()}>Disconnect</button>
-        </> : <button className="button button-quiet" onClick={connect} disabled={!ready || !config?.contractId || config.mode === 'demo'}><Wallet size={17} aria-hidden="true" />{ready ? 'Connect wallet' : 'Loading wallet…'}</button>}</div>
+        </> : <button className="button button-quiet wallet-button" onClick={connect} disabled={!ready || !config?.contractId || config.mode === 'demo'}><Wallet size={16} aria-hidden="true" />{ready ? 'Connect wallet' : 'Loading wallet…'}</button>}</div></div>
       </header>
       <main id="main-content" className="main-content" tabIndex={-1}>
         {error && <div className="notice notice-error" role="alert"><CircleAlert size={18} aria-hidden="true" /><p>{error}</p></div>}
@@ -76,7 +79,7 @@ export function Shell({ children }: { children: ReactNode }) {
         <TransactionNotice />
         {children}
       </main>
-      <footer className="footer"><span>Built for the people who keep open source moving.</span><a href="https://github.com/CodeMasterLabs/gitsettle#trust-model-and-limitations" target="_blank" rel="noreferrer">How settlement works <ArrowUpRight size={13} aria-hidden="true" /></a></footer>
+      <footer className="footer"><span>GitSettle <span className="footer-divider" />Contribution infrastructure for open source.</span><nav className="footer-links" aria-label="Resources"><a href="https://github.com/CodeMasterLabs/gitsettle/blob/main/docs/CLI.md" target="_blank" rel="noreferrer"><Terminal size={14} aria-hidden="true" />Command line <ArrowUpRight size={13} aria-hidden="true" /></a><a href="https://github.com/CodeMasterLabs/gitsettle#trust-model-and-limitations" target="_blank" rel="noreferrer">Settlement rules <ArrowUpRight size={13} aria-hidden="true" /></a></nav></footer>
     </div>
   </div>;
 }

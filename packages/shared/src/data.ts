@@ -1,7 +1,9 @@
-import { fetchBounties, fetchLeaderboard, getConfig, getProfile, publicConfig } from './near.ts';
-import { getMetadata, getVerification, rankContributors, saveMetadata } from './db.ts';
+import { fetchBounties, fetchLeaderboard, getBounty, getConfig, getProfile, publicConfig, viewContract } from './near.ts';
+import { dataNamespace, getVerification, rankContributors } from './db.ts';
 import { isExpired, parseNear } from './format.ts';
 import { STORAGE_RESERVE, type BoardData, type Bounty, type BountyType, type BountyView, type Contributor } from './types.ts';
+import { bountyMetadata } from './metadata.ts';
+import { readModelCache } from './read-cache.ts';
 
 /** Local examples are never passed to signing or verification. Live mode never falls back to these. */
 export const demoWork: { title: string; description: string; type: BountyType; locale: string | null; reward: string }[] = [
@@ -41,62 +43,71 @@ export const demoContributors: Contributor[] = [
   { account_id: 'sam.demo.testnet', points: 300, merged_count: 3, total_earned: parseNear('54') },
 ];
 
-/** Cache only descriptive GitHub data. Reward/status always come from finalized contract views. */
-async function hydrateBounty(bounty: Bounty): Promise<BountyView> {
-  let metadata = getMetadata(bounty.id);
-  if (!metadata || Date.now() - metadata.updatedAt > 600_000) {
-    let title = metadata?.title || `Issue #${bounty.issue_url.split('/').pop()}`;
-    let description = metadata?.description || 'Read the linked GitHub issue for acceptance criteria and contribution details.';
-    try {
-      const issue = new URL(bounty.issue_url).pathname.split('/').pop();
-      const response = await fetch(`https://api.github.com/repos/${bounty.repo}/issues/${issue}`, {
-        headers: { Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2026-03-10', 'User-Agent': 'GitSettle/0.1 (CodeMasterLabs/gitsettle)' },
-        signal: AbortSignal.timeout(4000),
-      });
-      if (response.ok) {
-        const body = await response.json() as { title?: unknown; body?: unknown; pull_request?: unknown };
-        if (!body.pull_request && typeof body.title === 'string') title = body.title;
-        if (!body.pull_request && typeof body.body === 'string') description = body.body;
-      }
-    } catch { /* GitHub descriptions are optional; chain state remains available during a GitHub outage. */ }
-    saveMetadata(bounty.id, title, description);
-    metadata = getMetadata(bounty.id)!;
-  }
-  return { ...bounty, title: metadata.title, description: metadata.description, verification: getVerification(bounty.id), expired: isExpired(bounty) };
+/** Descriptions refresh independently; money/status always originate in finalized views. */
+function hydrateBounty(bounty: Bounty): BountyView {
+  return { ...bounty, ...bountyMetadata(bounty, dataNamespace()), verification: getVerification(bounty.id), expired: isExpired(bounty) };
 }
 
-let boardCache: { key: string; until: number; result: Promise<BoardData> } | undefined;
-/** Coalesce page reads for five seconds; live errors expire immediately and remain visible. */
+const cacheKey = (kind: string) => {
+  const config = publicConfig();
+  return `${config.mode}:${config.contractId}:${config.rpcUrl}:${kind}`;
+};
+const displayConfig = (force = false) => readModelCache.get(cacheKey('config'), getConfig, force);
+
+/** Clear presentation snapshots after a confirmed transaction; authority reads are never cached. */
+export function invalidateReadModels() { readModelCache.clear(); }
+
+/** Expose bounded snapshot age and server work time without caching HTTP responses. */
+export function readModelHeaders(updatedAt: number, startedAt: number): Record<string, string> {
+  return { 'Cache-Control': 'no-store', 'Server-Timing': `readmodel;dur=${(performance.now() - startedAt).toFixed(1)}`,
+    'X-GitSettle-Read-At': new Date(updatedAt).toISOString(), 'X-GitSettle-Cache-Ttl-Ms': '5000' };
+}
+
+/** Five-second finalized snapshots; errors never fall back to stale or illustrative balances. */
 export async function boardData(force = false): Promise<BoardData> {
   const config = publicConfig();
   if (config.mode === 'demo') {
     const bounties = demoBounties();
     return { ...config, config: { verifier: 'verifier.demo.testnet', storage_reserve: STORAGE_RESERVE, bounty_count: bounties.length, points_per_merge: 100, leaderboard_limit: 100 }, bounties, updatedAt: Date.now() };
   }
-  const key = `${config.mode}:${config.contractId}`;
-  if (!force && boardCache?.key === key && boardCache.until > Date.now()) return boardCache.result;
-  const result = (async () => {
-    const chainConfig = await getConfig();
-    const bounties = await fetchBounties();
-    // Avoid an unbounded GitHub fanout as the instance grows.
-    const hydrated: BountyView[] = [];
-    for (let index = 0; index < bounties.length; index += 5) hydrated.push(...await Promise.all(bounties.slice(index, index + 5).map(hydrateBounty)));
-    return { ...config, config: chainConfig, bounties: hydrated, updatedAt: Date.now() };
-  })();
-  boardCache = { key, until: Date.now() + 5000, result };
-  try { return await result; } catch (error) { boardCache = undefined; throw error; }
+  return readModelCache.get(cacheKey('board'), async () => {
+    // These independent finalized reads start together. The old board performed
+    // get_config twice and then the first page, creating three sequential waits.
+    const [chainConfig, firstPage] = await Promise.all([
+      displayConfig(force), viewContract<Bounty[]>('list_bounties', { from_index: 0, limit: 100 }),
+    ]);
+    const bounties = await fetchBounties(chainConfig, firstPage);
+    return { ...config, config: chainConfig, bounties: bounties.map(hydrateBounty), updatedAt: Date.now() };
+  }, force);
 }
 
-export async function leaderboardData() {
+/** A detail page reads only its bounty; it never waits for the complete work queue. */
+export async function bountyData(id: number, force = false) {
   const config = publicConfig();
-  const entries = config.mode === 'demo' ? demoContributors : await fetchLeaderboard();
-  return { ...config, ...rankContributors(entries) };
+  if (config.mode === 'demo') {
+    const { bounties, ...board } = await boardData();
+    return { ...board, bounty: bounties.find(row => row.id === id) ?? null };
+  }
+  return readModelCache.get(cacheKey(`bounty:${id}`), async () => {
+    const [chainConfig, bounty] = await Promise.all([displayConfig(force), getBounty(id)]);
+    return { ...config, config: chainConfig, bounty: bounty ? hydrateBounty(bounty) : null, updatedAt: Date.now() };
+  }, force);
 }
 
-export async function contributorData(account: string) {
-  const board = await boardData();
-  const profile = board.mode === 'demo'
-    ? demoContributors.find(row => row.account_id === account) ?? { account_id: account, points: 0, merged_count: 0, total_earned: '0' }
-    : await getProfile(account);
-  return { ...publicConfig(), profile, bounties: board.bounties.filter(row => row.claimant === account) };
+export async function leaderboardData(force = false) {
+  const config = publicConfig();
+  if (config.mode === 'demo') return { ...config, ...rankContributors(demoContributors), updatedAt: Date.now() };
+  return readModelCache.get(cacheKey('leaderboard'), async () => ({ ...config, ...rankContributors(await fetchLeaderboard()), updatedAt: Date.now() }), force);
+}
+
+export async function contributorData(account: string, force = false) {
+  const config = publicConfig();
+  return readModelCache.get(cacheKey(`contributor:${account}`), async () => {
+    const [board, profile] = await Promise.all([
+      boardData(force), config.mode === 'demo'
+        ? Promise.resolve(demoContributors.find(row => row.account_id === account) ?? { account_id: account, points: 0, merged_count: 0, total_earned: '0' })
+        : getProfile(account),
+    ]);
+    return { ...config, profile, bounties: board.bounties.filter(row => row.claimant === account), updatedAt: board.updatedAt };
+  }, force);
 }

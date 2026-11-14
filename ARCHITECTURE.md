@@ -41,6 +41,9 @@ flowchart LR
 | `services/verifier/src/near.ts` | Dedicated testnet signer adapter |
 | `services/verifier/src/worker.ts` | Serial verification loop and final-state reconciliation |
 | `apps/web/src/app/api` | Public chain APIs, wallet receipt checks, authenticated community/AI routes |
+| `apps/cli` | Executable terminal client; finalized reads, exact transaction previews and explicit signing |
+| `packages/shared/src/read-cache.ts` | Short-lived display cache with in-flight coalescing and explicit invalidation |
+| `packages/shared/src/metadata.ts` | Bounded background refresh for public GitHub descriptions |
 | `apps/web/src/components` | Interactive screens, wallet context, display states |
 | `scripts` | Local wallet provisioning, atomic deployment, seeds, live-loop evidence |
 | `docs/CONTRACT_API.md` | Canonical method signatures, limits, currency/time units |
@@ -94,7 +97,7 @@ An unmerged PR stays pending even after the submission deadline. An API outage, 
 
 ## Persistence and operational behavior
 
-SQLite uses WAL and a five-second busy timeout. Both services share one data volume. Tables are created through an idempotent additive migration; existing data is preserved. Descriptive issue text is cached for ten minutes. Finalized bounty data is coalesced in memory for five seconds; an RPC failure remains visible rather than displaying a stale reward as current. Demo and each contract deployment have distinct database namespaces.
+SQLite uses WAL and a five-second busy timeout. Both services share one data volume. Tables are created through an idempotent additive migration; existing data is preserved. Descriptive issue text is cached for ten minutes and refreshed in the background without blocking escrow responses. Finalized display reads are coalesced in memory for five seconds with contract/RPC namespaces; browser navigation respects the same read timestamp. A failed refresh remains visible rather than displaying a stale reward as current. Direct confirmation and appeal eligibility reads remain uncached. See `docs/PERFORMANCE.md`. Demo and each contract deployment have distinct database namespaces.
 
 The leaderboard captures its first observed snapshot per UTC day. Movement compares with the most recent earlier day. New instances show no previous snapshot instead of fabricated movement. Do not remove the persistent volume if history matters; it can be rebuilt for metadata and audit, but historical rank observations cannot be recovered from the current contract state alone.
 

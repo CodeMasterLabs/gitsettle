@@ -1,0 +1,270 @@
+{
+  "measured_at": "2026-11-14T10:06:58.783Z",
+  "contract_id": "gitsettle-ac1b0f23f4.testnet",
+  "transactions_sent": 0,
+  "baseline": {
+    "origin": "https://gitsettle.89.167.109.196.sslip.io",
+    "measured_at": "2026-11-14T09:35:08.082Z",
+    "note": "Initial observed requests, not a forced process cold start.",
+    "rows": [
+      {
+        "phase": "initial",
+        "path": "/",
+        "status": 200,
+        "headers_ms": 823,
+        "total_ms": 833,
+        "bytes": 13966
+      },
+      {
+        "phase": "initial",
+        "path": "/api/config",
+        "status": 200,
+        "headers_ms": 755,
+        "total_ms": 772,
+        "bytes": 216
+      },
+      {
+        "phase": "initial",
+        "path": "/api/bounties",
+        "status": 503,
+        "headers_ms": 1218,
+        "total_ms": 1223,
+        "bytes": 93
+      },
+      {
+        "phase": "initial",
+        "path": "/api/bounties/8",
+        "status": 503,
+        "headers_ms": 1213,
+        "total_ms": 1221,
+        "bytes": 54
+      },
+      {
+        "phase": "initial",
+        "path": "/api/leaderboard",
+        "status": 503,
+        "headers_ms": 1306,
+        "total_ms": 1313,
+        "bytes": 59
+      },
+      {
+        "phase": "initial",
+        "path": "/api/contributors/contributor.gitsettle-ac1b0f23f4.testnet",
+        "status": 503,
+        "headers_ms": 1322,
+        "total_ms": 1325,
+        "bytes": 60
+      },
+      {
+        "phase": "repeat-within-cache",
+        "path": "/",
+        "status": 200,
+        "headers_ms": 213,
+        "total_ms": 215,
+        "bytes": 13966
+      },
+      {
+        "phase": "repeat-within-cache",
+        "path": "/api/config",
+        "status": 200,
+        "headers_ms": 210,
+        "total_ms": 211,
+        "bytes": 216
+      },
+      {
+        "phase": "repeat-within-cache",
+        "path": "/api/bounties",
+        "status": 503,
+        "headers_ms": 230,
+        "total_ms": 234,
+        "bytes": 93
+      },
+      {
+        "phase": "repeat-within-cache",
+        "path": "/api/bounties/8",
+        "status": 503,
+        "headers_ms": 226,
+        "total_ms": 231,
+        "bytes": 54
+      },
+      {
+        "phase": "repeat-within-cache",
+        "path": "/api/leaderboard",
+        "status": 503,
+        "headers_ms": 218,
+        "total_ms": 229,
+        "bytes": 59
+      },
+      {
+        "phase": "repeat-within-cache",
+        "path": "/api/contributors/contributor.gitsettle-ac1b0f23f4.testnet",
+        "status": 503,
+        "headers_ms": 225,
+        "total_ms": 229,
+        "bytes": 60
+      }
+    ]
+  },
+  "successful_baseline_samples": [
+    {
+      "source": "public HTTP before provider change",
+      "path": "/api/bounties",
+      "status": 200,
+      "ms": 9993
+    },
+    {
+      "source": "public HTTP before provider change",
+      "path": "/api/leaderboard",
+      "status": 200,
+      "ms": 3267
+    }
+  ],
+  "rpc_from_vps": [
+    {
+      "endpoint": "https://rpc.testnet.near.org",
+      "initial_ms": 3175,
+      "warm_ms": 3052
+    },
+    {
+      "endpoint": "https://test.rpc.fastnear.com",
+      "initial_ms": 83,
+      "warm_ms": 53
+    },
+    {
+      "endpoint": "https://near-testnet.drpc.org",
+      "initial_ms": 128,
+      "warm_ms": 65
+    }
+  ],
+  "provider_only": {
+    "origin": "https://gitsettle.89.167.109.196.sslip.io",
+    "measured_at": "2026-11-14T09:59:15.780Z",
+    "note": "Same public source5665b61 after operator changed the RPC provider; source optimizations not deployed yet.",
+    "rows": [
+      {
+        "phase": "initial",
+        "path": "/api/config",
+        "status": 200,
+        "ms": 1146
+      },
+      {
+        "phase": "initial",
+        "path": "/api/bounties",
+        "status": 200,
+        "ms": 1733
+      },
+      {
+        "phase": "initial",
+        "path": "/api/bounties/8",
+        "status": 200,
+        "ms": 1731
+      },
+      {
+        "phase": "initial",
+        "path": "/api/leaderboard",
+        "status": 200,
+        "ms": 1167
+      },
+      {
+        "phase": "repeat",
+        "path": "/api/config",
+        "status": 200,
+        "ms": 222
+      },
+      {
+        "phase": "repeat",
+        "path": "/api/bounties",
+        "status": 200,
+        "ms": 222
+      },
+      {
+        "phase": "repeat",
+        "path": "/api/bounties/8",
+        "status": 200,
+        "ms": 221
+      },
+      {
+        "phase": "repeat",
+        "path": "/api/leaderboard",
+        "status": 200,
+        "ms": 265
+      }
+    ]
+  },
+  "local_revised_source": {
+    "source": "Local shared readmodel functions with real finalized testnet reads and a fresh metadata database; not production HTTP/browser timing.",
+    "rpc_url": "https://test.rpc.fastnear.com",
+    "rows": [
+      {
+        "name": "config",
+        "phase": "cold-read-cache",
+        "ms": 0,
+        "count": null,
+        "bounty_status": null
+      },
+      {
+        "name": "config",
+        "phase": "warm-read-cache",
+        "ms": 0,
+        "count": null,
+        "bounty_status": null
+      },
+      {
+        "name": "board",
+        "phase": "cold-read-cache",
+        "ms": 567,
+        "count": 9,
+        "bounty_status": null
+      },
+      {
+        "name": "board",
+        "phase": "warm-read-cache",
+        "ms": 0,
+        "count": 9,
+        "bounty_status": null
+      },
+      {
+        "name": "detail",
+        "phase": "cold-read-cache",
+        "ms": 204,
+        "count": null,
+        "bounty_status": "Released"
+      },
+      {
+        "name": "detail",
+        "phase": "warm-read-cache",
+        "ms": 0,
+        "count": null,
+        "bounty_status": "Released"
+      },
+      {
+        "name": "leaderboard",
+        "phase": "cold-read-cache",
+        "ms": 205,
+        "count": 1,
+        "bounty_status": null
+      },
+      {
+        "name": "leaderboard",
+        "phase": "warm-read-cache",
+        "ms": 0,
+        "count": 1,
+        "bounty_status": null
+      },
+      {
+        "name": "contributor",
+        "phase": "cold-read-cache",
+        "ms": 279,
+        "count": 1,
+        "bounty_status": null
+      },
+      {
+        "name": "contributor",
+        "phase": "warm-read-cache",
+        "ms": 0,
+        "count": 1,
+        "bounty_status": null
+      }
+    ]
+  }
+}

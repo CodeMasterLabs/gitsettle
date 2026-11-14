@@ -56,12 +56,12 @@ export function recordVerification(record: VerificationRecord) {
 export function getVerification(id: number): VerificationRecord | null {
   return getDatabase().select().from(verification).where(eq(verification.key, `${dataNamespace()}:${id}`)).get()?.payload ?? null;
 }
-export function saveMetadata(id: number, title: string, description: string) {
-  const row = { key: `${dataNamespace()}:${id}`, title: title.slice(0, 300), description: description.slice(0, 6000), updatedAt: Date.now() };
+export function saveMetadata(id: number, title: string, description: string, namespace = dataNamespace()) {
+  const row = { key: `${namespace}:${id}`, title: title.slice(0, 300), description: description.slice(0, 6000), updatedAt: Date.now() };
   getDatabase().insert(metadata).values(row).onConflictDoUpdate({ target: metadata.key, set: row }).run();
 }
-export function getMetadata(id: number) {
-  return getDatabase().select().from(metadata).where(eq(metadata.key, `${dataNamespace()}:${id}`)).get() ?? null;
+export function getMetadata(id: number, namespace = dataNamespace()) {
+  return getDatabase().select().from(metadata).where(eq(metadata.key, `${namespace}:${id}`)).get() ?? null;
 }
 
 /** Compare against a real previous UTC-day snapshot; never invent rank movements. */

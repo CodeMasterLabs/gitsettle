@@ -1,0 +1,22 @@
+{
+  "name": "@gitsettle/cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "GitSettle testnet command-line contribution escrow client",
+  "repository": { "type": "git", "url": "https://github.com/CodeMasterLabs/gitsettle.git" },
+  "license": "MIT",
+  "engines": { "node": ">=22.22.2" },
+  "bin": { "gitsettle": "bin/gitsettle.mjs" },
+  "files": ["bin", "src", "tsconfig.json"],
+  "scripts": {
+    "start": "node bin/gitsettle.mjs",
+    "test": "tsx --test src/*.test.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@gitsettle/shared": "0.1.0",
+    "near-api-js": "7.5.3",
+    "tsx": "4.23.15"
+  }
+}

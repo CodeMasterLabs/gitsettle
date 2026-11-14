@@ -1,43 +1,65 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { PublicViewCache } from './public-cache';
 
-/** Fetch read-only server data; a confirmed wallet transaction refreshes every mounted view. */
+/** Public GETs share a tiny navigation cache; private support/AI never enter it. */
+const publicViews = new PublicViewCache(async (url) => {
+  const response = await fetch(url, { cache: 'no-store', signal: AbortSignal.timeout(15_000) });
+  const payload = await response.json();
+  if (!response.ok) throw new Error(typeof payload.error === 'string' ? payload.error : payload.error?.message || payload.message || 'The request could not be completed.');
+  return payload;
+});
+
+/** Keep mounted content stable while refreshing; a changed URL never inherits another account's data. */
 export function useApi<T>(url: string | null) {
-  const [data, setData] = useState<T | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [resource, setResource] = useState<{ url: string | null; data: T | null; error: string | null; loading: boolean; refreshing: boolean }>(() => {
+    const data = url ? publicViews.peek<T>(url) : null;
+    return { url, data, error: null, loading: Boolean(url) && !data, refreshing: false };
+  });
   const [revision, setRevision] = useState(0);
-  const retry = useCallback(() => setRevision((value) => value + 1), []);
+  const retry = useCallback(() => {
+    if (url) publicViews.invalidate(url);
+    setRevision(value => value + 1);
+  }, [url]);
 
   useEffect(() => {
-    if (!url) { setLoading(false); return; }
-    const controller = new AbortController();
-    setLoading(true);
-    async function load() {
-      try {
-        const response = await fetch(url!, { signal: controller.signal, cache: 'no-store' });
-        const payload = await response.json();
-        if (!response.ok) throw new Error(payload.error || payload.message || 'The request could not be completed.');
-        setData(payload as T);
-        setError(null);
-      } catch (reason) {
-        if (!controller.signal.aborted) setError(reason instanceof Error ? reason.message : 'The request could not be completed.');
-      } finally {
-        if (!controller.signal.aborted) setLoading(false);
-      }
+    let active = true;
+    if (!url) {
+      setResource({ url, data: null, error: null, loading: false, refreshing: false });
+      return;
     }
-    void load();
-    return () => controller.abort();
+    setResource(previous => {
+      const data = previous.url === url ? previous.data : publicViews.peek<T>(url);
+      return { url, data, error: null, loading: !data, refreshing: true };
+    });
+    void publicViews.read<T>(url).then(data => {
+      if (active) setResource({ url, data, error: null, loading: false, refreshing: false });
+    }).catch((reason: unknown) => {
+      // An upstream outage must not leave stale balances presented as current.
+      if (active) setResource({ url, data: null, error: reason instanceof Error ? reason.message : 'The request could not be completed.', loading: false, refreshing: false });
+    });
+    // Let the shared read finish for other mounted consumers/navigation, but stop
+    // this component receiving it after a route change or invalidating refresh.
+    return () => { active = false; };
   }, [url, revision]);
 
   useEffect(() => {
-    window.addEventListener('gitsettle:refresh', retry);
-    const timer = window.setInterval(retry, 30_000);
-    return () => { window.removeEventListener('gitsettle:refresh', retry); window.clearInterval(timer); };
+    const confirmed = () => { publicViews.invalidate(); setRevision(value => value + 1); };
+    const visible = () => { if (document.visibilityState === 'visible') retry(); };
+    window.addEventListener('gitsettle:refresh', confirmed);
+    document.addEventListener('visibilitychange', visible);
+    const timer = window.setInterval(visible, 30_000);
+    return () => {
+      window.removeEventListener('gitsettle:refresh', confirmed);
+      document.removeEventListener('visibilitychange', visible);
+      window.clearInterval(timer);
+    };
   }, [retry]);
 
-  return { data, error, loading, retry };
+  const matches = resource.url === url;
+  const data = matches ? resource.data : url ? publicViews.peek<T>(url) : null;
+  return { data, error: matches ? resource.error : null, loading: matches ? resource.loading : Boolean(url) && !data, refreshing: matches && resource.refreshing, retry };
 }
 
 export function dateLabel(seconds: number, withTime = false) {

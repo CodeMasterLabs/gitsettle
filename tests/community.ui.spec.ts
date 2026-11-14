@@ -57,12 +57,14 @@ async function ticketFixture(page: Page) {
 
 async function captureAndCheck(page: Page, info: TestInfo, name: string) {
   await page.evaluate(() => document.fonts.ready);
+  await page.evaluate(() => window.scrollTo(0, 0));
   const width = await page.evaluate(() => ({ content: document.documentElement.scrollWidth, viewport: window.innerWidth }));
   expect(width.content).toBeLessThanOrEqual(width.viewport + 1);
   const result = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
   expect(result.violations.filter((violation) => violation.impact === 'serious' || violation.impact === 'critical')).toEqual([]);
   const directory = resolve('docs/screenshots', info.project.name);
   await mkdir(directory, { recursive: true });
+  await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: resolve(directory, `${name}.png`), fullPage: true, animations: 'disabled' });
 }
 
@@ -90,6 +92,11 @@ test('private ticket fixture supports reply and terminal resolution', async ({ p
   await page.goto('/support');
   await expect(page.locator('.ticket-conversation-heading h2')).toHaveText(initialTicket.subject);
   await expect(page.locator('.ticket-message')).toHaveCount(2);
+  await page.getByLabel('Find a conversation', { exact: true }).fill('no matching thread');
+  await expect(page.locator('.ticket-list-item')).toHaveCount(0);
+  await page.getByLabel('Find a conversation', { exact: true }).fill('Spanish');
+  await expect(page.locator('.ticket-list-item')).toHaveCount(1);
+  await page.getByLabel('Find a conversation', { exact: true }).clear();
   await captureAndCheck(page, info, 'support-private-thread-fixture');
   await page.getByLabel('Reply to this conversation').fill('I added the exact file path and linked the merged commit above.');
   await page.getByRole('button', { name: 'Send reply', exact: true }).click();

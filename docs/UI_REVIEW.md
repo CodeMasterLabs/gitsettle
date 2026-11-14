@@ -1,46 +1,27 @@
 # Browser and visual review
 
-**Verified November 14, 2026: 45 of 45 browser checks passed in 51.8 seconds**
-against the production Next.js build, using Playwright 1.65.1 and Chromium 159.
-The browser suite uses explicitly labeled demo data and never connects a real wallet.
-Transaction-state tests intercept read-only confirmation responses to exercise
-presentation; they do not prove a signed transaction, merge or payout.
+**Verified November 14, 2026: 96 of 96 browser checks passed in 2.3 minutes** against the final premium Next.js production build, using Playwright 1.65.1 and Chromium. The build completed without warnings.
 
-Completed coverage:
+The suite uses clearly labeled demo data. Wallet selector checks open its modal but do not connect a real wallet or sign transactions. Confirmation, support-session, ticket, signature callback and AI responses are explicit fixtures. The connected-header layout check substitutes public account markup only; it proves responsive layout, not wallet ownership. Real authentication and settlement evidence are recorded separately in [COMMUNITY_E2E.json](COMMUNITY_E2E.json) and [LIVE_E2E.json](LIVE_E2E.json).
 
-- Work queue, bounty detail, post flow, contributor profile, leaderboard and
-  maintainer dashboard at 1440 px, 375 px and a dark desktop appearance.
-- Type, locale, reward and status filtering, including recovery from empty results.
-- Loading skeletons, API errors and retry, expired work and disconnected wallet.
-- Form validation, storage reserve review and preservation of unsent drafts.
-- Pending, confirmed and failed transaction messages using response fixtures.
-- Axe WCAG A/AA serious/critical findings, keyboard skip navigation, and page overflow.
-- Visual inspection of every main-screen capture for spacing and alignment.
+## Coverage and final design review
 
-All six main routes were inspected at desktop 1440 × 960, mobile 375 × 812,
-and desktop dark appearance. These 18 main-screen checks found no serious or
-critical Axe WCAG A/AA violations, horizontal page overflow, or browser runtime
-exceptions. Additional state captures bring the committed total to 45 PNGs
-(approximately 5.6 MB).
+- All main screens: work queue, bounty detail, posting/review, contributor profile, rankings, maintainer dashboard and support desk.
+- Type/status/reward filtering, translation quick view, open-work quick view, conversation search and empty-result recovery.
+- Loading skeletons, API retry, expired/settled work, disconnected wallet and terminal-state action hints.
+- Exact storage/deposit review, draft preservation, pending/confirmed/failed transaction presentation and retained intent after mismatched evidence.
+- Private support sign-in, appeal drafts, accessible/inaccessible threads, replies, resolution, expired sessions, NEP-413 callback validation and fragment scrubbing.
+- Duplicate-funding acknowledgement, payout-cap disclosure, optional AI unavailable/failure/reply states.
+- Deferred wallet-code loading, recovery despite a failed optional chunk download, and preservation of a pending action after a mismatched return hash.
+- Keyboard skip navigation, visible focus, serious/critical Axe WCAG A/AA findings and page overflow.
 
-Review found and corrected a keyboard defect: activating “Skip to content” did
-not move focus into the main region. The main region now accepts programmatic
-focus, and the keyboard test passes in all three projects. The mobile header
-caption was separated into clear lines, and desktop work-queue rows were reduced
-from 107 px to 87 px while retaining the mobile touch layout. Those changes were
-rebuilt and the full suite rerun successfully.
+Main layouts were tested at **1440 × 960**, **375 × 812**, and dark desktop appearance. An additional connected-wallet layout regression checks **320 px and 375 px** in each appearance: header elements cannot overlap, account/theme/disconnect targets are at least 44 px high, form values use at least 16 px text to avoid iOS focus zoom, and testnet identification remains visible.
 
-The final visual pass checked the work queue, translation detail, both posting
-steps, contributor statistics/history, leaderboard and maintainer filters. Column
-alignment, locale badges, financial typography, form spacing and light/dark
-surfaces remain consistent. On small screens the leaderboard intentionally
-scrolls inside a labeled, keyboard-focusable region; it does not widen the page.
-Maximum-precision NEAR amounts retain every digit and wrap within the mobile
-review panel rather than being rounded.
+The premium revision uses a graphite navigation rail, Manrope headings and financial values, Source Sans body text, forest-green actions, a continuous escrow overview, and structured queue/form/inbox surfaces. The final visual pass inspected every main desktop capture plus the mobile queue, connected header, form and support states. Sidebar, breadcrumb, table-column and action alignment are consistent. Mobile navigation scrolls within its own region, the overview uses compact spacing, and the account controls wrap beneath the breadcrumb when necessary. The page itself does not scroll horizontally. Long comparative leaderboard columns retain a labeled, keyboard-focusable scroll region.
 
-Automated accessibility checks cover detectable rules and do not constitute a
-complete assistive-technology audit. The wallet and confirmation fixtures test
-UI recovery only; real testnet settlement evidence is recorded separately.
+The refreshed captures include **78 demo/fixture PNGs**. Each full-page capture scrolls to the top first, preventing sticky navigation and the offscreen skip link from appearing at a misleading scrolled position. No further spacing correction was needed after the final production build.
+
+Automated accessibility checks cannot replace a complete assistive-technology audit. Browser fixture results must not be presented as real escrow or provider activity. The separate `screenshots/live/` directory records the public deployment and is updated independently during deployment verification.
 
 ## Main-screen captures
 
@@ -52,6 +33,12 @@ UI recovery only; real testnet settlement evidence is recorded separately.
 | Contributor | [View](screenshots/desktop/contributor-profile.png) | [View](screenshots/mobile/contributor-profile.png) | [View](screenshots/dark/contributor-profile.png) |
 | Leaderboard | [View](screenshots/desktop/leaderboard.png) | [View](screenshots/mobile/leaderboard.png) | [View](screenshots/dark/leaderboard.png) |
 | Maintainer dashboard | [View](screenshots/desktop/maintainer-dashboard.png) | [View](screenshots/mobile/maintainer-dashboard.png) | [View](screenshots/dark/maintainer-dashboard.png) |
+| Support sign-in | [View](screenshots/desktop/support-signed-out.png) | [View](screenshots/mobile/support-signed-out.png) | [View](screenshots/dark/support-signed-out.png) |
+| Private conversation fixture | [View](screenshots/desktop/support-private-thread-fixture.png) | [View](screenshots/mobile/support-private-thread-fixture.png) | [View](screenshots/dark/support-private-thread-fixture.png) |
+| Appeal draft fixture | [View](screenshots/desktop/support-appeal-draft-fixture.png) | [View](screenshots/mobile/support-appeal-draft-fixture.png) | [View](screenshots/dark/support-appeal-draft-fixture.png) |
+| Duplicate and payout-cap fixture | [View](screenshots/desktop/post-duplicate-and-cap-fixture.png) | [View](screenshots/mobile/post-duplicate-and-cap-fixture.png) | [View](screenshots/dark/post-duplicate-and-cap-fixture.png) |
+| Connected header at 375 px (layout fixture) | [View](screenshots/desktop/connected-wallet-layout-fixture.png) | [View](screenshots/mobile/connected-wallet-layout-fixture.png) | [View](screenshots/dark/connected-wallet-layout-fixture.png) |
+| AI reply fixture | [View](screenshots/desktop/support-ai-reply-fixture.png) | [View](screenshots/mobile/support-ai-reply-fixture.png) | [View](screenshots/dark/support-ai-reply-fixture.png) |
 
 Each appearance directory also contains `review-bounty`, `empty-filter-results`,
 `loading-queue`, `queue-error`, `expired-bounty`, `wallet-not-connected`, and the
@@ -66,10 +53,10 @@ Run after `npm run build`:
 npm run test:ui
 ```
 
-The Playwright server starts in demo mode; an existing server is allowed only if
-its `/api/config` also reports demo mode. To review a separately started server,
-set `PLAYWRIGHT_BASE_URL`. Screenshots are written to `docs/screenshots/` by
-viewport/theme. Test failure traces and the HTML report remain local artifacts.
+Playwright starts a demo-mode server. An existing server must also report demo mode; the browser tests do not target live signing. For a separately started QA server, set `PLAYWRIGHT_BASE_URL`. Screenshots are written to `docs/screenshots/` by appearance. Failure traces and the HTML report remain local artifacts.
 
-The suite lives in `tests/ui.spec.ts`; viewport, browser and server configuration
-live in `playwright.config.ts`. Repeated test runs overwrite their review captures.
+The suite lives in `tests/ui.spec.ts`, `tests/community.ui.spec.ts`, and `tests/performance.ui.spec.ts`. Viewport, browser and server configuration is in `playwright.config.ts`. Repeated runs overwrite review captures. Run a single meaningful subset when investigating a regression, for example:
+
+```sh
+npx playwright test --grep 'narrow connected-wallet header'
+```

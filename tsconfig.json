@@ -20,7 +20,8 @@
   "include": [
     "packages/**/*.ts",
     "services/**/*.ts",
-    "scripts/**/*.ts"
+    "scripts/**/*.ts",
+    "apps/cli/src/**/*.ts"
   ],
   "exclude": [
     "node_modules"

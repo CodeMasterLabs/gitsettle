@@ -5,6 +5,10 @@ export interface ConfirmationInput {
 }
 export interface Confirmation {
   status: 'pending' | 'confirmed' | 'failed'; message: string; txHash: string; bountyId?: number;
+  /** On failed results only: true proves the complete requested action failed at FINAL.
+   * False or absent must not clear a pending request or permit a blind retry.
+   */
+  verifiedAction?: boolean;
 }
 const methods = new Set(['create_bounty', 'claim_bounty', 'submit_pr', 'release', 'refund']);
 
@@ -16,7 +20,8 @@ export async function confirmTransaction(
   readBounty: (id: number) => Promise<Bounty | null>,
 ): Promise<Confirmation> {
   const base = { txHash: input.txHash };
-  const fail = (message: string): Confirmation => ({ ...base, status: 'failed', message });
+  const fail = (message: string, verifiedAction = false): Confirmation => ({ ...base, status: 'failed', verifiedAction,
+    message: verifiedAction ? message : `${message} The original request remains unconfirmed; check wallet activity before sending another.` });
   const pending = (): Confirmation => ({ ...base, status: 'pending', message: 'NEAR is still confirming this transaction. Check again shortly.' });
   if (!methods.has(input.method)) return fail('Unsupported escrow action.');
   if (!outcome || typeof outcome !== 'object') return pending();
@@ -31,17 +36,45 @@ export async function confirmTransaction(
   const action = tx.actions?.[0]?.FunctionCall;
   if (tx.actions?.length !== 1 || action?.method_name !== input.method) return fail('The returned transaction does not match the action you requested.');
   let actualArgs: Record<string, unknown>;
-  try { actualArgs = JSON.parse(Buffer.from(action.args || '', 'base64').toString('utf8')) as Record<string, unknown>; }
+  try {
+    const encoded = action.args || '';
+    const decoded = Buffer.from(encoded, 'base64');
+    if (decoded.toString('base64') !== encoded) return fail('The transaction argument encoding could not be verified.');
+    const parsed = JSON.parse(decoded.toString('utf8')) as unknown;
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return fail('The transaction arguments are not a valid action object.');
+    actualArgs = parsed as Record<string, unknown>;
+  }
   catch { return fail('The transaction arguments could not be verified.'); }
   if (input.bountyId !== undefined && actualArgs.id !== input.bountyId) return fail('The returned transaction belongs to a different bounty.');
   if (input.expectedArgs && canonicalJson(input.expectedArgs) !== canonicalJson(actualArgs)) return fail('The returned transaction arguments differ from the action you requested.');
-  if (typeof result.status === 'object' && result.status && 'Failure' in result.status) return fail('The transaction failed on NEAR. Open it in the explorer for the contract error.');
-  if (result.final_execution_status !== 'FINAL' || typeof result.status !== 'object' || !result.status || !('SuccessValue' in result.status)) return pending();
+  // A wallet can return a hash before finality. Even a provisional failure must
+  // not release the original pending action for another potentially paid attempt.
+  if (result.final_execution_status !== 'FINAL' || typeof result.status !== 'object' || !result.status) return pending();
+  const matchedExpectedArgs = Boolean(input.expectedArgs) && typeof input.expectedArgs === 'object'
+    && !Array.isArray(input.expectedArgs) && canonicalJson(input.expectedArgs) === canonicalJson(actualArgs);
+  if ('Failure' in result.status) {
+    if ('SuccessValue' in result.status || !result.status.Failure || typeof result.status.Failure !== 'object'
+      || Array.isArray(result.status.Failure) || !Object.keys(result.status.Failure).length) {
+      return fail('NEAR returned an incomplete or inconsistent failure result.');
+    }
+    return matchedExpectedArgs
+      ? fail('The requested transaction failed on NEAR. Open it in the explorer for the contract error.', true)
+      : fail('The returned transaction failed, but its complete requested arguments were not available for comparison.');
+  }
+  if (!('SuccessValue' in result.status)) return pending();
   let value: unknown;
-  try { value = JSON.parse(Buffer.from(result.status.SuccessValue || '', 'base64').toString('utf8')); }
+  try {
+    const encoded = result.status.SuccessValue || '';
+    const decoded = Buffer.from(encoded, 'base64');
+    if (decoded.toString('base64') !== encoded) return fail('The contract result encoding could not be verified.');
+    value = JSON.parse(decoded.toString('utf8'));
+  }
   catch { return fail('The contract returned an unexpected confirmation.'); }
   if (input.method === 'release' || input.method === 'refund') {
-    if (value !== true) return fail('The transfer failed. Funds remain in escrow; the authorized account can retry.');
+    if (value === false) return matchedExpectedArgs
+      ? fail('The requested transfer did not complete. Check the bounty’s current state before trying again.', true)
+      : fail('The returned transfer callback reported failure, but its complete requested arguments could not be matched.');
+    if (value !== true) return fail('The contract returned an unknown transfer result.');
     const id = input.bountyId ?? Number(actualArgs.id);
     const bounty = await readBounty(id);
     if (!bounty || bounty.status !== (input.method === 'release' ? 'Released' : 'Refunded')) return pending();

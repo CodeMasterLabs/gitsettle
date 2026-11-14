@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "completed_at": "2026-11-14T09:22:55.897Z",
+  "target_origin": "https://gitsettle.89.167.109.196.sslip.io",
+  "network": "testnet",
+  "contract_id": "gitsettle-ac1b0f23f4.testnet",
+  "creator_account": "contributor.gitsettle-ac1b0f23f4.testnet",
+  "unrelated_account": "verifier.gitsettle-ac1b0f23f4.testnet",
+  "finalized_key_blocks": {
+    "contributor": 277637861,
+    "verifier": 277637867
+  },
+  "ticket_id": "e9ae3c55-50c7-4b9c-b78f-aac5d2fb709b",
+  "final_ticket_status": "resolved",
+  "authorized_message_count": 2,
+  "checks": {
+    "nep413_signature": true,
+    "finalized_full_access_keys": true,
+    "nonce_replay_rejected": true,
+    "anonymous_rejected": true,
+    "cross_origin_rejected": true,
+    "session_derived_identity": true,
+    "unrelated_read_reply_resolve_rejected": true,
+    "unrelated_list_isolated": true,
+    "creator_reply_and_resolve": true,
+    "resolved_reply_rejected": true,
+    "logout_rejected": true
+  },
+  "near_transactions_sent": 0,
+  "limitations": [
+    "No appeal is created; the live payout bounty is already Released.",
+    "This verifies API and real wallet-key ownership. Interactive wallet popup/redirect UX is tested separately."
+  ]
+}

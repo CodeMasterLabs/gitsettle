@@ -18,7 +18,7 @@ export default function MaintainerDashboard() {
   if (!data) return null;
   const displayAccount = accountId || (data.mode === 'demo' ? data.bounties[0]?.poster : null);
   if (!displayAccount) return <>
-    <PageHeading title="The maintainer desk" description="Keep an eye on funded work, review submissions, and settle rewards." />
+    <PageHeading title="Maintainer overview" description="Keep an eye on funded work, review submissions, and settle rewards." />
     <EmptyState title="Your funded work, in one place." description="Connect the NEAR account you use to post bounties. Only that account can approve rewards or request eligible refunds." action={<button className="button button-primary" onClick={connect} disabled={!ready || !config?.contractId}><Wallet size={17} aria-hidden="true" />Connect wallet</button>} />
   </>;
   const owned = data.bounties.filter((bounty) => bounty.poster === displayAccount);
@@ -27,7 +27,7 @@ export default function MaintainerDashboard() {
   const refundable = owned.filter((bounty) => isExpired(bounty));
   const filtered = owned.filter((bounty) => tab === 'all' || (tab === 'review' && bounty.status === 'Submitted') || (tab === 'expired' && isExpired(bounty)) || (tab === 'settled' && ['Released', 'Refunded'].includes(bounty.status)) || (tab === 'active' && !['Released', 'Refunded', 'Submitted'].includes(bounty.status) && !isExpired(bounty)));
   return <>
-    <PageHeading title="The maintainer desk" description="A clear view of the work you’ve funded and what needs your attention." action={<Link className="button button-primary" href="/bounties/new"><Plus size={17} aria-hidden="true" />Post a bounty</Link>} />
+    <PageHeading title="Maintainer overview" description="A clear view of the work you’ve funded and what needs your attention." action={<Link className="button button-primary" href="/bounties/new"><Plus size={17} aria-hidden="true" />Post a bounty</Link>} />
     <p className="dashboard-account">{data.mode === 'demo' && !accountId ? 'Previewing an example maintainer: ' : 'Showing bounties posted by '}<strong>{displayAccount}</strong></p>
     <dl className="stat-line"><div><dt>{data.mode === 'demo' ? 'Example escrow' : 'Held in escrow'}</dt><dd>{formatNear(held.toString())} <span>NEAR</span></dd></div><div><dt>Ready for review</dt><dd>{review.length} <span>{review.length === 1 ? 'submission' : 'submissions'}</span></dd></div><div><dt>Past deadline</dt><dd>{refundable.length} <span>eligible for refund</span></dd></div></dl>
     <div className="section-heading"><h2>Your funded work</h2><p>{owned.length} {owned.length === 1 ? 'bounty' : 'bounties'} posted</p></div>

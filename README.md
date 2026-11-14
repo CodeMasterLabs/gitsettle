@@ -27,7 +27,7 @@ Testnet deployment:
 | Contract | `gitsettle-ac1b0f23f4.testnet` |
 | Verifier | `verifier.gitsettle-ac1b0f23f4.testnet` |
 | Network | NEAR Testnet |
-| RPC | `https://rpc.testnet.near.org` |
+| RPC | `https://test.rpc.fastnear.com` |
 | Deployment transaction | [Cd741zywcPRe1npNGp4wgxTFbZhHKqncnfoBFww3LYRZ](https://testnet.nearblocks.io/txns/Cd741zywcPRe1npNGp4wgxTFbZhHKqncnfoBFww3LYRZ) |
 | Artifact/config evidence | [docs/DEPLOYMENT.json](docs/DEPLOYMENT.json) |
 
@@ -83,7 +83,26 @@ Open **Support**, connect a wallet and sign the domain-bound NEP-413 message to 
 
 For optional AI, set `LLM_BASE_URL`, `LLM_API_KEY` and `LLM_MODEL` in the protected server environment. The endpoint must support OpenAI-compatible Chat Completions and strict JSON-schema output. Users explicitly request AI; selected questions/public issue context then go to that provider. Keys remain server-side. Each signed wallet has 20 AI attempts per UTC day. The hosted instance runs with AI disabled until a provider is configured; provider calls have been tested with controlled fixtures, not a live paid model.
 
-See [docs/TRIAGE.md](docs/TRIAGE.md) and [docs/COMMUNITY.md](docs/COMMUNITY.md) for API, configuration, privacy, quotas and limits.
+See [docs/TRIAGE.md](docs/TRIAGE.md) and [docs/COMMUNITY.md](docs/COMMUNITY.md) for API, configuration, privacy, quotas and limits. [docs/COMMUNITY_E2E.json](docs/COMMUNITY_E2E.json) records the passing real-wallet HTTPS authentication, ticket privacy/reply/resolution and logout checks.
+
+## Command line
+
+The same core escrow workflow is available from a terminal. From a checkout with `npm ci` completed:
+
+```sh
+npm run cli -- list --type Translation --locale es --status Open
+npm run cli -- show 8
+npm run cli -- leaderboard --json
+npm run cli -- claim 0 --dry-run
+```
+
+Use `npm link --workspace @gitsettle/cli` for a bare `gitsettle` command. Signed actions require `--yes` and a protected local wallet file or environment credential; ordinary reads and previews need no private key. The CLI talks directly to finalized testnet RPC, with an optional self-hosted API for read commands. Support conversations and AI remain in the web app. [docs/CLI.md](docs/CLI.md) documents every command and [docs/CLI_E2E.json](docs/CLI_E2E.json) records live read-only checks. This is an executable workspace package; no npm publication is claimed.
+
+## Loading and data freshness
+
+The board reads contract configuration and bounty pages in parallel, and a detail page loads only its bounty. Descriptive GitHub text refreshes in the background; it cannot block escrow data. Display reads use a five-second success-only cache, retain their actual read timestamp, and invalidate after confirmed wallet actions. Signing and confirmation always use the authoritative contract path. Errors never become fake balances.
+
+The default documented testnet RPC is FASTNEAR. Browsing also defers the wallet signing bundle until Connect or an existing wallet return needs it. [docs/PERFORMANCE.md](docs/PERFORMANCE.md) records timings, measurement conditions and cache limits.
 
 ## Local development and checks
 
@@ -155,8 +174,8 @@ Dependencies, residual advisory findings and implementation review are recorded 
 
 ## Hackathon provenance and submission
 
-Development started from an empty workspace on November 14, 2026; no earlier application baseline was supplied. GitSettle's contract, verifier, UI, tooling and documentation were built in the hackathon window with AI coding assistance. Dependencies and templates: near-sdk, near-api-js, NEAR Wallet Selector, Next.js, React, Tailwind, Drizzle, better-sqlite3, Lucide, Source Sans 3, Newsreader, Playwright, and the `frontend-design` skill. See lockfiles for exact packages. Reused AgentGuard code is described below. No pre-hackathon proprietary code is included. License: [MIT](LICENSE).
+Development started from an empty workspace on November 14, 2026; no earlier application baseline was supplied. GitSettle's contract, verifier, UI, tooling and documentation were built in the hackathon window with AI coding assistance. Dependencies and templates: near-sdk, near-api-js, NEAR Wallet Selector, Next.js, React, Tailwind, Drizzle, better-sqlite3, Lucide, Source Sans 3, Manrope, Playwright, and the `frontend-design` skill. See lockfiles for exact packages. Reused AgentGuard code is described below. No pre-hackathon proprietary code is included. License: [MIT](LICENSE).
 
 **Related project disclosure (Q-005/Q-015):** [AgentGuard](https://github.com/CodeMasterLabs/agentguard) is a separate project by the same developer. GitSettle vendors its MIT recipient/text risk rules at commit `4ec34e69bc7c6cfd17a3e027bf9727a67eab97f6` as reused baseline; these rules are not claimed as new GitSettle work. GitSettle provides contribution escrow, GitHub verification, its risk adapter, reputation, support and triage workflows; AgentGuard provides a separate vault/risk-oracle product. Exact files, license and hashes: [docs/AGENTGUARD.md](docs/AGENTGUARD.md). The user confirmed that AgentGuard is their other submitted hackathon project. Both projects disclose their relationship and distinct scope; the documentation-only reciprocal change is retained in [docs/agentguard-disclosure.patch](docs/agentguard-disclosure.patch).
 
-The deadline is **2026-11-14 23:59 UTC**. A public repo and reproducible local demo are eligible; when judges cannot open the hosted demo, the X post must include a video. The human publishes the post and supplies team/contact details, mainnet prize account, and consent. Final submission happens once, only after approval of the exact JSON payload. [DEMO.md](DEMO.md) contains the demo script and X draft. Keep the repo public through judging and the hosted demo available through November 18, ideally November 25.
+The deadline is **2026-11-14 23:59 UTC**. A public repo and reproducible local demo are eligible; when judges cannot open the hosted demo, the X post must include a video. The human publishes the post and supplies team/contact details, mainnet prize account, and consent. The user will publish the X post and submit manually; the agent has been instructed not to send a hackathon application. [DEMO.md](DEMO.md) contains the demo script and X draft. Keep the repo public through judging and the hosted demo available through November 18, ideally November 25.

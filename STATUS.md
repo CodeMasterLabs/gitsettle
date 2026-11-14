@@ -11,16 +11,20 @@ Updated: 2026-11-14. Canonical repository: https://github.com/CodeMasterLabs/git
 - **GitHub API compatibility:** current API omits `merge_commit_sha`; absent/null SHA requires an independent HTTP 204 merge confirmation. Real read-only policy and real payout passed; public evidence represents SHA as null rather than inventing one.
 - **AgentGuard:** pinned MIT risk rules, exact per-payout cap, held submissions stay protected, no raw PR text persisted. `docs/AGENTGUARD.md` documents local trust boundary and baseline reuse. Approved reciprocal README disclosure published to AgentGuard commit `fe8a64d`; user confirmed it is their other submitted hackathon project.
 - **Community and triage:** NEP-413 wallet sessions, private support/appeal conversations, ticket ACLs/status/replies, atomic spam/duplicate limits, deterministic issue preflight, duplicate-PR holds, optional BYO-LLM advice with quotas and bounded context. No LLM key configured and no live paid AI call claimed.
-- **Application checks:** combined Node suite passed 136 tests and TypeScript passed after the auth/AI review. Expanded Next production build passed. All 78 browser scenarios pass across desktop/mobile/dark; screenshots reviewed. Worker-scoped processing retains the full contract list for duplicate detection.
-- **Original containers:** clean public clone `9ca2b56` built and started on VPS using Docker Compose without credentials, with persistent SQLite and HTTPS verified. Details: `docs/DOCKER_VERIFICATION.md`. New feature/live configuration deployment is the next checkpoint.
+- **Initial application checks:** combined Node suite passed 136 tests and TypeScript passed after the auth/AI review. Expanded Next production build passed. All 78 browser scenarios pass across desktop/mobile/dark; screenshots reviewed. Worker-scoped processing retains the full contract list for duplicate detection.
+- **Live expanded deployment:** public source revision `5665b616cb0bae4a513bcb9a46727b51a5603c10` is running on the VPS. Both services healthy; HTTPS config reports testnet and AgentGuard enabled. Board shows eight Open bounties and bounty 8 Released; leaderboard shows 100 points / 0.05 NEAR earned. Optional AI reports `configured: false`.
+- **Real support proof:** at 09:22 UTC, `scripts/verify-support.ts` passed against public HTTPS using actual finalized testnet FullAccess keys. It verified NEP-413 signatures, nonce replay, CSRF, session-derived identity, unrelated-wallet isolation, ticket reply/resolution and logout. No NEAR transactions sent. Evidence: `docs/COMMUNITY_E2E.json`.
+- **Original containers:** clean public clone `9ca2b56` built and started on VPS using Docker Compose without credentials, with persistent SQLite and HTTPS verified. Details: `docs/DOCKER_VERIFICATION.md`. Latest live checks are recorded alongside that baseline.
+
+## Current refinement requested by the user
+
+The user requested a premium SaaS/PaaS design, faster loading, and a CLI after the verified initial deployment. The redesign is in `apps/web` (Manrope/Source Sans, graphite navigation, forest-green actions, structured surfaces). A real CLI is implemented under `apps/cli`, and performance changes remove repeated RPC reads and blocking GitHub metadata fetches. The VPS already uses the verified FASTNEAR RPC; new source/UI deployment follows final browser review. Combined Node suite now passes **182 tests** and typecheck passes. Live read-only CLI evidence is in `docs/CLI_E2E.json`. Do not submit a hackathon application; the user handles it manually.
 
 ## In progress / remaining
 
-1. Expanded browser and worker checks are complete; `docs/UI_REVIEW.md` records screenshot evidence.
-2. Commit and push tested additions under the GitHub-only identity. Rebuild Docker from that public revision and activate the minimal live environment on the VPS.
-3. Verify real NEP-413 HTTP sessions and private support flow using `scripts/verify-support.ts`, writing `docs/COMMUNITY_E2E.json` only on success. Check live board, settled bounty, leaderboard, HTTPS, containers and credential isolation.
-4. Record final clean-clone Docker and GitHub CI evidence, update this checkpoint, and publish the handoff.
-5. **User will submit manually and explicitly instructed the agent not to submit anything to the hackathon.** The human owns the X post and application. No further personal details are needed by the agent; no submission request must be sent. **No GitSettle application has been submitted by this agent.**
+1. Build and visually review the premium redesign, including all screens and existing/new browser checks; keep the previous public deployment healthy until this passes.
+2. Rebuild/publish/deploy the reviewed source; measure public loading again, rerun support proof for the new UI/runtime, and record CI/Docker evidence.
+3. Publish final CLI/performance/design docs and evidence. The human owns the X post and manual application. **No hackathon submission action is authorized.**
 
 ## Deployment and credential map
 

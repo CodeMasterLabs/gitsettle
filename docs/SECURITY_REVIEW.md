@@ -35,7 +35,7 @@ text can require manual review.
 
 ## Community and AI review
 
-The complete Node suite passes 136 tests (64 verifier, 32 community, 33 triage and 7 shared). Authentication uses genuine NEP-413 signatures, browser/domain/account binding, single-use challenges, finalized key checks and hashed sessions. Ticket identities are session-derived, mutations require exact origin, and unauthorized resources return 404.
+At the community/triage checkpoint, the Node suite passed 136 tests (64 verifier, 32 community, 33 triage and 7 shared). Authentication uses genuine NEP-413 signatures, browser/domain/account binding, single-use challenges, finalized key checks and hashed sessions. Ticket identities are session-derived, mutations require exact origin, and unauthorized resources return 404.
 
 Two additional review findings were fixed with regressions: rotating invented account IDs could bypass the per-account challenge limit, so issuance now has an atomic 120/minute deployment ceiling and actual-expiry pruning; chat history could retain extra nested fields, so provider context is projected to only `role` and `content`. SQLite transactions cover support quotas/duplicates/writes and AI daily quotas across connections.
 
@@ -124,3 +124,9 @@ unverified transitive override, or lockfile mutation was applied. Monitor the
 upstream selector/crypto replacement, then update the coordinated wallet packages
 and rerun connection, signing, transaction-return, production build and dependency
 checks. Keep the advisory visible as an unresolved dependency review item.
+
+## CLI and performance revision
+
+The current Node suite has 182 passing tests, including 25 CLI cases. CLI signing requires an explicit `--yes`, a validated testnet endpoint and a protected local Ed25519 credential. A duplicate create requires a separate `--allow-duplicate` acknowledgement; failed duplicate lookups prevent signing. CLI reads and dry runs were checked against the deployed contract and hosted API without new transactions (`CLI_E2E.json`).
+
+Display caches are bounded, exclude private routes, namespace chain/RPC/account state and invalidate after confirmed wallet actions. They do not participate in contract authorization or private appeal eligibility. A wallet chunk-loading failure cannot discard a pending action. Mismatched/unverifiable return evidence preserves the original requested action; only a matched finalized failure can clear it as failed. Browser and CLI regressions cover that boundary.

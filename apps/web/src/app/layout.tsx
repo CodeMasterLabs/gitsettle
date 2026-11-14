@@ -1,9 +1,8 @@
 import type { Metadata } from 'next';
 import '@fontsource/source-sans-3/400.css';
-import '@fontsource/source-sans-3/500.css';
 import '@fontsource/source-sans-3/600.css';
-import '@fontsource/source-sans-3/700.css';
-import '@fontsource/newsreader/400.css';
+import '@fontsource/manrope/600.css';
+import '@fontsource/manrope/700.css';
 import '@near-wallet-selector/modal-ui/styles.css';
 import './globals.css';
 import { WalletProvider } from '@/components/wallet-provider';

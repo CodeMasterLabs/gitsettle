@@ -1,0 +1,42 @@
+{
+  "verified_at": "2026-11-14T10:42:55.537094+00:00",
+  "network": "testnet",
+  "contract_id": "gitsettle-ac1b0f23f4.testnet",
+  "rpc_url": "https://test.rpc.fastnear.com",
+  "api_origin": "https://gitsettle.89.167.109.196.sslip.io",
+  "bounty_count": 9,
+  "filtered_bounty_ids": [
+    0
+  ],
+  "paid_bounty_id": 8,
+  "paid_status": "Released",
+  "profile": {
+    "account_id": "contributor.gitsettle-ac1b0f23f4.testnet",
+    "points": 100,
+    "merged_count": 1,
+    "total_earned": "50000000000000000000000"
+  },
+  "checks": {
+    "executable_launch": true,
+    "finalized_reads": true,
+    "type_locale_status_reward_filter": true,
+    "bounty_detail": true,
+    "profile_leaderboard": true,
+    "self_hosted_api_reads": true,
+    "dry_run_without_reading_wallet": true,
+    "duplicate_creation_preview": true
+  },
+  "near_transactions_sent": 0,
+  "limitations": [
+    "Read-only live proof. Signed mutation paths are covered by fake-port tests; the separate live bounty loop proves the deployed contract and automatic verifier."
+  ],
+  "duplicate_preview": {
+    "verified_at": "2026-11-14T13:07:56.666785+00:00",
+    "existing_bounty_ids": [
+      0
+    ],
+    "attached_yocto": "100000000000000000000000",
+    "credential_read": false,
+    "transactions_sent": 0
+  }
+}

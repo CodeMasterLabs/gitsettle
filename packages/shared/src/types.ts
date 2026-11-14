@@ -19,6 +19,8 @@ export interface VerificationRecord {
 }
 export interface BountyView extends Bounty {
   title: string; description: string; verification: VerificationRecord | null; expired: boolean;
+  /** Descriptive GitHub metadata may refresh after the authoritative escrow view returns. */
+  metadataUpdatedAt?: number | null; metadataStale?: boolean;
 }
 export interface RankedContributor extends Contributor { rank: number; previous_rank: number | null; movement: number | null }
 export interface PublicConfig {

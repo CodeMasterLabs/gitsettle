@@ -100,7 +100,7 @@ export default function PostBounty() {
   const fieldError = (field: string) => errors[field] ? <span className="field-error" id={`${field}-error`}>{errors[field]}</span> : null;
   return <>
     <Link href="/" className="back-link"><ArrowLeft size={16} aria-hidden="true" />Back to work queue</Link>
-    <PageHeading title="Fund the next contribution." description="Turn a clear GitHub issue into a reward someone can count on." />
+    <PageHeading title="Create a bounty" description="Define the contribution, set the reward, and fund a clear commitment." />
     <WalletNotice purpose="fund the reward when your bounty is ready" />
     <ol className="form-steps" aria-label="Post a bounty steps"><li className={step === 1 ? 'current' : ''} aria-current={step === 1 ? 'step' : undefined}><span className="step-number">{step === 2 ? <Check size={13} aria-hidden="true" /> : '1'}</span>Describe the work</li><li className={step === 2 ? 'current' : ''} aria-current={step === 2 ? 'step' : undefined}><span className="step-number">2</span>Review & fund</li></ol>
     <div className="detail-layout form-layout"><div className="detail-main"><section className="content-panel">

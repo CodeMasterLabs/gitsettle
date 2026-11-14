@@ -22,13 +22,14 @@
     "build": "npm run build --workspace @gitsettle/web",
     "start": "npm run start --workspace @gitsettle/web",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test packages/*/src/*.test.ts services/verifier/src/*.test.ts",
+    "test": "tsx --test packages/*/src/*.test.ts services/verifier/src/*.test.ts apps/cli/src/*.test.ts apps/web/src/lib/*.test.ts",
     "test:ui": "playwright test",
     "verify": "npm run typecheck && npm test && npm run build",
     "verifier": "npm run start --workspace @gitsettle/verifier --",
     "wallets": "tsx scripts/provision-testnet.ts",
     "deploy": "tsx scripts/deploy.ts",
-    "seed": "tsx scripts/seed.ts"
+    "seed": "tsx scripts/seed.ts",
+    "cli": "npm run start --workspace @gitsettle/cli --"
   },
   "dependencies": {
     "near-api-js": "7.5.3",

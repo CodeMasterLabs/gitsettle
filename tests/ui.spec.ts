@@ -17,6 +17,7 @@ async function capture(page: Page, info: TestInfo, name: string) {
   const directory = resolve('docs/screenshots', info.project.name);
   await mkdir(directory, { recursive: true });
   await page.evaluate(() => document.fonts.ready);
+  await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: resolve(directory, `${name}.png`), fullPage: true, animations: 'disabled' });
 }
 
@@ -87,7 +88,34 @@ test('loading skeleton gives way to the work queue', async ({ page }, info) => {
   await expect(page.getByLabel('Loading content', { exact: true })).toBeVisible();
   await capture(page, info, 'loading-queue');
   release();
-  await expect(page.getByRole('heading', { level: 1, name: 'The work queue' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Work queue' })).toBeVisible();
+  await expect(page.getByLabel('Loading content', { exact: true })).toHaveCount(0);
+});
+
+test('quick bounty views change the working set without losing the table controls', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('.bounty-row')).toHaveCount(8);
+  await page.getByRole('button', { name: 'Open to claim', exact: false }).click();
+  await expect(page.locator('.bounty-row')).toHaveCount(4);
+  await expect(page.getByLabel('Status', { exact: true })).toHaveValue('Open');
+  await page.getByRole('button', { name: 'Translations', exact: true }).click();
+  await expect(page.locator('.bounty-row')).toHaveCount(3);
+  await expect(page.getByLabel('Work type', { exact: true })).toHaveValue('Translation');
+  await page.getByRole('button', { name: 'All work', exact: false }).click();
+  await expect(page.locator('.bounty-row')).toHaveCount(8);
+});
+
+test('settled bounties do not show active claiming or payout-routing instructions', async ({ page }) => {
+  await page.route('**/api/bounties/6', async (route) => {
+    const response = await route.fetch();
+    const data = await response.json();
+    await route.fulfill({ contentType: 'application/json', body: JSON.stringify({ ...data, automation: { agentGuardEnabled: true, maxAutomaticPayoutYocto: '5000000000000000000000000' } }) });
+  });
+  await page.goto('/bounties/6');
+  await expect(page.getByText('Reward settled', { exact: true })).toBeVisible();
+  await expect(page.locator('.wallet-notice')).toHaveCount(0);
+  await expect(page.getByText('Automated payout limit:', { exact: false })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Claim this bounty', exact: true })).toHaveCount(0);
 });
 
 test('an API error is readable and retry reloads the queue', async ({ page }, info) => {
@@ -192,7 +220,7 @@ test('pending transaction presentation advances only after confirmed API evidenc
 
 test('failed transaction presentation shows recovery without announcing payment', async ({ page }, info) => {
   await installTransactionFixture(page);
-  await page.route('**/api/transactions/confirm', (route) => route.fulfill({ contentType: 'application/json', body: JSON.stringify({ status: 'failed', message: 'Fixture: transfer failed; reward remains in escrow.', txHash: simulatedHash }) }));
+  await page.route('**/api/transactions/confirm', (route) => route.fulfill({ contentType: 'application/json', body: JSON.stringify({ status: 'failed', verifiedAction: true, message: 'Fixture: transfer failed; reward remains in escrow.', txHash: simulatedHash }) }));
   await page.goto('/');
   await expect(page.getByText('Transaction not completed', { exact: true })).toBeVisible();
   await expect(page.getByRole('main').getByRole('alert')).toContainText('reward remains in escrow');
@@ -200,4 +228,40 @@ test('failed transaction presentation shows recovery without announcing payment'
   await capture(page, info, 'transaction-failed-fixture');
   await page.getByRole('button', { name: 'Dismiss transaction message' }).click();
   await expect(page.getByText('Transaction not completed', { exact: true })).toHaveCount(0);
+});
+
+/** Layout-only fixture: reproduces the connected header markup without loading a wallet or signing. */
+test('narrow connected-wallet header keeps controls separate and touch targets usable', async ({ page }, info) => {
+  for (const width of [320, 375]) {
+    await page.setViewportSize({ width, height: 812 });
+    await page.goto('/');
+    await expect(page.locator('.bounty-row')).toHaveCount(8);
+    await page.waitForLoadState('networkidle');
+    await page.evaluate(() => {
+      const account = 'contributor.gitsettle-ac1b0f23f4.testnet';
+      document.querySelector('.topbar')!.classList.add('has-account');
+      document.querySelector('.wallet-controls')!.innerHTML = `<a class="account-link" href="/contributors/${account}" title="${account}"><span class="account-dot"></span>${account.slice(0, 16)}…${account.slice(-9)}</a><button class="button button-quiet compact">Disconnect</button>`;
+    });
+    const boxes = await page.locator('.breadcrumbs, .topbar .theme-toggle, .account-link, .wallet-controls .compact').evaluateAll(elements => elements.map(element => {
+      const { x, y, width, height } = element.getBoundingClientRect();
+      return { x, y, width, height };
+    }));
+    for (const box of boxes) {
+      expect(box.width).toBeGreaterThan(0);
+      expect(box.x).toBeGreaterThanOrEqual(0);
+      expect(box.x + box.width).toBeLessThanOrEqual(width + 1);
+    }
+    for (let index = 1; index < boxes.length; index++) expect(boxes[index].height).toBeGreaterThanOrEqual(44);
+    for (let first = 0; first < boxes.length; first++) for (let next = first + 1; next < boxes.length; next++) {
+      const a = boxes[first], b = boxes[next];
+      const overlap = Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x) > 1
+        && Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y) > 1;
+      expect(overlap, `Header controls overlap at ${width}px`).toBe(false);
+    }
+    await expect(page.locator('.sidebar-network')).toBeVisible();
+    const inputSizes = await page.locator('main input, main select, main textarea').evaluateAll(elements => elements.map(element => Number.parseFloat(getComputedStyle(element).fontSize)));
+    expect(inputSizes.every(size => size >= 16)).toBe(true);
+    await checkPageWidth(page);
+    if (width === 375) await capture(page, info, 'connected-wallet-layout-fixture');
+  }
 });

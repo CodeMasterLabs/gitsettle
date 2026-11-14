@@ -26,7 +26,7 @@ export default function ContributorProfile() {
   const profile = data.profile;
   return <>
     <Link href="/leaderboard" className="back-link"><ArrowLeft size={16} aria-hidden="true" />Contributor leaderboard</Link>
-    <div className="page-heading"><div className="profile-identity"><span className="contributor-avatar" aria-hidden="true">{profile.account_id[0]?.toUpperCase()}</span><div><h1 className="profile-title">{profile.account_id}</h1><p>Contributor profile <span aria-hidden="true">/</span> NEAR Testnet</p></div></div></div>
+    <div className="page-heading profile-heading"><div className="profile-identity"><span className="contributor-avatar" aria-hidden="true">{profile.account_id[0]?.toUpperCase()}</span><div><h1 className="profile-title">{profile.account_id}</h1><p>Contributor profile <span aria-hidden="true">/</span> NEAR Testnet</p></div></div></div>
     <ExternalLink href={`https://testnet.nearblocks.io/address/${encodeURIComponent(profile.account_id)}`}>View account on NEAR</ExternalLink>
     <dl className="stat-line"><div><dt>Contribution points</dt><dd>{profile.points.toLocaleString('en-US')}</dd></div><div><dt>Merged contributions</dt><dd>{profile.merged_count}</dd></div><div><dt>Total earned</dt><dd>{formatNear(profile.total_earned)} <span>NEAR</span></dd></div></dl>
     <div className="section-heading"><h2>Contribution history</h2><p>{data.bounties.length} {data.bounties.length === 1 ? 'bounty' : 'bounties'}</p></div>

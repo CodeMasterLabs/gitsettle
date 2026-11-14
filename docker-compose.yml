@@ -36,7 +36,7 @@ services:
       DEMO_MODE: ${DEMO_MODE:-}
       NEAR_NETWORK_ID: testnet
       NEAR_CONTRACT_ID: ${NEAR_CONTRACT_ID:-}
-      NEAR_RPC_URL: ${NEAR_RPC_URL:-https://rpc.testnet.near.org}
+      NEAR_RPC_URL: ${NEAR_RPC_URL:-https://test.rpc.fastnear.com}
       AGENTGUARD_ENABLED: ${AGENTGUARD_ENABLED:-true}
       AGENTGUARD_MAX_PAYOUT_NEAR: ${AGENTGUARD_MAX_PAYOUT_NEAR:-5}
       APP_ORIGIN: ${APP_ORIGIN:-http://localhost:3000}
@@ -69,7 +69,7 @@ services:
       DEMO_MODE: ${DEMO_MODE:-}
       NEAR_NETWORK_ID: testnet
       NEAR_CONTRACT_ID: ${NEAR_CONTRACT_ID:-}
-      NEAR_RPC_URL: ${NEAR_RPC_URL:-https://rpc.testnet.near.org}
+      NEAR_RPC_URL: ${NEAR_RPC_URL:-https://test.rpc.fastnear.com}
       NEAR_VERIFIER_ACCOUNT_ID: ${NEAR_VERIFIER_ACCOUNT_ID:-}
       NEAR_VERIFIER_PRIVATE_KEY: ${NEAR_VERIFIER_PRIVATE_KEY:-}
       GITHUB_TOKEN: ${GITHUB_TOKEN:-}

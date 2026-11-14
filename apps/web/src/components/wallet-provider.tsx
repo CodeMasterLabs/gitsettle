@@ -35,6 +35,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const selector = useRef<WalletSelector | null>(null);
   const modal = useRef<WalletSelectorModal | null>(null);
   const confirming = useRef(false);
+  const loadWallet = useRef<(() => Promise<void>) | null>(null);
 
   const confirm = useCallback(async (pending: PendingAction) => {
     if (!pending.txHash || confirming.current) return;
@@ -50,6 +51,14 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         });
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || result.message || 'Transaction confirmation is unavailable.');
+        if (result.status === 'failed' && result.verifiedAction !== true) {
+          // A wrong/forged return hash is not proof that the original action
+          // failed. Keep its intent and let the user recover the correct hash.
+          delete pending.txHash;
+          localStorage.setItem(PENDING_KEY, JSON.stringify(pending));
+          setTransaction({ status: 'pending', message: `${result.message} Check your wallet activity and recover the original transaction before sending another.` });
+          return;
+        }
         if (result.status === 'confirmed' || result.status === 'failed') {
           setTransaction({ status: result.status, message: result.message, hash: pending.txHash, bountyId: result.bountyId, method: pending.method });
           localStorage.removeItem(PENDING_KEY);
@@ -75,51 +84,77 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         if (stopped) return;
         setConfig(current);
         if (current.mode === 'demo' || !current.contractId) { setReady(true); return; }
-        const [{ setupWalletSelector }, { setupModal }, { setupMyNearWallet }] = await Promise.all([
-          import('@near-wallet-selector/core'), import('@near-wallet-selector/modal-ui'), import('@near-wallet-selector/my-near-wallet'),
-        ]);
-        const instance = await setupWalletSelector({ network: 'testnet', modules: [setupMyNearWallet()] });
-        if (stopped) return;
-        selector.current = instance;
-        modal.current = setupModal(instance, { contractId: current.contractId, theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light' });
-        const update = () => {
-          const state = instance.store.getState();
-          setAccountId(state.accounts.find((account) => account.active)?.accountId || state.accounts[0]?.accountId || null);
+        // Browsing does not need the selector's signing/cryptography bundle.
+        // Restore known connections/redirects immediately; otherwise load it
+        // only when Connect is requested. Keys below match selector 10.1.4.
+        let walletInitialization: Promise<void> | undefined;
+        const initializeWallet = () => {
+          if (walletInitialization) return walletInitialization;
+          walletInitialization = (async () => {
+            const [{ setupWalletSelector }, { setupModal }, { setupMyNearWallet }] = await Promise.all([
+              import('@near-wallet-selector/core'), import('@near-wallet-selector/modal-ui'), import('@near-wallet-selector/my-near-wallet'),
+            ]);
+            if (stopped) return;
+            const instance = await setupWalletSelector({ network: 'testnet', modules: [setupMyNearWallet()] });
+            if (stopped) return;
+            selector.current = instance;
+            modal.current = setupModal(instance, { contractId: current.contractId!, theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light' });
+            const update = () => {
+              const state = instance.store.getState();
+              setAccountId(state.accounts.find(account => account.active)?.accountId || state.accounts[0]?.accountId || null);
+            };
+            update();
+            const subscription = instance.store.observable.subscribe(update);
+            unsubscribe = () => subscription.unsubscribe();
+          })().catch((reason: unknown) => { walletInitialization = undefined; throw reason; });
+          return walletInitialization;
         };
-        update();
-        const subscription = instance.store.observable.subscribe(update);
-        unsubscribe = () => subscription.unsubscribe();
-        setReady(true);
+        loadWallet.current = initializeWallet;
+        // Recover persisted intent before loading any optional wallet chunk.
+        // A download/setup failure must never make a sent action disappear.
         const url = new URL(window.location.href);
         const saved = localStorage.getItem(PENDING_KEY);
         if (saved) {
-          const pending = JSON.parse(saved) as PendingAction;
-          const hashes = url.searchParams.get('transactionHashes');
-          const walletError = url.searchParams.get('errorCode');
-          if (walletError) {
-            localStorage.removeItem(PENDING_KEY);
-            setTransaction({ status: 'failed', message: 'The wallet did not complete the transaction. Your input has been preserved.' });
-          } else if (hashes) {
-            pending.txHash = hashes.split(',')[0];
-            localStorage.setItem(PENDING_KEY, JSON.stringify(pending));
-            void confirm(pending);
-          } else if (pending.txHash) {
-            void confirm(pending);
-          } else {
-            // Losing a redirect does not prove that broadcasting failed. Preserve
-            // the original action until the user can reconcile wallet activity.
-            setTransaction({ status: 'pending', message: 'No transaction result was returned. Check your wallet activity before sending another request; it may already have been submitted.' });
+          setTransaction({ status: 'pending', message: 'Recovering your previous wallet request. Do not send it again until its result is checked.' });
+          try {
+            const pending = JSON.parse(saved) as PendingAction;
+            if (!pending || !pending.method || !pending.accountId) throw new Error('Invalid saved request');
+            const returnedHash = url.searchParams.get('transactionHashes')?.split(',')[0];
+            // An established hash has priority over untrusted redirect parameters.
+            if (!pending.txHash && returnedHash) {
+              pending.txHash = returnedHash;
+              localStorage.setItem(PENDING_KEY, JSON.stringify(pending));
+            }
+            if (pending.txHash) void confirm(pending);
+            else setTransaction({ status: 'pending', message: 'No verified transaction result was returned. Check your wallet activity before sending another request; it may already have been submitted.' });
+          } catch {
+            setTransaction({ status: 'pending', message: 'The saved wallet request could not be read. Check wallet activity before clearing this request or sending another.' });
           }
-          ['transactionHashes', 'errorCode', 'errorMessage'].forEach((key) => url.searchParams.delete(key));
+          ['transactionHashes', 'errorCode', 'errorMessage'].forEach(key => url.searchParams.delete(key));
           window.history.replaceState({}, '', url.toString());
         }
+        const hasWalletState = Boolean(localStorage.getItem('near-wallet-selector:selectedWalletId')
+          || localStorage.getItem('near-wallet-selector:selectedWalletId:pending')
+          || localStorage.getItem(PENDING_KEY));
+        const returning = /[?&#](?:account_id|public_key|transactionHashes|accountId|signature)=/.test(window.location.href);
+        if (hasWalletState || returning) await initializeWallet();
+        if (stopped) return;
+        setReady(true);
+
       } catch (reason) { if (!stopped) { setError(reason instanceof Error ? reason.message : 'Wallet setup failed.'); setReady(true); } }
     }
     void initialize();
-    return () => { stopped = true; unsubscribe?.(); };
+    return () => { stopped = true; unsubscribe?.(); loadWallet.current = null; };
   }, [confirm]);
 
-  const connect = useCallback(() => modal.current?.show(), []);
+  const connect = useCallback(() => {
+    const initialize = loadWallet.current;
+    if (!initialize) return;
+    setError(null); setReady(false);
+    void initialize().then(() => modal.current?.show()).catch((reason: unknown) => {
+      setError(reason instanceof Error ? reason.message : 'Wallet setup failed. Try connecting again.');
+    }).finally(() => setReady(true));
+  }, []);
   const disconnect = useCallback(async () => {
     try { const wallet = await selector.current?.wallet(); await wallet?.signOut(); setAccountId(null); window.dispatchEvent(new Event('gitsettle:wallet-disconnected')); }
     catch (reason) { setError(reason instanceof Error ? reason.message : 'Could not disconnect the wallet.'); }
@@ -129,7 +164,10 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     if (!selector.current || !accountId || !config?.contractId || config.mode !== 'testnet') {
       setTransaction({ status: 'failed', message: 'Connect a testnet wallet before sending this transaction.' }); return;
     }
-    if (transaction?.status === 'pending') return;
+    if (transaction?.status === 'pending' || localStorage.getItem(PENDING_KEY)) {
+      setTransaction(current => current?.status === 'pending' ? current : { status: 'pending', message: 'A previous wallet request still needs verification. Check wallet activity before sending another.' });
+      return;
+    }
     const pending: PendingAction = { method, accountId, bountyId: typeof args.id === 'number' ? args.id : undefined, expectedArgs: args, createdAt: Date.now() };
     localStorage.setItem(PENDING_KEY, JSON.stringify(pending));
     setTransaction({ status: 'pending', message: 'Review and sign the transaction in your wallet…' });
@@ -165,14 +203,16 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const clearTransaction = useCallback(() => setTransaction(null), []);
   const retryConfirmation = useCallback(() => {
     const saved = localStorage.getItem(PENDING_KEY);
-    if (saved) void confirm(JSON.parse(saved) as PendingAction);
+    if (saved) { try { void confirm(JSON.parse(saved) as PendingAction); } catch { setTransaction({ status: 'pending', message: 'The saved request could not be read. Check wallet activity before clearing it.' }); } }
   }, [confirm]);
   const recoverTransaction = useCallback((hash: string) => {
     const saved = localStorage.getItem(PENDING_KEY);
     if (!saved || !/^[1-9A-HJ-NP-Za-km-z]{32,64}$/.test(hash.trim())) return;
-    const pending = { ...JSON.parse(saved), txHash: hash.trim() } as PendingAction;
-    localStorage.setItem(PENDING_KEY, JSON.stringify(pending));
-    void confirm(pending);
+    try {
+      const pending = { ...JSON.parse(saved), txHash: hash.trim() } as PendingAction;
+      localStorage.setItem(PENDING_KEY, JSON.stringify(pending));
+      void confirm(pending);
+    } catch { setTransaction({ status: 'pending', message: 'The saved request could not be read. Check wallet activity before clearing it.' }); }
   }, [confirm]);
   const dismissUnsent = useCallback(() => {
     localStorage.removeItem(PENDING_KEY);

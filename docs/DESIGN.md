@@ -1,12 +1,12 @@
 # GitSettle design system
 
-Status: design reviewed before component implementation. The `frontend-design` skill was read from `/home/ubuntu/.codex/skills/frontend-design/SKILL.md` on 2026-11-14. This document is the shared UI contract, including states that must be reviewed in a browser before the MVP is called complete.
+Status: premium workspace revision reviewed on November 14, 2026. The `frontend-design` skill at `/home/ubuntu/.codex/skills/frontend-design/SKILL.md` was applied before implementation and during screenshot review. This document records the current shared UI contract.
 
 ## Product and visual idea
 
-GitSettle is a work desk for maintainers, developers, and translators. Its primary job is to put a concrete GitHub issue, a promised NEAR reward, and the next action next to one another. A contributor should be able to compare work without opening six cards. A maintainer should be able to see exactly what is held, submitted, and settled.
+GitSettle is a workspace for maintainers, developers, and translators to fund and deliver specific GitHub issues. The premium revision gives that workflow a structured application shell: a graphite navigation rail, crisp breadcrumb and account controls, a continuous escrow summary, and a dense queue with useful quick views. Every summary value comes from the displayed data; example balances are explicitly labeled in demo mode.
 
-The visual language borrows the precision of a repository issue list and the hierarchy of a technical journal. The memorable element is the work queue itself: generous issue titles, small visible locale chips, a clean numerical reward column, and stateful action guidance. Decoration does not compete with the issue content. Forest green indicates action and successful settlement; type and written labels carry all meaning without depending on color.
+The queue is the central visual element. Type-specific icons, visible locale badges, concise issue titles, aligned NEAR amounts, and clear lifecycle labels let contributors compare work without opening each issue. The rest of the interface supports that task with consistent spacing, quiet borders, restrained shadows, and forest-green actions. All exposed controls perform a real operation or link to a real destination.
 
 ## Tokens
 
@@ -14,67 +14,62 @@ The visual language borrows the precision of a repository issue list and the hie
 
 | Token | Light | Dark | Role |
 | --- | --- | --- | --- |
-| Canvas | `#F3F6F4` | `#111E18` | Page background; cool, slightly green paper |
-| Surface | `#FFFFFF` | `#192A21` | Queue, input, and transaction surfaces |
-| Soft surface | `#E7EEEA` | `#24382C` | Navigation selection and quiet information panels |
-| Ink | `#18261F` | `#EAF3ED` | Primary text |
-| Muted ink | `#526359` | `#ADBEAF` | Supporting text, labels, inactive navigation |
-| Forest | `#006400` | `#9DCDA5` | Links, focus indicator, affirmative status text |
+| Canvas | `#F5F7F9` | `#111917` | Neutral application background |
+| Surface | `#FFFFFF` | `#19231F` | Work queues, forms, and escrow panels |
+| Soft surface | `#F0F4F2` | `#22312A` | Table headers and quiet information panels |
+| Ink | `#15251B` | `#EFF5F0` | Primary text |
+| Muted ink | `#65716A` | `#B0BDB5` | Supporting copy and metadata |
+| Forest | `#006400` | `#94D3A4` | Links, focus, selected controls, affirmative text |
 
-The primary button retains the brand's `#006400` fill and white label in both themes. Borders use `#CCD8D0` in light and `#425348` in dark. Warning text uses `#804112` on `#FAECD7`; error text uses `#9D2D27` on `#FAE9E7`. Dark warning/error states use `#F0C48C` / `#F4A29B` on the dark surface. Do not place muted text over tinted surfaces unless its measured contrast remains at least 4.5:1.
+The sidebar retains `#101D17` in both appearances, with `#BDCBC2` navigation labels and `#213C2C` selected backgrounds. The primary button retains `#006400` and white text in both themes. Light borders use `#DDE4DF`; dark borders use `#35433B`. Warning text uses `#804112` on `#FAECD7`; error text uses `#9D2D27` on `#FAE9E7`. The corresponding dark text uses `#F0C48C` and `#F4A29B`. Text and icons carry state meaning independently of color.
 
 ### Typography
 
-- Source Sans 3: navigation, copy, issue titles, forms, tables, numeric data. Bundle fonts with the app so clean builds and self-hosting do not need a font CDN.
-- Newsreader: page titles and one editorial statement per screen at most. The body and all controls stay sans serif.
-- Fallbacks: `Arial, sans-serif` for Source Sans 3; `Georgia, serif` for Newsreader.
-- Type scale: 12, 14, 16, 18, 24, 32, 44 px. Main page titles use 44/48 desktop and 32/36 mobile. Issue titles use 18/24, regular body uses 16/24, metadata uses 14/20. Avoid text below 12 px.
-- Use `font-variant-numeric: tabular-nums` for amounts, point values, ranks, issue numbers, and dates. Avoid monospace labels unless the content is an account identifier or exact code to copy.
-- Left align prose and headings. Right align amounts, counts, and rank movements within their columns. Keep explanatory prose below 72 characters per line.
+- **Manrope 600/700:** page titles, navigation, compact actions, issue titles, financial values, and rankings. Headings are purposeful and compact: 34 px desktop / 28 px mobile, with 32 px detailed issue titles where needed.
+- **Source Sans 3 400/600:** body copy, supporting information, form values, and long support conversations. Body copy is 15 px with 1.55 line height. Both fonts are bundled locally, avoiding a font CDN dependency.
+- Supporting and functional labels are at least **12 px** in every viewport; mobile navigation scrolls inside its own region instead of shrinking text. Issue titles use 13 px desktop / 12 px mobile with generous line height.
+- Use `font-variant-numeric: tabular-nums` for NEAR amounts, points, ranks, issue numbers, and dates. Exact review amounts preserve every yoctoNEAR digit and wrap when necessary.
+- Left align prose and headings. Right align financial values in comparative tables. Use monospace only for code or copyable account-verification markers.
 
 ### Space, shape, and motion
 
-- Spacing scale: 4, 8, 12, 16, 24, 32, 48, 64 px. Desktop page padding 40 px; mobile 20 px.
-- Desktop shell: 216 px navigation column, main content width up to 1360 px, with content aligned to a consistent left edge. The board uses its available width; detail/form pages cap prose at 760 px and put escrow facts in a 280 px aside.
-- Radius: 6 px controls, 10 px bounded work surfaces, 999 px compact status and locale chips. Table row divisions stay square. No decorative rounded blobs or glass effects.
-- Controls target at least 44 px high, including mobile theme/wallet controls. Visible 3 px focus ring with 3 px offset.
-- No automatic entry animation. A transaction progress strip can move while waiting; changes to leaderboard rank may briefly highlight the changed row. Honor `prefers-reduced-motion` by removing transitions and animation.
-- Lucide is the single icon family; decorative icons have `aria-hidden`. Icons never replace an action's accessible name.
+- Spacing scale: 4, 8, 12, 16, 24, 32, 48, 64 px, with intermediate values only for compact data alignment. Desktop content padding is 40 px, mobile padding is 16–20 px.
+- Desktop shell: 244 px sidebar, reduced to 222 px at narrower desktop widths. Main content has a 1488 px maximum. At 940 px and below, navigation becomes a contained horizontal row above the workspace.
+- Main work surfaces use **12 px radii** and a restrained two-part shadow; controls use **8 px**; status pills use a full radius. Small locale badges remain compact rounded rectangles. No gradients, glass panels, decorative blobs, or identical card grids.
+- Primary buttons and mobile navigation/theme controls are at least 44 px high. Detail section links also have a 44 px hit area. Focus has a visible 3 px ring with a 3 px offset.
+- The detail page has a sticky escrow action panel and real section links. Mobile moves escrow above the detail copy so the reward and next action are immediately reachable.
+- Motion is limited to pending transactions and factual leaderboard rank changes. No entry animations or invented activity. Respect `prefers-reduced-motion`.
+- Lucide is the only icon family. Decorative icons use `aria-hidden`; actions retain visible text and accessible names.
 
 ## Layout exploration and review
 
-Option A: a horizontal masthead and full-width issue table would be efficient, but it leaves account actions and maintainer work detached from the board when pages become long.
+The initial journal-like presentation was revised after feedback requested a more polished SaaS workspace. Two arrangements were considered: a horizontal global navigation with a broad dashboard, and a persistent rail with a queue-first workspace. The rail was retained because contribution, funding, and support workflows need predictable navigation even on long pages. The revised design concentrates summary information into one continuous strip instead of repeating cards.
 
 ```text
-GitSettle     Work queue   Leaderboard   Dashboard       Wallet
-The work queue                                 Post a bounty
-Search                  Type     Status       Reward
-Issue / repository                Locale     Reward    State
++----------------------+---------------------------------------------------+
+| GitSettle            | Workspace / Work queue     Network  Theme  Wallet |
+| Community workspace  +---------------------------------------------------+
+|                      | Work queue                          Post a bounty |
+| Work queue           | Reward held in escrow until merge                 |
+| Leaderboard          |                                                   |
+| My contributions     | Example rewards    Open work   In review  Locales |
+| Maintainer desk      |                                                   |
+| Support & appeals    | All work   Open to claim   Translations           |
+|                      | Search                 Type   Status   Min reward |
+|                      | Issue / repository          Type    Reward  State |
+| Escrow explanation   | Translate wallet flow       es     18 NEAR  Open  |
+| View source          | Fix stale reward display    Bug    12 NEAR  Open  |
+| Command line         |                                                   |
++----------------------+---------------------------------------------------+
 ```
 
-Option B, selected: a quiet left navigation column gives each work area a stable home, while the main column uses issue-list density and an editorial heading. It also reserves a reliable location for network identity and theme controls.
+The product's identity comes from real GitHub work and settlement data: explicit locale scope, exact financial values, transparent verification routing, and clear next actions. The interface avoids decorative charts and fabricated activity. Workspace breadcrumbs, navigation, quick views, filters, conversation search, and CLI links are functional.
 
-```text
-+-------------------+--------------------------------------------------+
-| GitSettle         | Work queue                            Wallet     |
-|                   |                                                  |
-| Work queue        | The work queue                    Post a bounty  |
-| Leaderboard       | Reward held in escrow until merge                 |
-| My contributions  |                                                  |
-| Maintainer desk   | Search issues...         Type / Status / Reward  |
-|                   | Issue and repository         Reward       State   |
-|                   | #24 Fix stale reward display  12.00 NEAR  Open    |
-|                   | #31 Translate wallet flow es  18.00 NEAR  Open    |
-|                   | #42 Audit refund behavior     30.00 NEAR  Claimed |
-|                   |                                                  |
-| NEAR Testnet      | Bounties settle to the contributor's NEAR account|
-| Theme             |                                                  |
-+-------------------+--------------------------------------------------+
-```
+At mobile widths the queue becomes issue-first rows with reward, type, locale, deadline, and status still visible. Comparative leaderboard columns use a labeled, keyboard-focusable horizontal scroll region. The page itself must never overflow. The small-screen footer exposes the same CLI and settlement-rule resources as the desktop sidebar.
 
-At widths below 900 px, the navigation becomes a compact header with wrapping text links. Queue rows reflow into issue-first blocks that keep reward and state visible. No fixed sidebar overlays mobile content. The form aside moves under the title. Tables with genuinely comparative content, such as the leaderboard, use a contained horizontal scroll region and retain row headers.
+## Loading and perceived speed
 
-Review against the brief: the sidebar alone is a common application pattern, so visual identity comes from real issue content, visible localization scope, aligned financial values, and a sparse serif heading. The first sketch's oversized aggregate escrow number was removed because it distracted from choosing work. Hairline rules are used only to divide rows or explain a lifecycle; the app is not a newspaper imitation. There are no uniform card grids, gradient fills, ornamental labels, or marketing hero art.
+The work-queue title and creation action render immediately, followed by dimensionally stable loading skeletons. Public data can remain visible during background refresh; returning to a recently visited public page uses the short navigation cache. Private support data is never placed in this public cache. Wallet selector code loads when connection is needed, while transaction recovery remains available independently. The UI shows a real loading state instead of hiding its shell behind a wallet SDK or chain request.
 
 ## Screens and actions
 

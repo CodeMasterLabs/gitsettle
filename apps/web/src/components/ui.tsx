@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowUpRight, CircleAlert, Clock3, GitPullRequest, Inbox, Wallet } from 'lucide-react';
+import { ArrowUpRight, Blocks, Bug, ChevronRight, CircleAlert, Clock3, FileText, Inbox, Languages, ShieldCheck, Wallet } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { BountyView } from '@gitsettle/shared/types';
 import { formatNear, isExpired } from '@gitsettle/shared/format';
@@ -12,8 +12,8 @@ export function PageHeading({ title, description, action }: { title: string; des
   return <div className="page-heading"><div><h1>{title}</h1><p>{description}</p></div>{action}</div>;
 }
 
-export function PageSkeleton({ rows = 5 }: { rows?: number }) {
-  return <div className="page-skeleton" aria-busy="true" aria-label="Loading content"><span className="sr-only">Loading content…</span><div className="skeleton skeleton-heading" /><div className="skeleton skeleton-subtitle" /><div className="skeleton skeleton-toolbar" />{Array.from({ length: rows }, (_, index) => <div className="skeleton-row" key={index}><div><div className="skeleton skeleton-title" /><div className="skeleton skeleton-meta" /></div><div className="skeleton skeleton-value" /></div>)}</div>;
+export function PageSkeleton({ rows = 5, hideHeading = false }: { rows?: number; hideHeading?: boolean }) {
+  return <div className={`page-skeleton${hideHeading ? ' skeleton-under-heading' : ''}`} aria-busy="true" aria-label="Loading content"><span className="sr-only">Loading content…</span>{!hideHeading && <><div className="skeleton skeleton-heading" /><div className="skeleton skeleton-subtitle" /></>}<div className="skeleton skeleton-toolbar" />{Array.from({ length: rows }, (_, index) => <div className="skeleton-row" key={index}><div><div className="skeleton skeleton-title" /><div className="skeleton skeleton-meta" /></div><div className="skeleton skeleton-value" /></div>)}</div>;
 }
 
 export function DataError({ error, retry }: { error: string; retry: () => void }) {
@@ -43,12 +43,14 @@ export function TypeBadge({ type, locale }: { type: string; locale?: string | nu
 export function BountyQueue({ bounties, emptyAction }: { bounties: BountyView[]; emptyAction?: ReactNode }) {
   if (!bounties.length) return <EmptyState title="No bounties match these filters." description="Try another type or reward range, or bring a new issue to the queue." action={emptyAction} />;
   return <div className="queue-surface"><div className="queue-head" aria-hidden="true"><span>Issue & repository</span><span>Work type</span><span>Reward</span><span>Status</span></div><div role="list">
-    {bounties.map((bounty) => <div role="listitem" className="bounty-row" key={bounty.id}>
-      <div className="queue-issue"><span className={`issue-icon issue-icon-${bounty.bounty_type.toLowerCase()}`}><GitPullRequest size={19} strokeWidth={1.6} aria-hidden="true" /></span><div><Link className="bounty-title" href={`/bounties/${bounty.id}`}>{bounty.title}</Link><div className="issue-meta"><a href={bounty.issue_url} target="_blank" rel="noreferrer">{bounty.repo} <span>#{issueNumber(bounty.issue_url)}</span><ArrowUpRight size={12} aria-hidden="true" /></a></div></div></div>
+    {bounties.map((bounty) => {
+      const Icon = { Bug, Feature: Blocks, Audit: ShieldCheck, Translation: Languages, Other: FileText }[bounty.bounty_type];
+      return <div role="listitem" className="bounty-row" key={bounty.id}>
+      <div className="queue-issue"><span className={`issue-icon issue-icon-${bounty.bounty_type.toLowerCase()}`}><Icon size={18} strokeWidth={1.75} aria-hidden="true" /></span><div><Link className="bounty-title" href={`/bounties/${bounty.id}`}>{bounty.title}</Link><div className="issue-meta"><a href={bounty.issue_url} target="_blank" rel="noreferrer">{bounty.repo} <span>#{issueNumber(bounty.issue_url)}</span><ArrowUpRight size={12} aria-hidden="true" /></a></div></div></div>
       <div className="queue-type"><TypeBadge type={bounty.bounty_type} locale={bounty.target_locale} /></div>
       <div className="queue-reward tabular-nums"><strong>{formatNear(bounty.reward)}</strong><span>NEAR</span></div>
-      <div className="queue-status"><StatusBadge bounty={bounty} /><span className="deadline"><Clock3 size={12} aria-hidden="true" />{dateLabel(bounty.deadline)}</span></div>
-    </div>)}
+      <div className="queue-status"><StatusBadge bounty={bounty} /><span className="deadline"><Clock3 size={12} aria-hidden="true" />{dateLabel(bounty.deadline)}</span><ChevronRight className="queue-row-arrow" size={16} aria-hidden="true" /></div>
+    </div>; })}
   </div></div>;
 }
 
