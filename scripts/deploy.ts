@@ -11,7 +11,7 @@ async function main() {
   await assertTestnet(provider);
   const contract = walletAccount(wallets.contract, provider);
   const wasmPath = process.env.CONTRACT_WASM_PATH || 'contracts/gitsettle/target/wasm32-unknown-unknown/release/gitsettle.wasm';
-  if (!existsSync(wasmPath)) throw new Error('Build the contract Wasm first; see contracts/gitsettle/README.md.');
+  if (!existsSync(wasmPath)) throw new Error('Build the contract Wasm first; see docs/CONTRACT.md.');
   const code = readFileSync(wasmPath);
   const account = await provider.viewAccount({ accountId: wallets.contract.accountId, blockQuery: { finality: 'final' } });
   if (account.code_hash !== '11111111111111111111111111111111') {

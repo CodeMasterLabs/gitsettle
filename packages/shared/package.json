@@ -1,0 +1,22 @@
+{
+  "name": "@gitsettle/shared",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./types": "./src/types.ts",
+    "./format": "./src/format.ts",
+    "./db": "./src/db.ts",
+    "./near": "./src/near.ts",
+    "./data": "./src/data.ts",
+    "./transactions": "./src/transactions.ts"
+  },
+  "dependencies": {
+    "better-sqlite3": "13.1.1",
+    "drizzle-orm": "0.45.4",
+    "near-api-js": "7.5.3"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "9.6.0"
+  }
+}

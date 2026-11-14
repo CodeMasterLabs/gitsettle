@@ -3,8 +3,8 @@ name = "gitsettle"
 version = "0.1.0"
 edition = "2024"
 rust-version = "1.95"
-description = "Native NEAR contribution escrow for codemaster/gitsettle"
-repository = "https://github.com/codemaster/gitsettle"
+description = "Native NEAR contribution escrow for CodeMasterLabs/gitsettle"
+repository = "https://github.com/CodeMasterLabs/gitsettle"
 license = "MIT"
 
 [lib]

@@ -1,0 +1,43 @@
+{
+  "name": "gitsettle",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Self-hosted contribution escrow on NEAR by CodeMasterLabs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CodeMasterLabs/gitsettle.git"
+  },
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "services/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace @gitsettle/web",
+    "build": "npm run build --workspace @gitsettle/web",
+    "start": "npm run start --workspace @gitsettle/web",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test packages/shared/src/*.test.ts services/verifier/src/*.test.ts",
+    "test:ui": "playwright test",
+    "verify": "npm run typecheck && npm test && npm run build",
+    "verifier": "npm run start --workspace @gitsettle/verifier --",
+    "wallets": "tsx scripts/provision-testnet.ts",
+    "deploy": "tsx scripts/deploy.ts",
+    "seed": "tsx scripts/seed.ts"
+  },
+  "dependencies": {
+    "near-api-js": "7.5.3",
+    "tsx": "4.23.15"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.6",
+    "typescript": "7.0.2",
+    "@playwright/test": "1.65.1",
+    "@axe-core/playwright": "4.14.0"
+  }
+}
